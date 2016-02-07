@@ -297,12 +297,14 @@ CAEN_DGTZ_ErrorCode ret;
         ret = CAEN_DGTZ_Reset(handle[b]);                                               /* Reset Digitizer */
 	    ret = CAEN_DGTZ_GetInfo(handle[b], &BoardInfo);                                 /* Get Board Info */
 	    ret = CAEN_DGTZ_SetRecordLength(handle[b],4096);                                /* Set the lenght of each waveform (in samples) */
-	    ret = CAEN_DGTZ_SetChannelEnableMask(handle[b],1);                              /* Enable channel 0 */
-	    ret = CAEN_DGTZ_SetChannelTriggerThreshold(handle[b],0,32768);                  /* Set selfTrigger threshold */
-	    ret = CAEN_DGTZ_SetChannelSelfTrigger(handle[b],CAEN_DGTZ_TRGMODE_ACQ_ONLY,1);  /* Set trigger on channel 0 to be ACQ_ONLY */
-	    ret = CAEN_DGTZ_SetSWTriggerMode(handle[b],CAEN_DGTZ_TRGMODE_ACQ_ONLY);         /* Set the behaviour when a SW tirgger arrives */
+	    ret = CAEN_DGTZ_SetChannelEnableMask(handle[b],0xFFFFFFFF);                              /* Enable channel 0 */
+//	    ret = CAEN_DGTZ_SetChannelTriggerThreshold(handle[b],0,32768);                  /* Set selfTrigger threshold */
+//	    ret = CAEN_DGTZ_SetChannelSelfTrigger(handle[b],CAEN_DGTZ_TRGMODE_ACQ_ONLY,0xFFFFFFFF);  /* Set trigger on channel 0 to be ACQ_ONLY */
+	    ret = CAEN_DGTZ_SetExtTriggerInputMode(handle[b], CAEN_DGTZ_TRGMODE_ACQ_ONLY); /* External trigger causes the board to only acquire data */
+	    ret = CAEN_DGTZ_SetIOLevel(handle[b], CAEN_DGTZ_IOLevel_NIM);	/* Trigger is a NIM signal */
+	    ret = CAEN_DGTZ_SetSWTriggerMode(handle[b],CAEN_DGTZ_TRGMODE_DISABLED);         /* Set the behaviour when a SW tirgger arrives */
 	    ret = CAEN_DGTZ_SetMaxNumEventsBLT(handle[b],3);                                /* Set the max number of events to transfer in a sigle readout */
-        ret = CAEN_DGTZ_SetAcquisitionMode(handle[b],CAEN_DGTZ_SW_CONTROLLED);          /* Set the acquisition mode */
+        ret = CAEN_DGTZ_SetAcquisitionMode(handle[b],CAEN_DGTZ_FIRST_TRG_CONTROLLED);          /* Set the acquisition mode */
         if(ret != CAEN_DGTZ_Success) {
             printf("Errors during Digitizer Configuration.\n");
             goto QuitProgram;
@@ -311,14 +313,14 @@ CAEN_DGTZ_ErrorCode ret;
 	printf("\n\nPress 's' to start the acquisition\n");
     printf("Press 'k' to stop  the acquisition\n");
     printf("Press 'q' to quit  the application\n\n");
-/*    while (1) {
-		printf ("blah");
+    while (1) {
+//		printf ("blah");
 		c = checkCommand();
 		if (c == 9) break;
 		if (c == 2) return;
 		Sleep(100);
-    }*/
-	printf ("%d\n", __LINE__);
+    }
+//	printf ("%d\n", __LINE__);
     /* Malloc Readout Buffer.
     NOTE1: The mallocs must be done AFTER digitizer's configuration!
     NOTE2: In this example we use the same buffer, for every board. We
@@ -329,18 +331,18 @@ CAEN_DGTZ_ErrorCode ret;
 
     
     for(b=0; b<MAXNB; b++)
-	printf("%d\n", __LINE__);
+//	printf("%d\n", __LINE__);
             /* Start Acquisition
             NB: the acquisition for each board starts when the following line is executed
             so in general the acquisition does NOT starts syncronously for different boards */
             ret = CAEN_DGTZ_SWStartAcquisition(handle[b]);
 
-	printf("%d\n", __LINE__);
+//	printf("%d\n", __LINE__);
             /* Start Acquisition*/
     // Start acquisition loop
 	while(1) {
         for(b=0; b<MAXNB; b++) {
-		    ret = CAEN_DGTZ_SendSWtrigger(handle[b]); /* Send a SW Trigger */
+		    //ret = CAEN_DGTZ_SendSWtrigger(handle[b]); /* Send a SW Trigger */
 
 		    ret = CAEN_DGTZ_ReadData(handle[b],CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT,buffer,&bsize); /* Read the buffer from the digitizer */
 
@@ -350,21 +352,21 @@ CAEN_DGTZ_ErrorCode ret;
 		
 
 
-	printf("%d. ret = %d. Num of events: %d\n", __LINE__, ret, numEvents);
-		    printf(".");
+//	printf("%d. ret = %d. Num of events: %d\n", __LINE__, ret, numEvents);
+//		    printf(".");
 
 		    count[b] +=numEvents;
 		    for (i=0;i<numEvents;i++) {
                 /* Get the Infos and pointer to the event */
 			    ret = CAEN_DGTZ_GetEventInfo(handle[b],buffer,bsize,i,&eventInfo,&evtptr);
 	PrintEventInfo(&eventInfo);
-	printf("Logging event %d...\n",eventInfo.EventCounter); 
+	//printf("Logging event %d...\n",eventInfo.EventCounter); 
 	//SendEvent(evtptr, eventInfo.EventSize);
 	LogEvent(evtptr, eventInfo.EventSize);
 	/*printf("++++++++++++++++++++");
 	hexDump("event dump", evtptr, eventInfo.EventSize);
 	printf("********************")*/
-	printf("%d. ret = %d\n", __LINE__, ret);
+//	printf("%d. ret = %d\n", __LINE__, ret);
 
 	
 
@@ -374,7 +376,7 @@ CAEN_DGTZ_ErrorCode ret;
 				
 
 
-	printf("%d. ret = %d\n", __LINE__, ret);
+//	printf("%d. ret = %d\n", __LINE__, ret);
 			    //*************************************
 			    // Event Elaboration
 			    //*************************************
@@ -383,7 +385,7 @@ CAEN_DGTZ_ErrorCode ret;
 	PrintEvent(Evt);
 
 
-	printf("%d. ret = %d\n", __LINE__, ret);
+//	printf("%d. ret = %d\n", __LINE__, ret);
 		    }
 		    c = checkCommand();
 		    if (c == 1) goto Continue;
