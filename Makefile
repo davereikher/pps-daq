@@ -1,62 +1,49 @@
-########################################################################
-#
-##              --- CAEN SpA - Computing Division ---
-#
-##   CAENDigitizer Software Project
-#
-##   Created  :  October    2009      (Rel. 1.0)
-#
-##   Auth: A. Lucchesi
-#
-#########################################################################
-ARCH	=	`uname -m`
+ROOTLIBS = $(shell root-config --libs) -lRooFitCore -lMinuit -lEG 
+ROOTINCS = $(shell root-config --cflags) 
+ROOTLIBS = -L$(ROOTSYS)/lib  -lHtml -lCore -lTreePlayer -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lm -ldl -rdynamic -lGenVector -lTMVA
+MYFLAG = $(shell ./rootarch.sh)
+CXX = g++
+DEBUG =
+CXXFLAGS = $(MYFLAG) -fpermissive $(ROOTINCS) -Wall -Wno-return-type -Wunused -Wno-deprecated
+#CXXFLAGS        =-I$(ROOTSYS)/include -O -Wall -fPIC
+LD = $(CXX)
+###LDLIBS = $(ROOTLIBS) -lz -lpthread
+LDLIBS = $(ROOTLIBS) -lpthread -lCAENDigitizer
+LDFLAGS = $(MYFLAG)
 
-OUTDIR  =    	./bin/$(ARCH)/Release/
-OUTNAME =    	ReadoutTest_Digitizer.bin
-OUT     =    	$(OUTDIR)/$(OUTNAME)
+EXECS = v1742-readout
+OBJECTS = src/ReadoutTest_Digitizer.o src/keyb.o src/ProprietaryUtils.o src/Event.o src/Exception.o
 
-#CC	=	g++
+.SUFFIXES: .o .C .cpp .so .cxx
 
-#COPTS	=	-fPIC -DLINUX -O2
+all : $(EXECS)
 
-#FLAGS	=	-soname -s
-#FLAGS	=       -Wall,-soname -s
-#FLAGS	=	-Wall,-soname -nostartfiles -s
-#FLAGS	=	-Wall,-soname
+v1742-readout: $(OBJECTS)
+	@echo "=> linking $@"	
+	@echo $(LDFLAGS) 
+	$(LD) $(LDFLAGS) $(OBJECTS) $(LDLIBS) -o $@
 
-DEPLIBS	=	-lCAENDigitizer
+%.o: %.C
+	@echo "=> compiling $<"
+	@echo  $(CXXFLAGS) 
+	$(CXX) $(CXXFLAGS) $(DEBUG) -c $<
 
-LIBS	=	-L..
+%.o: %.cpp
+	@echo "=> compiling $<"
+	@echo  $(CXXFLAGS) 
+	$(CXX) $(CXXFLAGS) $(DEBUG) -c $<
 
-INCLUDEDIR =	-I./include
+%.o: %.cxx
+	@echo "=> compiling $<"
+	@echo  $(CXXFLAGS) 
+	$(CXX) $(CXXFLAGS) $(DEBUG) -c $<
 
-OBJS	=	src/ReadoutTest_Digitizer.o src/keyb.o src/ProprietaryUtils.o src/Event.o src/Exception.o
 
-CPPFLAGS = -I./include
+.PHONY : clean clobber
+clean :
+	@echo "=> removing object files"
+	@rm -f *.o 
 
-INCLUDES =	./include/*
-
-EVENTS_DIR = /tmp/vme
-
-#########################################################################
-
-all	:	$(OUT)
-
-clean	:
-		/bin/rm -f $(OBJS) $(OUT)
-
-clean-events	:
-		/bin/rm -f $(OBJS) $(OUT)
-		/bin/rm $(EVENTS_DIR)/*
-
-$(OUT)	:	$(OBJS)
-		/bin/rm -f $(OUT)
-		if [ ! -d $(OUTDIR) ]; then mkdir -p $(OUTDIR); fi
-		$(CXX) -o $(OUT) $(OBJS) $(DEPLIBS)
-		
-
-$(OBJS)	:	$(INCLUDES) Makefile
-
-%.o	:	%.c
-		$(CXX) $(INCLUDEDIR) -c -o $@ $<
-
+clobber : clean
+	@echo "=> removing executables"
+	@rm -f $(EXECS)
