@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include "CAENDigitizer.h"
+#include "ProprietaryUtils.h"
 
 #include "keyb.h"
 #define UNIX_PATH_MAX    108
@@ -96,7 +97,7 @@ int OpenSocket()
   socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (socket_fd < 0){
       printf("socket() failed: %d\n", errno);
-      return;
+      return 0;
   } 
 
  // unlink("/tmp/demo_socket");
@@ -210,7 +211,7 @@ void SendDummies()
 	FILE* file;
 	int err = 0;
 	file = fopen("/tmp/vme/1454598277-861109485", "rb");
-	if (err==NULL)
+	if (file == NULL)
 	{
 		printf("Error opening dummy file: %d", errno);
 	}
@@ -296,8 +297,34 @@ CAEN_DGTZ_ErrorCode ret;
 	    
         ret = CAEN_DGTZ_Reset(handle[b]);                                               /* Reset Digitizer */
 	    ret = CAEN_DGTZ_GetInfo(handle[b], &BoardInfo);                                 /* Get Board Info */
-	    ret = CAEN_DGTZ_SetRecordLength(handle[b],4096);                                /* Set the lenght of each waveform (in samples) */
-	    ret = CAEN_DGTZ_SetChannelEnableMask(handle[b],0xFFFFFFFF);                              /* Enable channel 0 */
+//	    ret = CAEN_DGTZ_SetRecordLength(handle[b],4096);                                /* Set the lenght of each waveform (in samples) */
+	    ret = CAEN_DGTZ_SetRecordLength(handle[b],1);                                /* Set the lenght of each waveform (in samples) */	    
+	    unsigned int dat = -777;
+	    CAEN_DGTZ_GetRecordLength(handle[b], &dat);
+	    printf("Record length: %d\n", dat);
+	    dat = -777;
+	    CAEN_DGTZ_GetPostTriggerSize(handle[b], &dat);
+	    printf("Post trigger size CAEN: %d\n", dat);
+	    dat = Proprietary1742Utils::GetPostTriggerSetting(handle[b]);
+	    printf("Post trigger size proprietary: %d\n", dat);
+	    int grpEnableMask = Proprietary1742Utils::GetGroupEnableMask(handle[b]);
+	    printf("Group enable mask before setting: %d.\n", grpEnableMask);
+//	    ret = CAEN_DGTZ_SetGroupEnableMask(handle[b],0x00000001);                              /* Enable channel 0 */
+	    Proprietary1742Utils::SetGroupEnableMask(handle[b], 1, 1, 1, 1);
+	    int eventSize = Proprietary1742Utils::GetEventSize(handle[b]);
+	    printf("Event size: %d.\n", eventSize);
+	    int boardType = Proprietary1742Utils::GetBoardType(handle[b]);
+	    printf("Board type: %d.\n", boardType);
+	    grpEnableMask = Proprietary1742Utils::GetGroupEnableMask(handle[b]);
+	    printf("Group enable mask after setting: %d.\n", grpEnableMask);
+	    
+	    CAEN_DGTZ_DRS4Frequency_t samplingFreq;
+	    CAEN_DGTZ_GetDRS4SamplingFrequency(handle[b], &samplingFreq);
+	    printf("Sampling frequency before setting: %d.\n", samplingFreq);
+	    Proprietary1742Utils::SetSamplingFrequency(handle[b], CAEN_DGTZ_DRS4_2_5GHz);
+	    CAEN_DGTZ_GetDRS4SamplingFrequency(handle[b], &samplingFreq);
+	    printf("Sampling frequency after setting: %d.\n", samplingFreq);
+
 //	    ret = CAEN_DGTZ_SetChannelTriggerThreshold(handle[b],0,32768);                  /* Set selfTrigger threshold */
 //	    ret = CAEN_DGTZ_SetChannelSelfTrigger(handle[b],CAEN_DGTZ_TRGMODE_ACQ_ONLY,0xFFFFFFFF);  /* Set trigger on channel 0 to be ACQ_ONLY */
 	    ret = CAEN_DGTZ_SetExtTriggerInputMode(handle[b], CAEN_DGTZ_TRGMODE_ACQ_ONLY); /* External trigger causes the board to only acquire data */
@@ -317,7 +344,7 @@ CAEN_DGTZ_ErrorCode ret;
 //		printf ("blah");
 		c = checkCommand();
 		if (c == 9) break;
-		if (c == 2) return;
+		if (c == 2) return 0;
 		Sleep(100);
     }
 //	printf ("%d\n", __LINE__);
@@ -372,7 +399,7 @@ CAEN_DGTZ_ErrorCode ret;
 
                 /* Decode the event to get the data */
 				//Evt = NULL;
-			    ret = CAEN_DGTZ_DecodeEvent(handle[b],evtptr,&Evt);
+//			    ret = CAEN_DGTZ_DecodeEvent(handle[b],evtptr,&Evt);
 				
 
 
@@ -382,7 +409,7 @@ CAEN_DGTZ_ErrorCode ret;
 			    //*************************************
 		//	    ret = CAEN_DGTZ_FreeEvent(handle[b],&Evt);
 		//		Evt = NULL;
-	PrintEvent(Evt);
+//	PrintEvent(Evt);
 
 
 //	printf("%d. ret = %d\n", __LINE__, ret);

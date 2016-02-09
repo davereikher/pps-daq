@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import struct
 import sys
 import matplotlib.pyplot as plt
