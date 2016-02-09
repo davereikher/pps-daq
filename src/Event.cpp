@@ -1,7 +1,6 @@
 #include "Event.h"
 
-#define DWORD_AT(offset) *((unsigned int *)(a_pData+(offset)))
-#define EXTRACT_VALUE(data, offset, mask, shift_left) (*((unsigned in *)(data+(offset))) & mask) >> shift_left
+#define EXTRACT_VALUE(data, offset, mask, shift_left) (*((unsigned int *)(data+(offset))) & mask) >> shift_left
 
 #define MASK_EVENT_SIZE			0x0fffffff
 #define MASK_GROUP_MASK			0x0000000f

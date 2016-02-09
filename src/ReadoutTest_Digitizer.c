@@ -9,6 +9,7 @@
 #include <netdb.h>
 #include "CAENDigitizer.h"
 #include "ProprietaryUtils.h"
+#include "Event.h"
 
 #include "keyb.h"
 #define UNIX_PATH_MAX    108

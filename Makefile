@@ -30,7 +30,7 @@ LIBS	=	-L..
 
 INCLUDEDIR =	-I./include
 
-OBJS	=	src/ReadoutTest_Digitizer.o src/keyb.o src/ProprietaryUtils.o
+OBJS	=	src/ReadoutTest_Digitizer.o src/keyb.o src/ProprietaryUtils.o src/Event.o
 
 CPPFLAGS = -I./include
 
