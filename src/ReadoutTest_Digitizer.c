@@ -10,6 +10,7 @@
 #include "CAENDigitizer.h"
 #include "ProprietaryUtils.h"
 #include "Event.h"
+#include "Exception.h"
 
 #include "keyb.h"
 #define UNIX_PATH_MAX    108
@@ -177,9 +178,15 @@ void PrintEventInfo(CAEN_DGTZ_EventInfo_t* eventInfo)
 	printf("Channel mask: %08x\n", eventInfo->ChannelMask);
 	printf("Triger time stamp: %d\n\n", eventInfo->TriggerTimeTag);
 }
-void PrintEvent(CAEN_DGTZ_UINT16_EVENT_t *Evt)
+
+void PrintEvent(Event& event)
 {
-	
+	printf("Event size in bytes: %d\n", event.m_iEventSizeBytes);
+	printf("board id: %d\n", event.m_iBoardId);
+	printf("pattern: %d\n", event.m_iPattern);
+	printf("group mask : %08x\n", event.m_iGroupMask);
+	printf("event counter: %d\n", event.m_iEventCounter);
+	printf("event time tag: %d\n", event.m_iEventTimeTag);		
 }
 
 int checkCommand() {
@@ -230,7 +237,9 @@ void SendDummies()
 	}	
 }
 
-int main(int argc, char* argv[])
+
+
+int DoMain()
 {
 //	SendDummies();
 //	return 0;
@@ -298,8 +307,8 @@ CAEN_DGTZ_ErrorCode ret;
 	    
         ret = CAEN_DGTZ_Reset(handle[b]);                                               /* Reset Digitizer */
 	    ret = CAEN_DGTZ_GetInfo(handle[b], &BoardInfo);                                 /* Get Board Info */
-//	    ret = CAEN_DGTZ_SetRecordLength(handle[b],4096);                                /* Set the lenght of each waveform (in samples) */
-	    ret = CAEN_DGTZ_SetRecordLength(handle[b],1);                                /* Set the lenght of each waveform (in samples) */	    
+	    ret = CAEN_DGTZ_SetRecordLength(handle[b],4096);                                /* Set the lenght of each waveform (in samples) */
+//	    ret = CAEN_DGTZ_SetRecordLength(handle[b],1);                                /* Set the lenght of each waveform (in samples) */	    
 	    unsigned int dat = -777;
 	    CAEN_DGTZ_GetRecordLength(handle[b], &dat);
 	    printf("Record length: %d\n", dat);
@@ -311,7 +320,7 @@ CAEN_DGTZ_ErrorCode ret;
 	    int grpEnableMask = Proprietary1742Utils::GetGroupEnableMask(handle[b]);
 	    printf("Group enable mask before setting: %d.\n", grpEnableMask);
 //	    ret = CAEN_DGTZ_SetGroupEnableMask(handle[b],0x00000001);                              /* Enable channel 0 */
-	    Proprietary1742Utils::SetGroupEnableMask(handle[b], 1, 1, 1, 1);
+	    Proprietary1742Utils::SetGroupEnableMask(handle[b], 0, 1, 1, 1);
 	    int eventSize = Proprietary1742Utils::GetEventSize(handle[b]);
 	    printf("Event size: %d.\n", eventSize);
 	    int boardType = Proprietary1742Utils::GetBoardType(handle[b]);
@@ -387,9 +396,13 @@ CAEN_DGTZ_ErrorCode ret;
 		    for (i=0;i<numEvents;i++) {
                 /* Get the Infos and pointer to the event */
 			    ret = CAEN_DGTZ_GetEventInfo(handle[b],buffer,bsize,i,&eventInfo,&evtptr);
+	printf("USING CAEN_DGTZ_GetEventInfo:\n");
 	PrintEventInfo(&eventInfo);
 	//printf("Logging event %d...\n",eventInfo.EventCounter); 
 	//SendEvent(evtptr, eventInfo.EventSize);
+	printf("USING EVENT.CPP:\n");
+	Event event(evtptr, eventInfo.EventSize);
+	PrintEvent(event);
 	LogEvent(evtptr, eventInfo.EventSize);
 	/*printf("++++++++++++++++++++");
 	hexDump("event dump", evtptr, eventInfo.EventSize);
@@ -437,3 +450,17 @@ QuitProgram:
 	return 0;
 }
 
+int main(int argc, char* argv[])
+{
+	try
+	{
+		DoMain();
+	}
+	catch (EventParsingException& ex)
+	{
+		printf (ex.What().c_str());
+		return -1;
+	}
+
+	return 0;
+}

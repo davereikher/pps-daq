@@ -1,9 +1,9 @@
 #pragma once
 
 #define EXTRACT_VALUE(out, data, size, offset, mask, shift_left) \
-	if ((offset) + sizeof(unsigned int) > (size)) \
+	if (((offset) + sizeof(unsigned int)) > (size)) \
 	{ \
-		throw EventParsingException((size), (offset)); \ 
+		throw EventParsingException((size), (offset), __LINE__); \
 	} \
 	(out) = (*((unsigned int *)((data)+(offset))) & (mask)) >> (shift_left)
 
@@ -85,7 +85,12 @@
 #define OFFSET_CHANNEL_7		8
 
 #define EVENT_SIZE_GRANULARITY_BYTES 	4 
-#define EVENT_HEADER_SIZE_BYTES		4
+#define EVENT_HEADER_SIZE		12
+#define SAMPLE_SIZE_BYTES		12
+#define BITS_PER_SAMPLE			12
+#define BITS_PER_BYTE			8
+#define TRIGGER_TIME_TAG_SIZE		4
+#define EVENT_DESCRIPTION_SIZE		4
 
 #define NUMBER_OF_GROUPS		4
 #define NUMBER_OF_CHANNELS_IN_GROUP	8

@@ -15,6 +15,6 @@ protected:
 class EventParsingException: public ExceptionBase
 {
 public:
-	EventParsingException(int a_iSize, int a_iOffset);
+	EventParsingException(int a_iSize, int a_iOffset, int a_iLine);
 };
 

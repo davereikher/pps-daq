@@ -17,9 +17,9 @@ private:
 		std::vector<std::vector<unsigned short> > m_vChannelSamples; //index is the channel number (0-7) in the current group, inner vector is the vector of samples
 	};
 public:
-	Event(unsigned char* a_pData, int a_iSize);
-	void Parse(unsigned char* a_pData, int a_iSize);
-private:
+	Event(char* a_pData, int a_iSize);
+	void Parse(char* a_pData, int a_iSize);
+public:
 	unsigned int m_iEventSizeBytes;
 	unsigned int m_iBoardId;
 	unsigned int m_iPattern;

@@ -15,11 +15,11 @@ std::string ExceptionBase::What()
 	return m_sDescription;
 }
 
-EventParsingException::EventParsingException(int a_iSize, int a_iOffset)
+EventParsingException::EventParsingException(int a_iSize, int a_iOffset, int a_iLine)
 {
 	char pMsg[EXCEPTION_MESSAGE_MAX_LEN] = {0};
 	
 	//not much to do on error here
-	snprintf(pMsg, EXCEPTION_MESSAGE_MAX_LEN, "Parsing error: tried to parse offset %d but exceeded buffer size (%d)", a_iSize, a_iOffset);
+	snprintf(pMsg, EXCEPTION_MESSAGE_MAX_LEN, "Parsing error: tried to parse offset %d but exceeded buffer size (%d), around line %d", a_iOffset, a_iSize, a_iLine);
 	m_sDescription = pMsg;
 }
