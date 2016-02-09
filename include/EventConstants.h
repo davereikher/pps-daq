@@ -1,6 +1,11 @@
 #pragma once
 
-#define EXTRACT_VALUE(data, offset, mask, shift_left) (*((unsigned int *)(data+(offset))) & mask) >> shift_left
+#define EXTRACT_VALUE(out, data, size, offset, mask, shift_left) \
+	if ((offset) + sizeof(unsigned int) > (size)) \
+	{ \
+		throw EventParsingException((size), (offset)); \ 
+	} \
+	(out) = (*((unsigned int *)((data)+(offset))) & (mask)) >> (shift_left)
 
 //masks for extraction of fields from dwords
 #define MASK_EVENT_SIZE			0x0fffffff
@@ -80,6 +85,7 @@
 #define OFFSET_CHANNEL_7		8
 
 #define EVENT_SIZE_GRANULARITY_BYTES 	4 
+#define EVENT_HEADER_SIZE_BYTES		4
 
 #define NUMBER_OF_GROUPS		4
 #define NUMBER_OF_CHANNELS_IN_GROUP	8

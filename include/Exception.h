@@ -4,16 +4,17 @@
 class ExceptionBase
 {
 public:
+	ExceptionBase();
 	ExceptionBase(std::string a_sMsg);
 	virtual std::string What();
 
-private:
+protected:
 	std::string m_sDescription;
 };
 
 class EventParsingException: public ExceptionBase
 {
 public:
-	EventParsingException(std::string a_sExceptionMessage);
+	EventParsingException(int a_iSize, int a_iOffset);
 };
 
