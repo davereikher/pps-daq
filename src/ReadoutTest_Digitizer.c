@@ -12,6 +12,11 @@
 #include "Event.h"
 #include "Exception.h"
 #include "Plotter.h"
+#include "TGraph.h"
+#include "TCanvas.h"
+#include "TApplication.h"
+//#include "TSystem.h"
+#include "TH1D.h"
 
 #include "keyb.h"
 #define UNIX_PATH_MAX    108
@@ -254,7 +259,6 @@ int DoMain()
 //exit(1);
 CAEN_DGTZ_ErrorCode ret;
 	Plotter plt;
-	plt.Init();
 
     /* The following variable will be used to get an handler for the digitizer. The
     handler will be used for most of CAENDigitizer functions to identify the board */
@@ -323,7 +327,7 @@ CAEN_DGTZ_ErrorCode ret;
 	    int grpEnableMask = Proprietary1742Utils::GetGroupEnableMask(handle[b]);
 	    printf("Group enable mask before setting: %d.\n", grpEnableMask);
 //	    ret = CAEN_DGTZ_SetGroupEnableMask(handle[b],0x00000001);                              /* Enable channel 0 */
-	    Proprietary1742Utils::SetGroupEnableMask(handle[b], 0, 1, 1, 1);
+	    Proprietary1742Utils::SetGroupEnableMask(handle[b], 1, 1, 1, 1);
 	    int eventSize = Proprietary1742Utils::GetEventSize(handle[b]);
 	    printf("Event size: %d.\n", eventSize);
 	    int boardType = Proprietary1742Utils::GetBoardType(handle[b]);
@@ -458,6 +462,26 @@ QuitProgram:
 
 int main(int argc, char* argv[])
 {
+ TApplication app ("app",&argc,argv);
+	//TSystem* gSystem = new TSystem();
+	
+//printf ("Creating canvas...\n");
+//	   TCanvas *c1 = new TCanvas("c1","A Simple Graph Example",200,10,700,500);
+//TH1D h ("h", "h", 10, 0, 10);
+//h.Fill(1);
+//h.Draw();	
+//c1->Draw();
+//	while(1);
+//	
+//   Double_t x[100], y[100];
+  // Int_t n = 20;
+   //for (Int_t i=0;i<n;i++) {
+    // x[i] = i*0.1;
+     //y[i] = 10*sin(x[i]+0.2);
+  // }
+   //TGraph * gr = new TGraph(n,x,y);
+   //gr->Draw("AC*");	
+
 	try
 	{
 		DoMain();

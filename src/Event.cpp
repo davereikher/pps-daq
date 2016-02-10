@@ -27,9 +27,11 @@ void Event::Parse(char* a_pData, int a_iSize)
 	{
 		if ((m_iGroupMask & (GROUP_INITIAL_MASK << iGroupCount)))
 		{
+			//printf("group %d active\n", iGroupCount);
 			//group number iGroupCount is active and contains data
 			GroupEvent ev;
 			ev.m_vChannelSamples.resize(NUMBER_OF_CHANNELS_IN_GROUP);
+			//printf ("new size of m_vChannelSamples: %d\n", ev.m_vChannelSamples.size());
 			int iOffset = OFFSET_START_OF_GROUP_LIST + iGroupSizeAccumulator;
 			EXTRACT_VALUE(ev.m_iSizeOfEachChannelSamples, a_pData, a_iSize, iOffset + OFFSET_SIZE_OF_CHANNELS, MASK_SIZE_OF_CHANNELS, SHL_SIZE_OF_CHANNELS);
 			ev.m_iSizeOfEachChannelSamples /= NUMBER_OF_DWORDS_IN_SAMPLE;
@@ -47,6 +49,7 @@ void Event::Parse(char* a_pData, int a_iSize)
 				iOffset += NUMBER_OF_DWORDS_IN_SAMPLE * DWORD_SIZE_BYTES;
 				EXTRACT_VALUE(iChanValue, a_pData, a_iSize, iOffset + OFFSET_CHANNEL_0, MASK_CHANNEL_0, SHL_CHANNEL_0);
 				ev.m_vChannelSamples[0].push_back(iChanValue);
+				//printf("CHANNEL SAMPLES at 0 size is %d\n", ev.m_vChannelSamples[0].size());
 				
 				//channel 1
 				EXTRACT_VALUE(iChanValue, a_pData, a_iSize, iOffset + OFFSET_CHANNEL_1, MASK_CHANNEL_1, SHL_CHANNEL_1);
@@ -80,7 +83,7 @@ void Event::Parse(char* a_pData, int a_iSize)
 				EXTRACT_VALUE(iChanValue, a_pData, a_iSize, iOffset + OFFSET_CHANNEL_7, MASK_CHANNEL_7, SHL_CHANNEL_7);
 				ev.m_vChannelSamples[7].push_back(iChanValue);
 			}
-
+			//printf ("ev.m_vChannelSamples[0] is of size %d", ev.m_vChannelSamples[0].size());
 			int iSizeIncrement =  ev.m_iSizeOfEachChannelSamples * NUMBER_OF_DWORDS_IN_SAMPLE * DWORD_SIZE_BYTES;
 			if (ev.m_iTR)
 			{
@@ -90,7 +93,8 @@ void Event::Parse(char* a_pData, int a_iSize)
 				
 			iGroupSizeAccumulator += iSizeIncrement; 
 
-			m_vGroupEvents.push_back(ev);
+			m_vGroupEvents[iGroupCount] = ev;
+			//printf("m_vGroupEvents has %d entries. First one is of size %d\n", m_vGroupEvents.size(), m_vGroupEvents[0].m_vChannelSamples.size());			
 		}
 	}		
 }
