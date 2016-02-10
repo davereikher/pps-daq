@@ -13,8 +13,9 @@ LDFLAGS = $(MYFLAG)
 
 OBJDIR = obj
 SOURCEDIR = src
+BINDIR = bin
 
-EXECS = v1742-readout
+EXECS = $(BINDIR)/v1742-readout
 #TODO: fix the object output path issue. Plotter appears in a different path than the others!
 _OBJECTS = Plotter.o ReadoutTest_Digitizer.o keyb.o ProprietaryUtils.o Event.o Exception.o 
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
@@ -23,7 +24,7 @@ OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 
 all : $(EXECS)
 
-v1742-readout: $(OBJECTS)
+$(BINDIR)/v1742-readout: $(OBJECTS)
 	@echo "=> linking $@"	
 	@echo $(LDFLAGS) 
 	$(LD) $(LDFLAGS) $(OBJECTS) $(LDLIBS) -o $@
