@@ -61,10 +61,14 @@ void Plotter::Plot(Event& ev)
 
 Plotter::~Plotter()
 {
-	for (auto it = m_vpGraph.begin(); it != m_vpGraph.end(); it++)
+	for (int i = 0; i < m_vpGraph.size(); i++)
+	{
+		delete m_vpGraph[i];
+	}
+/*	for (std::vector<int>::iterator it = m_vpGraph.begin(); it != m_vpGraph.end(); it++)
 	{
 		delete *it;
-	}
+	}*/
 	delete m_pCanvas;
 }
 
