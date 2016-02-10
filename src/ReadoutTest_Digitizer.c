@@ -11,6 +11,7 @@
 #include "ProprietaryUtils.h"
 #include "Event.h"
 #include "Exception.h"
+#include "Plotter.h"
 
 #include "keyb.h"
 #define UNIX_PATH_MAX    108
@@ -252,6 +253,8 @@ int DoMain()
 //	SendEvent();	
 //exit(1);
 CAEN_DGTZ_ErrorCode ret;
+	Plotter plt;
+	plt.Init();
 
     /* The following variable will be used to get an handler for the digitizer. The
     handler will be used for most of CAENDigitizer functions to identify the board */
@@ -372,7 +375,9 @@ CAEN_DGTZ_ErrorCode ret;
             /* Start Acquisition
             NB: the acquisition for each board starts when the following line is executed
             so in general the acquisition does NOT starts syncronously for different boards */
-            ret = CAEN_DGTZ_SWStartAcquisition(handle[b]);
+        {
+	ret = CAEN_DGTZ_SWStartAcquisition(handle[b]);
+	}
 
 //	printf("%d\n", __LINE__);
             /* Start Acquisition*/
@@ -402,6 +407,7 @@ CAEN_DGTZ_ErrorCode ret;
 	//SendEvent(evtptr, eventInfo.EventSize);
 	printf("USING EVENT.CPP:\n");
 	Event event(evtptr, eventInfo.EventSize);
+	plt.Plot(event);
 	PrintEvent(event);
 	LogEvent(evtptr, eventInfo.EventSize);
 	/*printf("++++++++++++++++++++");

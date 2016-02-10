@@ -14,7 +14,7 @@ private:
 		unsigned int m_iFrequency;
 		unsigned int m_iTR;
 		unsigned int m_iSizeOfEachChannelSamples; //The size is the number of 4 byte words (each sample is 3 4 byte words containing all channels). This is basically the number of samples in each channel.
-		std::vector<std::vector<unsigned short> > m_vChannelSamples; //index is the channel number (0-7) in the current group, inner vector is the vector of samples
+		std::vector<std::vector<unsigned int> > m_vChannelSamples; //index is the channel number (0-7) in the current group, inner vector is the vector of samples
 	};
 public:
 	Event(char* a_pData, int a_iSize);
