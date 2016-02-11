@@ -22,6 +22,7 @@ void Plotter::Init()
 void Plotter::Plot(CAEN_DGTZ_X742_EVENT_t *evt)
 {
 	#define TP printf("TP: %d\n", __LINE__)
+	#define DATA_CHANNEL 0
 	TP;
 	if(!m_bInitialized)
 	{
@@ -40,7 +41,7 @@ void Plotter::Plot(CAEN_DGTZ_X742_EVENT_t *evt)
 			printf("iter: %d", i);
 			m_pCanvas->cd(i+1);
 			TP;
-			TGraph* pGr = new TGraph(1024, (Int_t*)GenerateTime(1024).data(), (Int_t*)evt->DataGroup[i].DataChannel[0]);
+			TGraph* pGr = new TGraph(1024, (Float_t*)GenerateTime(1024).data(), (Float_t*)evt->DataGroup[i].DataChannel[DATA_CHANNEL]);
 			TP;
 			m_vpGraph[i] = pGr;
 			TP;
@@ -60,7 +61,7 @@ void Plotter::Plot(CAEN_DGTZ_X742_EVENT_t *evt)
 				continue;
 			}
 			m_pCanvas->cd(i+1);
-			m_vpGraph[i]->DrawGraph(1024, (Int_t*)GenerateTime(1024).data(), (Int_t*)evt->DataGroup[i].DataChannel[0], "ACP");
+			m_vpGraph[i]->DrawGraph(1024, (Float_t*)GenerateTime(1024).data(), (Float_t*)evt->DataGroup[i].DataChannel[DATA_CHANNEL], "ACP");
 		}
 		m_pCanvas->Update();
 	}
@@ -83,16 +84,16 @@ Plotter::~Plotter()
 }
 
 //TODO: add frequency parameter
-std::vector<int> Plotter::GenerateTime(unsigned int a_iNumOfSamples)
+std::vector<float> Plotter::GenerateTime(unsigned int a_iNumOfSamples)
 {
 //	long iTrueFrequency = ;
 //	switch (a_iFrequency
 //	double time_step = 1.0/a_iFrequency;
-	std::vector<int> vResult;
+	std::vector<float> vResult;
 	vResult.resize(a_iNumOfSamples);
 	for (int i = 0; i < a_iNumOfSamples; i++)
 	{
-		vResult[i] = i;
+		vResult[i] = i * 0.4;
 	}
 	return vResult;
 }

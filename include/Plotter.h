@@ -13,7 +13,7 @@ public:
 //	void Init();
 	void Plot(CAEN_DGTZ_X742_EVENT_t *evt);
 //	void Plot(Event& a_event);
-	std::vector<int> GenerateTime(unsigned int a_iNumOfSamples);
+	std::vector<float> GenerateTime(unsigned int a_iNumOfSamples);
 
 private:
 	bool m_bInitialized;
