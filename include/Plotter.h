@@ -2,8 +2,8 @@
 #include "TGraph.h"
 #include "TCanvas.h"
 #include "Event.h"
-
-#include "TH1D.h"
+#include "CAENDigitizer.h"
+//#include "TH1D.h"
 class Plotter
 {
 public:
@@ -11,7 +11,8 @@ public:
 	~Plotter();
 	
 //	void Init();
-	void Plot(Event& a_event);
+	void Plot(CAEN_DGTZ_X742_EVENT_t *evt);
+//	void Plot(Event& a_event);
 	std::vector<int> GenerateTime(unsigned int a_iNumOfSamples);
 
 private:
@@ -19,5 +20,5 @@ private:
 	TCanvas* m_pCanvas;
 	//TODO: use auto pointers
 	std::vector<TGraph*> m_vpGraph;
-	TH1D* h;
+//	TH1D* h;
 };

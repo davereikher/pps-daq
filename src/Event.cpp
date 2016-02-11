@@ -2,11 +2,11 @@
 #include "Exception.h"
 #include "EventConstants.h"
 
+
 Event::Event(char* a_pData, int a_iSize)
 {
 	Parse(a_pData, a_iSize);
 }
-
 
 void Event::Parse(char* a_pData, int a_iSize)
 {

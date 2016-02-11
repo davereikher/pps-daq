@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "Plotter.h"
+
 Plotter::Plotter():
 m_bInitialized(false)
 {
@@ -18,9 +19,10 @@ void Plotter::Init()
 //	m_pGraph->Draw("ACP");
 }
 */
-void Plotter::Plot(Event& ev)
+void Plotter::Plot(CAEN_DGTZ_X742_EVENT_t *evt)
 {
 	#define TP printf("TP: %d\n", __LINE__)
+	TP;
 	if(!m_bInitialized)
 	{
 		printf("NOT INITIALIZED\n");
@@ -30,11 +32,15 @@ void Plotter::Plot(Event& ev)
 		TP;
 		for (int i = 0; i < 4; i++)
 		{
+			if (!evt->GrPresent[i])
+			{
+				continue;
+			}
 			TP;
 			printf("iter: %d", i);
 			m_pCanvas->cd(i+1);
 			TP;
-			TGraph* pGr = new TGraph((Int_t)ev.m_vGroupEvents[i].m_iSizeOfEachChannelSamples, (Int_t*)GenerateTime(1024).data(), (Int_t*)ev.m_vGroupEvents[i].m_vChannelSamples[0].data());
+			TGraph* pGr = new TGraph(1024, (Int_t*)GenerateTime(1024).data(), (Int_t*)evt->DataGroup[i].DataChannel[0]);
 			TP;
 			m_vpGraph[i] = pGr;
 			TP;
@@ -49,13 +55,17 @@ void Plotter::Plot(Event& ev)
 		m_pCanvas->Divide(2,2);
 		for (int i = 0; i < 4; i ++)
 		{
+			if (!evt->GrPresent[i])
+			{
+				continue;
+			}
 			m_pCanvas->cd(i+1);
-			m_vpGraph[i]->DrawGraph((Int_t)ev.m_vGroupEvents[i].m_iSizeOfEachChannelSamples, (Int_t*)GenerateTime(1024).data(), (Int_t*)ev.m_vGroupEvents[i].m_vChannelSamples[0].data(), "ACP");
+			m_vpGraph[i]->DrawGraph(1024, (Int_t*)GenerateTime(1024).data(), (Int_t*)evt->DataGroup[i].DataChannel[0], "ACP");
 		}
 		m_pCanvas->Update();
 	}
 
-	printf("ev len: %d, vector data len: %d\n", ev.m_vGroupEvents[0].m_iSizeOfEachChannelSamples, ev.m_vGroupEvents[0].m_vChannelSamples[0].size());
+//	printf("ev len: %d, vector data len: %d\n", ev.m_vGroupEvents[0].m_iSizeOfEachChannelSamples, ev.m_vGroupEvents[0].m_vChannelSamples[0].size());
 //	m_pGraph->Draw("ACP");
 }
 

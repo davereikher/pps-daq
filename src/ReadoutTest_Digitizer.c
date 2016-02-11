@@ -334,6 +334,8 @@ CAEN_DGTZ_ErrorCode ret;
 	    printf("Board type: %d.\n", boardType);
 	    grpEnableMask = Proprietary1742Utils::GetGroupEnableMask(handle[b]);
 	    printf("Group enable mask after setting: %d.\n", grpEnableMask);
+	    CAEN_DGTZ_LoadDRS4CorrectionData(handle[b], CAEN_DGTZ_DRS4_2_5GHz);
+	    CAEN_DGTZ_EnableDRS4Correction(handle[b]);
 	    
 	    CAEN_DGTZ_DRS4Frequency_t samplingFreq;
 	    CAEN_DGTZ_GetDRS4SamplingFrequency(handle[b], &samplingFreq);
@@ -410,10 +412,15 @@ CAEN_DGTZ_ErrorCode ret;
 	//printf("Logging event %d...\n",eventInfo.EventCounter); 
 	//SendEvent(evtptr, eventInfo.EventSize);
 	printf("USING EVENT.CPP:\n");
-	Event event(evtptr, eventInfo.EventSize);
-	plt.Plot(event);
-	PrintEvent(event);
-	LogEvent(evtptr, eventInfo.EventSize);
+	//Event event(evtptr, eventInfo.EventSize);
+        CAEN_DGTZ_X742_EVENT_t* pEvent = NULL;
+        CAEN_DGTZ_AllocateEvent(handle[b], (void**)&pEvent);
+        CAEN_DGTZ_DecodeEvent(handle[b], buffer, (void**)&pEvent);
+	plt.Plot(pEvent);
+	CAEN_DGTZ_FreeEvent(handle[b], (void**)&pEvent);
+	
+	//PrintEvent(event);
+	//LogEvent(evtptr, eventInfo.EventSize);
 	/*printf("++++++++++++++++++++");
 	hexDump("event dump", evtptr, eventInfo.EventSize);
 	printf("********************")*/
