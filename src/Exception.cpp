@@ -23,3 +23,13 @@ EventParsingException::EventParsingException(int a_iSize, int a_iOffset, int a_i
 	snprintf(pMsg, EXCEPTION_MESSAGE_MAX_LEN, "Parsing error: tried to parse offset %d but exceeded buffer size (%d), around line %d", a_iOffset, a_iSize, a_iLine);
 	m_sDescription = pMsg;
 }
+
+EventHandlerException::EventHandlerException(int m_iLine, std::string a_sMsg)
+{
+	char pMsg[EXCEPTION_MESSAGE_MAX_LEN] = {0};
+	snprintf(pMsg, EXCEPTION_MESSAGE_MAX_LEN, "ERROR (line %d): ", m_iLine);
+	
+	m_sDescription = pMsg;
+	m_sDescription += a_sMsg;
+	
+}

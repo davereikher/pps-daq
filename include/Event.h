@@ -1,9 +1,10 @@
 #pragma once
 #include <vector>
 #include "CAENDigitizer.h"
+#include "TObject.h"
 
 //This class represents the entire event coming from the digitizer (it includes the 4 group events)
-class Event
+class Event: public TObject
 {
 private:
 
@@ -17,8 +18,9 @@ private:
 		std::vector<std::vector<unsigned int> > m_vChannelSamples; //index is the channel number (0-7) in the current group, inner vector is the vector of samples
 	};
 public:
-	Event(char* a_pData, int a_iSize);
-	void Parse(char* a_pData, int a_iSize);
+	Event();
+	Event(CAEN_DGTZ_X742_EVENT_t* a_pEvent);
+	void Parse(CAEN_DGTZ_X742_EVENT_t* a_pEvent);
 public:
 	unsigned int m_iEventSizeBytes;
 	unsigned int m_iBoardId;
@@ -27,4 +29,6 @@ public:
 	unsigned int m_iEventCounter;
 	unsigned int m_iEventTimeTag;
 	std::vector<GroupEvent> m_vGroupEvents; //index is the group number
+
+	ClassDef(Event, 1)
 };
