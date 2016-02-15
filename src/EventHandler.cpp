@@ -11,11 +11,12 @@
 #define FILE_NAME_FORMAT "pps-events-%d.root"
 #define TOTAL_NUM_OF_CHANNELS MAX_X742_GROUP_SIZE * (MAX_X742_CHANNEL_SIZE - 1)
 
-EventHandler::EventHandler():
+EventHandler::EventHandler(int argc, char** argv):
 m_pRootFile(new TFile(GenerateFileName().c_str(), "RECREATE")),
 m_pRootTree(new TTree(TREE_NAME, TREE_DESCRIPTION)),
 m_bEventAddrSet(false),
-m_bEventInfoSet(false)
+m_bEventInfoSet(false),
+m_plotter(argc, argv)
 {}
 
 void EventHandler::SetEventAddress(CAEN_DGTZ_X742_EVENT_t* a_pEvent)
@@ -48,8 +49,11 @@ void EventHandler::AssertReady()
 }
 
 void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_t* a_pEventInfo)
-{
+{	
+	m_plotter.Plot(a_pEvent);
+	
 	AssertReady();
+	
 	m_vChannels.clear();
 	for (int iGroupCount = 0; iGroupCount < MAX_X742_GROUP_SIZE; iGroupCount++)
 	{
@@ -61,7 +65,6 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_
 				uint32_t iChannelSize = a_pEvent->DataGroup[iGroupCount].ChSize[iChannelCount];
 				float* pChannelPointer = a_pEvent->DataGroup[iGroupCount].DataChannel[iChannelCount];
 				std::vector<float> vChannel(pChannelPointer, pChannelPointer + iChannelSize);
-				printf("Channelsize: %d, vector size: %d", iChannelSize, (int)vChannel.size());
 				m_vChannels.push_back(vChannel);
 			}
 		}

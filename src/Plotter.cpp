@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include "Plotter.h"
 
-Plotter::Plotter():
+Plotter::Plotter(int argc, char **argv):
 m_bInitialized(false)
 {
-m_vpGraph.resize(4);
+	m_vpGraph.resize(4);
 //	Init();
 }
 /*

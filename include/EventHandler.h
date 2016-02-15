@@ -4,15 +4,12 @@
 #include "CAENDigitizer.h"
 #include "TFile.h"
 #include "TTree.h"
-/*
-#ifdef __MAKECINT__
-#pragma link C++ class std::vector<std::vector<float> >+;
-#endif
-*/
+#include "Plotter.h"
+
 class EventHandler
 {
 public:
-	EventHandler();
+	EventHandler(int argc, char** argv);
 	~EventHandler();
 	void Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_t* a_pEventInfo);
 	std::string GenerateFileName();
@@ -25,5 +22,6 @@ private:
 	std::vector<std::vector<float> > m_vChannels;
 	bool m_bEventAddrSet;
 	bool m_bEventInfoSet;
+	Plotter m_plotter;
 };
 

@@ -19,7 +19,7 @@ DICTDIR = root_dictionary
 LIBDIR = lib
 
 EXECS = $(BINDIR)/v1742-readout
-_OBJECTS = Plotter.o ReadoutTest_Digitizer.o keyb.o ProprietaryUtils.o EventHandler.o Exception.o dict.o
+_OBJECTS = Plotter.o keyb.o ProprietaryUtils.o EventHandler.o Exception.o dict.o DigitizerManager.o main.o
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx
