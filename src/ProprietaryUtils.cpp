@@ -66,7 +66,7 @@ unsigned int Proprietary1742Utils::GetSamplingFrequency(int a_iHandle)
 
 
 
-void Proprietary1742Utils::SetGroupEnableMask(int a_iHandle, bool a_iGroup0, bool a_iGroup1, bool a_iGroup2, bool a_iGroup3)
+int Proprietary1742Utils::SetGroupEnableMask(int a_iHandle, bool a_iGroup0, bool a_iGroup1, bool a_iGroup2, bool a_iGroup3)
 {
 	unsigned int data = 0;
 	data |= a_iGroup0 | (a_iGroup1 << 1) | (a_iGroup2 << 2) | (a_iGroup3 << 3);
@@ -74,12 +74,13 @@ void Proprietary1742Utils::SetGroupEnableMask(int a_iHandle, bool a_iGroup0, boo
 	int ret = CAEN_DGTZ_WriteRegister(a_iHandle, CAEN_DGTZ_CH_ENABLE_ADD, data);
 	if (ret != 0)
 	{
-		printf("SetGroupenabledMask (WriteRegister) failed with error %d\n", ret);
-		return;
+		return ret;
 	}
+
+	return 0;
 }
 
-void Proprietary1742Utils::SetSamplingFrequency(int a_iHandle, unsigned int a_iFrequency)
+int Proprietary1742Utils::SetSamplingFrequency(int a_iHandle, unsigned int a_iFrequency)
 {
 	unsigned int data = 0;
 	data |= a_iFrequency & 0x00000003;
@@ -87,9 +88,9 @@ void Proprietary1742Utils::SetSamplingFrequency(int a_iHandle, unsigned int a_iF
 	int ret = CAEN_DGTZ_WriteRegister(a_iHandle, CAEN_DGTZ_DRS4_FREQUENCY_REG_WRITE, data);
 	if (ret != 0)
 	{
-		printf("SetSamplingFrequency (WriteRegister) failed with error %d\n", ret);
-		return;
+		return ret;
 	}
+	return 0;
 }
 
 

@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include "Plotter.h"
 
-Plotter::Plotter():
+Plotter::Plotter(int argc, char **argv):
 m_bInitialized(false)
 {
-m_vpGraph.resize(4);
+	m_vpGraph.resize(4);
 //	Init();
 }
 /*
@@ -27,7 +27,7 @@ void Plotter::Plot(CAEN_DGTZ_X742_EVENT_t *evt)
 	if(!m_bInitialized)
 	{
 		printf("NOT INITIALIZED\n");
-		m_pCanvas = new TCanvas("m_pCanvas", "Title", 800, 600);
+		m_pCanvas.reset(new TCanvas("m_pCanvas", "Title", 800, 600));
 		TP;
 		m_pCanvas->Divide(2,2);
 		TP;
@@ -72,15 +72,10 @@ void Plotter::Plot(CAEN_DGTZ_X742_EVENT_t *evt)
 
 Plotter::~Plotter()
 {
-	for (int i = 0; i < m_vpGraph.size(); i++)
+	for (int i = 0; i < (int)m_vpGraph.size(); i++)
 	{
 		delete m_vpGraph[i];
 	}
-/*	for (std::vector<int>::iterator it = m_vpGraph.begin(); it != m_vpGraph.end(); it++)
-	{
-		delete *it;
-	}*/
-	delete m_pCanvas;
 }
 
 //TODO: add frequency parameter
@@ -91,7 +86,7 @@ std::vector<float> Plotter::GenerateTime(unsigned int a_iNumOfSamples)
 //	double time_step = 1.0/a_iFrequency;
 	std::vector<float> vResult;
 	vResult.resize(a_iNumOfSamples);
-	for (int i = 0; i < a_iNumOfSamples; i++)
+	for (int i = 0; i < (int)a_iNumOfSamples; i++)
 	{
 		vResult[i] = i * 0.4;
 	}
