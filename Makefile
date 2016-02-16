@@ -1,7 +1,7 @@
 ROOTLIBS = $(shell root-config --libs) -lRooFitCore -lMinuit -lEG 
 ROOTINCS = $(shell root-config --cflags) 
 ROOTLIBS = -L$(ROOTSYS)/lib  -lHtml -lCore -lTreePlayer -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lm -ldl -rdynamic -lGenVector -lTMVA
-MYFLAG = -I./include $(shell ./rootarch.sh)
+MYFLAG = -I./include #$(shell ./rootarch.sh)
 #CXX = g++
 DEBUG =
 CXXFLAGS = $(MYFLAG) -fpermissive $(ROOTINCS) -Wall -Wno-return-type -Wunused -Wno-deprecated
@@ -24,12 +24,18 @@ OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 
 all : $(EXECS)
 
-$(BINDIR)/v1742-readout: $(OBJECTS)
+$(BINDIR)/v1742-readout: $(OBJDIR) $(BINDIR) $(OBJECTS) 
 	@echo "=> linking $@"	
 	@echo $(LDFLAGS) 
 	$(LD) $(LDFLAGS) $(OBJECTS) $(LDLIBS) -o $@
 
-$(OBJDIR)/%.o: $(SOURCEDIR)/%.C
+$(OBJDIR):
+	@mkdir $@
+
+$(BINDIR):
+	@mkdir $@
+
+$(OBJDIR)/%.o: $(SOURCEDIR)/%.C 
 	@echo "=> compiling $<"
 	@echo  $(CXXFLAGS) 
 	$(CXX) $(CXXFLAGS) $(DEBUG) -c $< -o $@
