@@ -16,6 +16,7 @@ OBJDIR = obj
 SOURCEDIR = src
 BINDIR = bin
 DICTDIR = root_dictionary
+ROOTOUTDIR = root
 LIBDIR = lib
 
 EXECS = $(BINDIR)/v1742-readout
@@ -26,7 +27,7 @@ OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 
 all : $(EXECS)
 
-$(BINDIR)/v1742-readout: $(OBJDIR) $(BINDIR) $(OBJECTS) 
+$(BINDIR)/v1742-readout: $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR) $(OBJECTS) 
 	@echo "=> linking $@"	
 	@echo $(LDFLAGS) 
 	$(LD) $(LDFLAGS) $(OBJECTS) $(LDLIBS) -o $@
@@ -36,6 +37,10 @@ $(OBJDIR):
 
 $(BINDIR):
 	@mkdir $@
+
+$(ROOTOUTDIR):
+	@mkdir $@
+
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/%.C 
 	@echo "=> compiling $<"
@@ -47,10 +52,10 @@ $(OBJDIR)/%.o: $(SOURCEDIR)/%.cpp
 	@echo  $(CXXFLAGS) 
 	$(CXX) $(CXXFLAGS) $(DEBUG) -c $< -o $@
 
-#$(OBJDIR)/%.o: $(SOURCEDIR)/%.cxx
-#	@echo "=> compiling $<"
-#	@echo  $(CXXFLAGS) 
-#	$(CXX) $(CXXFLAGS) $(DEBUG) -c $< -o $@
+$(OBJDIR)/%.o: $(SOURCEDIR)/%.cxx
+	@echo "=> compiling $<"
+	@echo  $(CXXFLAGS) 
+	$(CXX) $(CXXFLAGS) $(DEBUG) -c $< -o $@
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/%.c
 	@echo "=> compiling $<"
@@ -58,7 +63,8 @@ $(OBJDIR)/%.o: $(SOURCEDIR)/%.c
 	$(CXX) $(CXXFLAGS) $(DEBUG) -c $< -o $@
 
 $(DICTDIR)/dict.cxx: $(DICTDIR)/LinkDef.h
-	rootcint -f $@ -p $^
+	@rootcint -f $@ -p $^
+	@mv $(DICTDIR)/dict_rdict.pcm $(BINDIR)/
 
 $(OBJDIR)/dict.o: $(DICTDIR)/dict.cxx
 	$(CXX) $(CXXFLAGS) -c $< -o $@ 
@@ -67,6 +73,7 @@ $(OBJDIR)/dict.o: $(DICTDIR)/dict.cxx
 clean :
 	@echo "=> removing object files"
 	@rm -f $(OBJDIR)/*.o 
+	@rm $(DICTDIR)/dict.cxx
 
 clobber : clean
 	@echo "=> removing executables"
