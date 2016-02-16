@@ -83,16 +83,6 @@ void hexDump (char *desc, void *addr, int len) {
 }
 */
 
-void PrintEventInfo(CAEN_DGTZ_EventInfo_t* m_eventInfo)
-{
-	printf("Event %d info\n", m_eventInfo->EventCounter);
-	printf("Event size: %d\n", m_eventInfo->EventSize);
-
-	printf("Board id : %d\n", m_eventInfo->BoardId);
-	printf("Pattern: %d\n", m_eventInfo->Pattern);
-	printf("Channel mask: %08x\n", m_eventInfo->ChannelMask);
-	printf("Triger time stamp: %d\n\n", m_eventInfo->TriggerTimeTag);
-}
 
 void PrintEvent(Event& event)
 {
@@ -139,7 +129,7 @@ DigitizerManager::~DigitizerManager()
 
 void DigitizerManager::PrintBoardInfo(CAEN_DGTZ_BoardInfo_t& a_boardInfo)
 {
-	printf("\nConnected to CAEN Digitizer Model %s", a_boardInfo.ModelName);
+	printf("\nConnected to CAEN Digitizer Model %s\n", a_boardInfo.ModelName);
 	printf("\tROC FPGA Release is %s\n", a_boardInfo.ROC_FirmwareRel);
 	printf("\tAMC FPGA Release is %s\n", a_boardInfo.AMC_FirmwareRel);
 }
@@ -227,9 +217,6 @@ void DigitizerManager::Acquire()
 	for (uint32_t i=0; i < numEvents; i++) {
 		/* Get the Infos and pointer to the event */
 		ASSERT_SUCCESS(CAEN_DGTZ_GetEventInfo(m_iHandle,m_pBuffer,bsize,i,&m_eventInfo,&evtptr), "Failed to get event info");
-		printf("USING CAEN_DGTZ_GetEventInfo:\n");
-		PrintEventInfo(&m_eventInfo);
-		printf("USING EVENT.CPP:\n");
 		ASSERT_SUCCESS(CAEN_DGTZ_DecodeEvent(m_iHandle, m_pBuffer, (void**)&m_pEvent), "Failed to decode event");
 		m_eventHandler.Handle(m_pEvent, &m_eventInfo);
 	}

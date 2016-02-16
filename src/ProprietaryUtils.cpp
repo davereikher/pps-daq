@@ -70,7 +70,6 @@ int Proprietary1742Utils::SetGroupEnableMask(int a_iHandle, bool a_iGroup0, bool
 {
 	unsigned int data = 0;
 	data |= a_iGroup0 | (a_iGroup1 << 1) | (a_iGroup2 << 2) | (a_iGroup3 << 3);
-	printf("data : %d\n\n", data); 
 	int ret = CAEN_DGTZ_WriteRegister(a_iHandle, CAEN_DGTZ_CH_ENABLE_ADD, data);
 	if (ret != 0)
 	{
@@ -84,7 +83,6 @@ int Proprietary1742Utils::SetSamplingFrequency(int a_iHandle, unsigned int a_iFr
 {
 	unsigned int data = 0;
 	data |= a_iFrequency & 0x00000003;
-	printf("data : %d\n\n", data); 
 	int ret = CAEN_DGTZ_WriteRegister(a_iHandle, CAEN_DGTZ_DRS4_FREQUENCY_REG_WRITE, data);
 	if (ret != 0)
 	{

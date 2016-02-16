@@ -16,6 +16,8 @@ public:
 	void SetEventAddress(CAEN_DGTZ_X742_EVENT_t* a_pEvent);
 	void SetEventInfoAddress(CAEN_DGTZ_EventInfo_t* a_pEventInfo);
 	void AssertReady();
+	void PrintEventInfo(CAEN_DGTZ_EventInfo_t* p_eventInfo);
+
 private:
 	std::unique_ptr<TFile> m_pRootFile;
 	std::unique_ptr<TTree> m_pRootTree;

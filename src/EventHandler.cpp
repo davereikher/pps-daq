@@ -1,3 +1,4 @@
+#include <iostream>
 #include "EventHandler.h"
 #include "Exception.h"
 #include "linux/limits.h"
@@ -36,9 +37,11 @@ void EventHandler::SetEventInfoAddress(CAEN_DGTZ_EventInfo_t* a_pEventInfo)
 	{
 		throw EventHandlerException(__LINE__, "Event info already set");
 	}
-	m_pRootTree->Branch("EventInfo", a_pEventInfo, "EventSize/i:BoardId:Pattern:ChannelMask:EventCounter:TriggerTimeTag");
+	//m_pRootTree->Branch("EventInfo", a_pEventInfo, "EventSize/i:BoardId:Pattern:ChannelMask:EventCounter:TriggerTimeTag");
+	m_pRootTree->Branch("EventInfo", &(a_pEventInfo->TriggerTimeTag), "TriggerTimeTag/i");
 	m_bEventInfoSet = true;
 }
+
 
 void EventHandler::AssertReady()
 {
@@ -48,9 +51,22 @@ void EventHandler::AssertReady()
 	}
 }
 
+void EventHandler::PrintEventInfo(CAEN_DGTZ_EventInfo_t* p_eventInfo)
+{
+	printf("Event %d info\n", p_eventInfo->EventCounter);
+	printf("Event size: %d\n", p_eventInfo->EventSize);
+
+	printf("Board id : %d\n", p_eventInfo->BoardId);
+	printf("Pattern: %d\n", p_eventInfo->Pattern);
+	printf("Channel mask: %08x\n", p_eventInfo->ChannelMask);
+	printf("Triger time stamp: %u\n\n", p_eventInfo->TriggerTimeTag);
+}
+
 void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_t* a_pEventInfo)
 {	
-	m_plotter.Plot(a_pEvent);
+
+/*	PrintEventInfo(a_pEventInfo);
+	m_plotter.Plot(a_pEvent);*/
 	
 	AssertReady();
 	
@@ -105,6 +121,8 @@ std::string EventHandler::GenerateFileName()
 	}
 
 	sStr += sFileName;
+
+	std::cout << "Acquired data is stored in " << sStr << std::endl;
 	
 	return sStr;
 }

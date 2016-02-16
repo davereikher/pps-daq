@@ -21,7 +21,8 @@ void Plotter::Init()
 */
 void Plotter::Plot(CAEN_DGTZ_X742_EVENT_t *evt)
 {
-	#define TP printf("TP: %d\n", __LINE__)
+	//#define TP printf("TP: %d\n", __LINE__)
+	#define TP
 	#define DATA_CHANNEL 0
 	TP;
 	if(!m_bInitialized)
