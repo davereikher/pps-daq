@@ -12,7 +12,7 @@ public:
 	void InitAndConfigure();
 	void PrintBoardInfo(CAEN_DGTZ_BoardInfo_t& a_boardInfo);
 	void Start();
-	void Acquire();
+	int Acquire();
 private:
 	int m_iHandle;
 	CAEN_DGTZ_X742_EVENT_t* m_pEvent;

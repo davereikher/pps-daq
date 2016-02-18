@@ -31,10 +31,13 @@ int main(int argc, char** argv)
 		DigitizerManager digitizerManager(eventHandler);
 		digitizerManager.InitAndConfigure();
 		digitizerManager.Start();
-
-		while (true)
+		int i = 0;
+		while (/*i < 10*/ true)
 		{
-			digitizerManager.Acquire();
+			if(digitizerManager.Acquire() > 0)
+			{
+//				i++;
+			}
 			c = checkCommand();
 			if (c == 1) break;
 		}

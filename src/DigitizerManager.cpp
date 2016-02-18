@@ -17,6 +17,7 @@
 #define IGNORE_DPP_DEPRECATED
 #define BOARD_ADDRESS 0xAAAA0000
 #define MAXNB 1 /* Number of connected boards */
+#define SAMPLING_FREQUENCY CAEN_DGTZ_DRS4_2_5GHz
 
 void LogEvent(char* eventptr, int size)
 {
@@ -162,7 +163,7 @@ void DigitizerManager::InitAndConfigure()
 //	printf("Board type: %d.\n", boardType);
 //	grpEnableMask = Proprietary1742Utils::GetGroupEnableMask(m_iHandle);
 //	printf("Group enable mask after setting: %d.\n", grpEnableMask);
-	ASSERT_SUCCESS(CAEN_DGTZ_LoadDRS4CorrectionData(m_iHandle, CAEN_DGTZ_DRS4_2_5GHz), "Failed to load DRS4 correction data");
+	ASSERT_SUCCESS(CAEN_DGTZ_LoadDRS4CorrectionData(m_iHandle, SAMPLING_FREQUENCY), "Failed to load DRS4 correction data");
 	ASSERT_SUCCESS(CAEN_DGTZ_EnableDRS4Correction(m_iHandle), "Failed to enable DRS4 correction");
 
 //	CAEN_DGTZ_DRS4Frequency_t samplingFreq;
@@ -181,6 +182,7 @@ void DigitizerManager::InitAndConfigure()
 	uint32_t size = 0; //dummy variable. Not used.
 	ASSERT_SUCCESS(CAEN_DGTZ_MallocReadoutBuffer(m_iHandle,&m_pBuffer,&size), "Failed to allocate readout buffer");
 	ASSERT_SUCCESS(CAEN_DGTZ_AllocateEvent(m_iHandle, (void**)&m_pEvent), "Failed to allocate event");
+
 	m_eventHandler.SetEventInfoAddress(&m_eventInfo);
 	m_eventHandler.SetEventAddress(m_pEvent);
 }
@@ -190,12 +192,12 @@ void DigitizerManager::Start()
 	ASSERT_SUCCESS(CAEN_DGTZ_SWStartAcquisition(m_iHandle), "Failed to start acquiring samples");
 }
 
-void DigitizerManager::Acquire()
+int DigitizerManager::Acquire()
 {
-	int count = 0;
+//	int count = 0;
 	char * evtptr = NULL;
 	uint32_t bsize;
-	uint32_t numEvents;
+	uint32_t iNumEvents;
 	
 	
 /*	printf("\n\nPress 's' to start the acquisition\n");
@@ -211,15 +213,17 @@ void DigitizerManager::Acquire()
 
 	ASSERT_SUCCESS(CAEN_DGTZ_ReadData(m_iHandle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, m_pBuffer,&bsize), "Failed to read data");
 
-	ASSERT_SUCCESS(CAEN_DGTZ_GetNumEvents(m_iHandle,m_pBuffer,bsize,&numEvents), "Failed to get number of events");
+	ASSERT_SUCCESS(CAEN_DGTZ_GetNumEvents(m_iHandle,m_pBuffer,bsize,&iNumEvents), "Failed to get number of events");
 
-	count +=numEvents;
-	for (uint32_t i=0; i < numEvents; i++) {
+	//count +=numEvents;
+	for (uint32_t i=0; i < iNumEvents; i++) {
 		/* Get the Infos and pointer to the event */
 		ASSERT_SUCCESS(CAEN_DGTZ_GetEventInfo(m_iHandle,m_pBuffer,bsize,i,&m_eventInfo,&evtptr), "Failed to get event info");
 		ASSERT_SUCCESS(CAEN_DGTZ_DecodeEvent(m_iHandle, m_pBuffer, (void**)&m_pEvent), "Failed to decode event");
 		m_eventHandler.Handle(m_pEvent, &m_eventInfo);
 	}
+
+	return iNumEvents;
 
 //Continue:
 //printf("\nRetrieved %d Events\n", count);

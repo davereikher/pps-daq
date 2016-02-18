@@ -13,7 +13,7 @@
 #define TOTAL_NUM_OF_CHANNELS MAX_X742_GROUP_SIZE * (MAX_X742_CHANNEL_SIZE - 1)
 
 EventHandler::EventHandler(int argc, char** argv):
-m_pRootFile(new TFile(GenerateFileName().c_str(), "RECREATE")),
+m_pRootFile(new TFile(GenerateFileName().c_str(), "RECREATE","", 3)),
 m_pRootTree(new TTree(TREE_NAME, TREE_DESCRIPTION)),
 m_bEventAddrSet(false),
 m_bEventInfoSet(false),
@@ -63,7 +63,7 @@ void EventHandler::PrintEventInfo(CAEN_DGTZ_EventInfo_t* p_eventInfo)
 }
 
 void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_t* a_pEventInfo)
-{	
+{
 
 /*	PrintEventInfo(a_pEventInfo);
 	m_plotter.Plot(a_pEvent);*/
