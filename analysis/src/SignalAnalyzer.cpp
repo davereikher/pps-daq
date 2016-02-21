@@ -1,5 +1,6 @@
 #include <cfloat>
-#include <limits>
+#include <limits.h>
+#include "SignalAnalyzer.h"
 #define MINIMUM_VALUE_FOR_SUIGNAL 1950
 
 std::vector <std::vector<int>> gvPanelChannelRanges;
@@ -12,32 +13,33 @@ We loop over all events. For each event, and for each range of channels (each ra
 	- Define a threshold MIN_EDGE_SEPARATION, which is the minimum amount of time the first detected pulse in a range of channels arrives before the following one in that same range for that pulse to be considered as the original one.
 	- Define a threshold MAX_EDGE_JITTER, which is the length of the window from the leading edge of the first pulse inside which pulses are considered to be "inseperable", that is, we cannot say just by the leading edge position which pulse comes first.
 	- Define a threshold MAX_AMPLITUDE_JITTER, which is the distance (in pulse height units) from the lowest value of the largest pulse within which another pulse, if found, is not weak enough to be dismissed as a signal, and therefore all signals the lowest points of which fall within this window will be considered as potential pulses.
-	- For each event:
-		- For each range:
-			- Map the vectors of samples associated with each channel in that range to a vector of pairs (leading_edge, min_pulse_value)
-			- In the vector of pairs find the lowest and the next to lowest value of leading_edge. 
-			- If these values are farther away than MIN_EDGE_SEPARATION:
-				- Take the one with the lowest value as the signal.
-			- Otherwise:
-				- Take all channels the leading_edge on which are bundled within a distance MAX_EDGE_JITTER from the first leading_edge and find the channel with the lowest min_pulse_value.
-				- Return all channel numbers the min_pulse_value of which are bundled withing a window
 */
 
-#define NO_PULSE_EDGE MAX_INT
+#define NO_PULSE_EDGE INT_MAX
 #define NO_PULSE_MINIMUM_VALUE FLT_MAX
 
 #define PULSE_THRESHOLD -1950 //TODO: set these values
 #define EDGE_THRESHOLD -1000
+#define EXPECTED_PULSE_WIDTH 40
+#define MIN_EDGE_SEPARATION 100
+#define MAX_EDGE_JITTER 40
+#define MAX_AMPLITUDE_JITTER 50
 
 
-std::pair<int, float> FindLeadingEdgeAndPulseAmplitude(std::vector<float> a_samplesVector)
+
+/**
+Maps a vector of samples to a pait of values - the leading edge of the first occurence of a pulse and the lowest value of that pulse.
+@param a_samplesVector - a vector of samples from a channel
+@return A pair, where the first item is the location of the leading edge and the second one is the minimum of the pulse.
+*/
+std::pair<int, float> SignalAnalyzer::FindLeadingEdgeAndPulseAmplitude(std::vector<float>& a_samplesVector)
 {
 	std::pair<int, float> p; //leading edge and pulse threshold pair
 	float minValue = FLT_MAX; 
-	int minValueIndex = -1;
 	int leading_edge = -1;
-	
-	for (int i = 0; i < a_samplesVector.size(), i++)
+	int i = -1;	
+
+	for (i = 0; i < (int)a_samplesVector.size(); i++)
 	{
 		if (a_samplesVector[i] < EDGE_THRESHOLD)
 		{
@@ -48,7 +50,7 @@ std::pair<int, float> FindLeadingEdgeAndPulseAmplitude(std::vector<float> a_samp
 		}
 	}
 
-	if (i == a_samplesVector.size())
+	if (i == (int)a_samplesVector.size())
 	{
 		//no leading edge found => no pulse
 		p.first = NO_PULSE_EDGE;
@@ -60,7 +62,7 @@ std::pair<int, float> FindLeadingEdgeAndPulseAmplitude(std::vector<float> a_samp
 
 	for ( ; i < window_end; i++)
 	{
-		if (a_samplesVector[i] < minValue):
+		if (a_samplesVector[i] < minValue)
 		{
 			minValue = a_samplesVector[i];
 		}
@@ -72,16 +74,32 @@ std::pair<int, float> FindLeadingEdgeAndPulseAmplitude(std::vector<float> a_samp
 	return p;
 }
 
-std::vector<int> FindOriginalPulseInChannelRange(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int>& a_vRange)
+/**
+Analyzes a range of the channels to find the original pulse.
+- For each event:
+	- For each range:
+		- Map the vectors of samples associated with each channel in that range to a vector of pairs (leading_edge, min_pulse_value)
+		- In the vector of pairs find the lowest and the next to lowest value of leading_edge. 
+		- If these values are farther away than MIN_EDGE_SEPARATION:
+			- Take the one with the lowest value as the signal.
+		- Otherwise:
+			- Take all channels the leading_edge on which are bundled within a distance MAX_EDGE_JITTER from the first leading_edge and find the channel with the lowest min_pulse_value.
+			- Return all channel numbers the min_pulse_value of which are bundled withing a window of size MAX_AMPLITUDE_JITTER upwards from the lowest min_pulse_value.
+
+@param a_vAllChannels - a vector of all 32 channels, where each item is a vector of samples from that channel.
+@param a_vRange - a vector of indices of the interesting channels in the first parameter.
+@return A vector of channels containing the original pulse (ideally there will be just one item)
+*/
+std::vector<int> SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int>& a_vRange)
 {
 	//Each pair represents a pulse. The first value is the leading edge time and the second is the lowest value of the pulse.
 	std::vector<std::pair<int, float> > pairs;
 
 	//Get all channels in the provided range, find the leading edge and minimum value of the pulses and store the result in a vector of pairs. Also, find the earliest and next-to-earliest leading edge in the channels in the range.
-	int iEarliestLeadingEdge = MAX_INT;
-	int iNextToEarliestLeadingEdge = MAX_INT;
+	int iEarliestLeadingEdge = INT_MAX;
+	int iNextToEarliestLeadingEdge = INT_MAX;
 	int iEarliestLeadingEdgeIndex = -1;
-	for (for int i = 0; i < a_vRange.size(); i++)
+	for (int i = 0; i < (int)a_vRange.size(); i++)
 	{
 		std::pair<int, float> p;
 		p = FindLeadingEdgeAndPulseAmplitude(a_vAllChannels[a_vRange[i]]);
@@ -114,7 +132,7 @@ std::vector<int> FindOriginalPulseInChannelRange(std::vector<std::vector<float> 
 	//However, if some of the bunched pulse's minimum values are too close to the lowest minimum value, we cannot definitely distinguish the original pulse. Therefore, we return all of them.
 	//Find all pulses the leading edges of which are within a window of size MAX_EDGE_JITTER and find the pulse with the largest amplitude.
 	std::vector<int> vChannelsWithBunchedPulses;
-	for (int i = 0; i < pair.size(); i++)
+	for (int i = 0; i < (int)pairs.size(); i++)
 	{
 		if ((pairs[i].first - iEarliestLeadingEdge) < MAX_EDGE_JITTER)
 		{
@@ -137,4 +155,14 @@ std::vector<int> FindOriginalPulseInChannelRange(std::vector<std::vector<float> 
 	}
 
 	return vResult;
+}
+
+/**
+Returns whether a range has a pulse in one of the channels or not. This is good for panel efficiency measurements, for example.
+@param a_vRange - the range of channels defining a panel
+@return Whether a pulse was detected on one of the panels
+*/
+bool SignalAnalyzer::DoesRangeHaveSignal(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int> a_vRange)
+{
+	return FindOriginalPulseInChannelRange(a_vAllChannels, a_vRange).empty();
 }
