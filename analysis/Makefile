@@ -1,23 +1,26 @@
 ROOTLIBS = $(shell root-config --libs) -lRooFitCore -lMinuit -lEG 
 ROOTINCS = $(shell root-config --cflags) 
 ROOTLIBS = -L$(ROOTSYS)/lib  -lHtml -lCore -lTreePlayer -lRIO -lNet -lssl -lcrypto -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lm -ldl -rdynamic -lGenVector -lTMVA
-MYFLAG = -I./include -I../additional-packages/include -L../additional-packages/lib -fmax-errors=5
 #CXX = g++
 DEBUG =
-CXXFLAGS = -D ROOT_FILE_OUT_DIR=\"$(ROOTFILEOUTDIR)\" $(MYFLAG) -fpermissive $(ROOTINCS) -Wall -Wno-return-type -Wunused -Wno-deprecated
 #CXXFLAGS        =-I$(ROOTSYS)/include -O -Wall -fPIC
 LD = $(CXX)
 ###LDLIBS = $(ROOTLIBS) -lz -lpthread
-LDLIBS = $(ROOTLIBS) -lpthread -ljson
-LDFLAGS = $(MYFLAG)
 
 OBJDIR = obj
 SOURCEDIR = src
 BINDIR = bin
-LIBDIR = lib
+LIBDIR = ./lib
+
+
+CXXFLAGS = -D ROOT_FILE_OUT_DIR=\"$(ROOTFILEOUTDIR)\" $(MYFLAG) -fpermissive $(ROOTINCS) -Wall -Wno-return-type -Wunused -Wno-deprecated
+MYFLAG = -I./include -I../additional-packages/include -L../additional-packages/lib -fmax-errors=5
+
+LDFLAGS = $(MYFLAG)
+LDLIBS = $(ROOTLIBS) -lpthread -ljson -L$(LIBDIR) -lanalysis
 
 EXECS = $(BINDIR)/analysis
-_OBJECTS = analysis.o SignalAnalyzer.o Configuration.o
+_OBJECTS = analysis.o Configuration.o
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx
@@ -42,22 +45,22 @@ $(ROOTOUTDIR):
 $(OBJDIR)/%.o: $(SOURCEDIR)/%.C 
 	@echo "=> compiling $<"
 	@echo  $(CXXFLAGS) 
-	$(CXX) $(CXXFLAGS) $(DEBUG) -c $< -o $@
+	$(CXX) $(DEBUG) -c $< -o $@ $(CXXFLAGS) 
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/%.cpp
 	@echo "=> compiling $<"
 	@echo  $(CXXFLAGS) 
-	$(CXX) $(CXXFLAGS) $(DEBUG) -c $< -o $@
+	$(CXX) $(DEBUG) -c $< -o $@ $(CXXFLAGS) 
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/%.cxx
 	@echo "=> compiling $<"
 	@echo  $(CXXFLAGS) 
-	$(CXX) $(CXXFLAGS) $(DEBUG) -c $< -o $@
+	$(CXX) $(DEBUG) -c $< -o $@ $(CXXFLAGS) 
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/%.c
 	@echo "=> compiling $<"
 	@echo  $(CXXFLAGS) 
-	$(CXX) $(CXXFLAGS) $(DEBUG) -c $< -o $@
+	$(CXX) $(DEBUG) -c $< -o $@ $(CXXFLAGS) 
 
 #$(DICTDIR)/dict.cxx: $(DICTDIR)/LinkDef.h
 #	@rootcint -f $@ -p $^

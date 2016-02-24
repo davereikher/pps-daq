@@ -65,8 +65,8 @@ void EventHandler::PrintEventInfo(CAEN_DGTZ_EventInfo_t* p_eventInfo)
 void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_t* a_pEventInfo)
 {
 
-/*	PrintEventInfo(a_pEventInfo);
-	m_plotter.Plot(a_pEvent);*/
+	PrintEventInfo(a_pEventInfo);
+	m_plotter.Plot(a_pEvent);
 	
 	AssertReady();
 	

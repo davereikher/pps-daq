@@ -1,0 +1,26 @@
+LIBDIR = ./lib
+TARGET = $(LIBDIR)/libanalysis.a
+
+SRCDIR = ./src
+INCDIR = ./include
+OBJDIR = ./obj
+
+MYFLAGS = -I$(INCDIR) -std=c++11
+
+_OBJECTS = SignalAnalyzer.o
+SRCFILES = $(patsubst %.o, $(SRCDIR)/%.cpp,$(_OBJECTS))
+OBJFILES = $(patsubst %.o, $(OBJDIR)/%.o,$(_OBJECTS))
+
+all: $(TARGET)
+
+$(OBJFILES): $(SRCFILES)
+	$(CXX) $(MYFLAGS) -c $< -o $@
+
+$(TARGET): $(OBJFILES) $(LIBDIR)
+	ar rvs $(TARGET) $(OBJFILES)
+
+$(LIBDIR):
+	@mkdir $(LIBDIR)
+
+$(OBJDIR):
+	@mkdir $(OBJDIR)

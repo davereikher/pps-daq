@@ -3,7 +3,7 @@
 #include "SignalAnalyzer.h"
 #define MINIMUM_VALUE_FOR_SUIGNAL 1950
 
-std::vector <std::vector<int>> gvPanelChannelRanges;
+std::vector <std::vector<int> > gvPanelChannelRanges;
 
 /*
 We loop over all events. For each event, and for each range of channels (each range corresponds to a panel), we look for the channel that was hit by the following procedure:
@@ -28,7 +28,7 @@ We loop over all events. For each event, and for each range of channels (each ra
 
 
 /**
-Maps a vector of samples to a pait of values - the leading edge of the first occurence of a pulse and the lowest value of that pulse.
+Maps a vector of samples to a pair of values - the leading edge of the first occurence of a pulse and the lowest value of that pulse.
 @param a_samplesVector - a vector of samples from a channel
 @return A pair, where the first item is the location of the leading edge and the second one is the minimum of the pulse.
 */
