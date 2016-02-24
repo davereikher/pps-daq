@@ -1,7 +1,7 @@
 ROOTLIBS = $(shell root-config --libs) -lRooFitCore -lMinuit -lEG 
 ROOTINCS = $(shell root-config --cflags) 
 ROOTLIBS = -L$(ROOTSYS)/lib  -lHtml -lCore -lTreePlayer -lRIO -lNet -lssl -lcrypto -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lm -ldl -rdynamic -lGenVector -lTMVA
-MYFLAG = -I./include
+MYFLAG = -I./include -I./analysis/include
 #CXX = g++
 DEBUG =
 ROOTFILEOUTDIR = ./root
@@ -9,7 +9,7 @@ CXXFLAGS = -D ROOT_FILE_OUT_DIR=\"$(ROOTFILEOUTDIR)\" $(MYFLAG) -fpermissive $(R
 #CXXFLAGS        =-I$(ROOTSYS)/include -O -Wall -fPIC
 LD = $(CXX)
 ###LDLIBS = $(ROOTLIBS) -lz -lpthread
-LDLIBS = $(ROOTLIBS) -lpthread -lCAENDigitizer
+LDLIBS = $(ROOTLIBS) -lpthread -lCAENDigitizer -L./analysis/lib -lanalysis
 LDFLAGS = $(MYFLAG)
 
 OBJDIR = obj

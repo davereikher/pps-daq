@@ -24,3 +24,6 @@ $(LIBDIR):
 
 $(OBJDIR):
 	@mkdir $(OBJDIR)
+
+clean:
+	@rm $(TARGET)

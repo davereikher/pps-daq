@@ -157,6 +157,13 @@ void DigitizerManager::InitAndConfigure()
 //	grpEnableMask = Proprietary1742Utils::GetGroupEnableMask(m_iHandle);
 //	printf("Group enable mask before setting: %d.\n", grpEnableMask);
 	ASSERT_SUCCESS(Proprietary1742Utils::SetGroupEnableMask(m_iHandle, 1, 1, 1, 1), "Failed to set group enable mask (through WriteRegister)");
+//	ASSERT_SUCCESS(CAEN_DGTZ_SetChannelDCOffset(m_iHandle, 16, 0xAFFF), "Could not set group DC offset");
+/*	for (int i = 0; i < MAX_X742_GROUP_SIZE; i++)
+	{	
+		ASSERT_SUCCESS(CAEN_DGTZ_SetGroupDCOffset(m_iHandle, i, 0xFFFF), "Could not set group DC offset");
+	} 
+*/
+
 //	eventSize = Proprietary1742Utils::GetEventSize(m_iHandle);
 //	printf("Event size: %d.\n", eventSize);
 //	boardType = Proprietary1742Utils::GetBoardType(m_iHandle);

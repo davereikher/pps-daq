@@ -89,7 +89,8 @@ std::vector<float> Plotter::GenerateTime(unsigned int a_iNumOfSamples)
 	vResult.resize(a_iNumOfSamples);
 	for (int i = 0; i < (int)a_iNumOfSamples; i++)
 	{
-		vResult[i] = i * 0.4;
+		//vResult[i] = i * 0.4;
+		vResult[i] = i;
 	}
 	return vResult;
 }

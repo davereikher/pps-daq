@@ -27,7 +27,7 @@ OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 
 all : $(EXECS)
 
-$(BINDIR)/analysis: $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR) $(OBJECTS) 
+$(BINDIR)/analysis: $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR) $(OBJECTS) $(LIBDIR)/libanalysis.a
 	@echo "=> linking $@"	
 	@echo $(LDFLAGS) 
 	$(LD) $(LDFLAGS) $(OBJECTS) $(LDLIBS) -o $@
@@ -41,6 +41,8 @@ $(BINDIR):
 $(ROOTOUTDIR):
 	@mkdir $@
 
+$(LIBDIR)/libanalysis.a:
+	make -f make_lib
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/%.C 
 	@echo "=> compiling $<"
@@ -73,6 +75,7 @@ $(OBJDIR)/%.o: $(SOURCEDIR)/%.c
 clean :
 	@echo "=> removing object files"
 	@rm -f $(OBJDIR)/*.o 
+	@make -f make_lib clean
 
 clobber : clean
 	@echo "=> removing executables"

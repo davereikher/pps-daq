@@ -5,6 +5,7 @@
 #include "TSystem.h"
 #include "TInterpreter.h"
 #include "time.h"
+#include "Analysis.h"
 
 
 #define TREE_NAME "DigitizerEvents"
@@ -95,6 +96,8 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_
 		}
 	}
 
+	PerformIntermediateAnalysis();
+
 /*	std::vector<float> vec;
 	vec.push_back((float)time(0));
 	vec.push_back((float)time(0) /100);
@@ -131,3 +134,19 @@ EventHandler::~EventHandler()
 {
 	m_pRootTree->Write();
 }
+
+void EventHandler::PerformIntermediateAnalysis()
+{
+	std::pair<int, float> leadingEdgeAndPulseHeight;
+	leadingEdgeAndPulseHeight = SignalAnalyzer::FindLeadingEdgeAndPulseHeight(m_vChannels[0]);
+
+	if ( (leadingEdgeAndPulseHeight.first == NO_PULSE_EDGE) && (leadingEdgeAndPulseHeight.second == NO_PULSE_MINIMUM_VALUE ) )
+	{
+		std::cout << "PULSE NOT DETECTED!" << std::endl;
+	}
+	else
+	{
+		std::cout << "!!!!!!!!!!!!DETECTED Pulse edge = " << leadingEdgeAndPulseHeight.first << " pulse minimum value: " << leadingEdgeAndPulseHeight.second  << std::endl;
+	}
+}
+

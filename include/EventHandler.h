@@ -12,11 +12,14 @@ public:
 	EventHandler(int argc, char** argv);
 	~EventHandler();
 	void Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_t* a_pEventInfo);
-	std::string GenerateFileName();
 	void SetEventAddress(CAEN_DGTZ_X742_EVENT_t* a_pEvent);
 	void SetEventInfoAddress(CAEN_DGTZ_EventInfo_t* a_pEventInfo);
-	void AssertReady();
+
+private:
+	void PerformIntermediateAnalysis();
 	void PrintEventInfo(CAEN_DGTZ_EventInfo_t* p_eventInfo);
+	void AssertReady();
+	std::string GenerateFileName();
 
 private:
 	std::unique_ptr<TFile> m_pRootFile;

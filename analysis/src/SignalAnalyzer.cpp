@@ -1,5 +1,3 @@
-#include <cfloat>
-#include <limits.h>
 #include "SignalAnalyzer.h"
 #define MINIMUM_VALUE_FOR_SUIGNAL 1950
 
@@ -15,15 +13,13 @@ We loop over all events. For each event, and for each range of channels (each ra
 	- Define a threshold MAX_AMPLITUDE_JITTER, which is the distance (in pulse height units) from the lowest value of the largest pulse within which another pulse, if found, is not weak enough to be dismissed as a signal, and therefore all signals the lowest points of which fall within this window will be considered as potential pulses.
 */
 
-#define NO_PULSE_EDGE INT_MAX
-#define NO_PULSE_MINIMUM_VALUE FLT_MAX
 
-#define PULSE_THRESHOLD -1950 //TODO: set these values
-#define EDGE_THRESHOLD -1000
-#define EXPECTED_PULSE_WIDTH 40
+#define PULSE_THRESHOLD 1700 //TODO: set these values
+#define EDGE_THRESHOLD 1840
+#define EXPECTED_PULSE_WIDTH 70
 #define MIN_EDGE_SEPARATION 100
-#define MAX_EDGE_JITTER 40
-#define MAX_AMPLITUDE_JITTER 50
+#define MAX_EDGE_JITTER 50
+#define MAX_AMPLITUDE_JITTER 200
 
 
 
@@ -32,7 +28,7 @@ Maps a vector of samples to a pair of values - the leading edge of the first occ
 @param a_samplesVector - a vector of samples from a channel
 @return A pair, where the first item is the location of the leading edge and the second one is the minimum of the pulse.
 */
-std::pair<int, float> SignalAnalyzer::FindLeadingEdgeAndPulseAmplitude(std::vector<float>& a_samplesVector)
+std::pair<int, float> SignalAnalyzer::FindLeadingEdgeAndPulseHeight(std::vector<float>& a_samplesVector)
 {
 	std::pair<int, float> p; //leading edge and pulse threshold pair
 	float minValue = FLT_MAX; 
@@ -102,7 +98,7 @@ std::vector<int> SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std
 	for (int i = 0; i < (int)a_vRange.size(); i++)
 	{
 		std::pair<int, float> p;
-		p = FindLeadingEdgeAndPulseAmplitude(a_vAllChannels[a_vRange[i]]);
+		p = FindLeadingEdgeAndPulseHeight(a_vAllChannels[a_vRange[i]]);
 		pairs.push_back(p);
 
 		if (p.first <= iEarliestLeadingEdge)
