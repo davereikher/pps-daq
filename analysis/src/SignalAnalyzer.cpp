@@ -1,5 +1,4 @@
 #include "SignalAnalyzer.h"
-#define MINIMUM_VALUE_FOR_SUIGNAL 1950
 
 std::vector <std::vector<int> > gvPanelChannelRanges;
 
