@@ -9,7 +9,7 @@ LD = $(CXX)
 
 OBJDIR = obj
 SOURCEDIR = src
-BINDIR = bin
+BINDIR = ../bin
 LIBDIR = ./lib
 
 
@@ -19,7 +19,7 @@ MYFLAG = -I./include -I../additional-packages/include -L../additional-packages/l
 LDFLAGS = $(MYFLAG)
 LDLIBS = $(ROOTLIBS) -lpthread -ljson -L$(LIBDIR) -lanalysis
 
-EXECS = $(BINDIR)/analysis 
+EXECS = $(BINDIR)/analysis
 _OBJECTS = analysis.o Configuration.o
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 

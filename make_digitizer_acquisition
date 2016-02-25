@@ -62,20 +62,18 @@ $(OBJDIR)/%.o: $(SOURCEDIR)/%.c
 	@echo  $(CXXFLAGS) 
 	$(CXX) $(CXXFLAGS) $(DEBUG) -c $< -o $@
 
-$(DICTDIR)/dict.cxx: $(DICTDIR)/LinkDef.h
-	@rootcint -f $@ -p $^
-	@mv $(DICTDIR)/dict_rdict.pcm $(BINDIR)/
+#$(DICTDIR)/dict.cxx: $(DICTDIR)/LinkDef.h
+#	@rootcint -f $@ -p $^
+#	@mv $(DICTDIR)/dict_rdict.pcm $(BINDIR)/
 
-$(OBJDIR)/dict.o: $(DICTDIR)/dict.cxx
-	$(CXX) $(CXXFLAGS) -c $< -o $@ 
+#$(OBJDIR)/dict.o: $(DICTDIR)/dict.cxx
+#	$(CXX) $(CXXFLAGS) -c $< -o $@ 
 
 .PHONY : clean clobber
 clean :
 	@echo "=> removing object files"
 	-rm -f $(OBJDIR)/*.o 
-	-rm $(DICTDIR)/dict.cxx
-	-rm $(BINDIR)/dict_rdict.pcm
-
+	
 clobber : clean
 	@echo "=> removing executables"
 	-rm -f $(EXECS)
