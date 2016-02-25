@@ -12,7 +12,7 @@ public:
 	~Plotter();
 	
 	void Plot(CAEN_DGTZ_X742_EVENT_t *evt);
-	std::vector<float> GenerateTime(unsigned int a_iNumOfSamples);
+//	std::vector<float> GenerateTime(unsigned int a_iNumOfSamples);
 
 private:
 	bool m_bInitialized;

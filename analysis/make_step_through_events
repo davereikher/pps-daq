@@ -9,7 +9,7 @@ LD = $(CXX)
 
 OBJDIR = obj
 SOURCEDIR = src
-BINDIR = bin
+BINDIR = ../bin
 LIBDIR = ./lib
 
 
@@ -20,17 +20,17 @@ LDFLAGS = $(MYFLAG)
 LDLIBS = $(ROOTLIBS) -lpthread -ljson -L$(LIBDIR) -lanalysis
 
 EXECS = $(BINDIR)/step_through_events
-_OBJECTS = analysis.o Configuration.o
+_OBJECTS = step_through_events.o Configuration.o
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx
 
-all : $(EXECS)
+all : $(EXECS) $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR)
 
-$(EXECS): $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR) $(OBJECTS) $(LIBDIR)/libanalysis.a
+$(EXECS):  $(OBJECTS) $(LIBDIR)/libanalysis.a
 	@echo "=> linking $@"	
 	@echo $(LDFLAGS) 
-	$(LD) $(LDFLAGS) $(OBJECTS) $(LDLIBS) -o $@
+	$(LD) $(LDFLAGS) $(OBJECTS) ../obj/dict.o $(LDLIBS) -o $@
 
 $(OBJDIR):
 	@mkdir $@
@@ -63,13 +63,6 @@ $(OBJDIR)/%.o: $(SOURCEDIR)/%.c
 	@echo "=> compiling $<"
 	@echo  $(CXXFLAGS) 
 	$(CXX) $(DEBUG) -c $< -o $@ $(CXXFLAGS) 
-
-#$(DICTDIR)/dict.cxx: $(DICTDIR)/LinkDef.h
-#	@rootcint -f $@ -p $^
-#	@mv $(DICTDIR)/dict_rdict.pcm $(BINDIR)/
-
-#$(OBJDIR)/dict.o: $(DICTDIR)/dict.cxx
-#	$(CXX) $(CXXFLAGS) -c $< -o $@ 
 
 .PHONY : clean clobber
 clean :

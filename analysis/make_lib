@@ -13,11 +13,11 @@ OBJFILES = $(patsubst %.o, $(OBJDIR)/%.o,$(_OBJECTS))
 
 all: $(TARGET)
 
-$(OBJFILES): $(SRCFILES)
-	$(CXX) $(MYFLAGS) -c $< -o $@
-
-$(TARGET): $(OBJFILES) $(LIBDIR)
+$(TARGET): $(OBJFILES) $(LIBDIR) $(OBJDIR)
 	ar rvs $(TARGET) $(OBJFILES)
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	$(CXX) $(MYFLAGS) -c $< -o $@
 
 $(LIBDIR):
 	@mkdir $(LIBDIR)

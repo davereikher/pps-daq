@@ -8,6 +8,7 @@
 void Usage(char* a_pProcName)
 {
 	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to root file>" << std::endl;
+	std::vector<float> vec = CommonUtils::GenerateTimeSequence(5);
 }
 
 

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "Plotter.h"
+#include "Analysis.h"
 
 Plotter::Plotter(int argc, char **argv):
 m_bInitialized(false)
@@ -42,7 +43,7 @@ void Plotter::Plot(CAEN_DGTZ_X742_EVENT_t *evt)
 			printf("iter: %d", i);
 			m_pCanvas->cd(i+1);
 			TP;
-			TGraph* pGr = new TGraph(1024, (Float_t*)GenerateTime(1024).data(), (Float_t*)evt->DataGroup[i].DataChannel[DATA_CHANNEL]);
+			TGraph* pGr = new TGraph(1024, (Float_t*)CommonUtils::GenerateTimeSequence(1024).data(), (Float_t*)evt->DataGroup[i].DataChannel[DATA_CHANNEL]);
 			TP;
 			m_vpGraph[i] = pGr;
 			TP;
@@ -62,7 +63,7 @@ void Plotter::Plot(CAEN_DGTZ_X742_EVENT_t *evt)
 				continue;
 			}
 			m_pCanvas->cd(i+1);
-			m_vpGraph[i]->DrawGraph(1024, (Float_t*)GenerateTime(1024).data(), (Float_t*)evt->DataGroup[i].DataChannel[DATA_CHANNEL], "ACP");
+			m_vpGraph[i]->DrawGraph(1024, (Float_t*)CommonUtils::GenerateTimeSequence(1024).data(), (Float_t*)evt->DataGroup[i].DataChannel[DATA_CHANNEL], "ACP");
 		}
 		m_pCanvas->Update();
 	}
@@ -80,7 +81,7 @@ Plotter::~Plotter()
 }
 
 //TODO: add frequency parameter
-std::vector<float> Plotter::GenerateTime(unsigned int a_iNumOfSamples)
+/*std::vector<float> Plotter::GenerateTime(unsigned int a_iNumOfSamples)
 {
 //	long iTrueFrequency = ;
 //	switch (a_iFrequency
@@ -94,4 +95,4 @@ std::vector<float> Plotter::GenerateTime(unsigned int a_iNumOfSamples)
 	}
 	return vResult;
 }
-
+*/
