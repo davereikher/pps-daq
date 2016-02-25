@@ -4,3 +4,4 @@
 v1742-readout
 *.root
 root_dictionary/dict.cxx
+*/bin/*
