@@ -53,17 +53,6 @@ std::map<std::string, std::vector<int> > Configuration::GetRanges()
 		}
 		vRanges[panelKey]= singlePanelRange;
 	}
-
-	for (int i = 0; i < vRanges["A"].size(); i++)
-	{
-		printf("Panel A: %d\n", vRanges["A"][i]);
-	}
-
-	for (int i = 0; i < vRanges["B"].size(); i++)
-	{
-		printf("Panel B: %d\n", vRanges["B"][i]);
-	}
-
 	
 	return vRanges;
 }
