@@ -24,4 +24,3 @@ std::vector<float> CommonUtils::GenerateTimeSequence(unsigned int a_iNumOfSample
 	return vResult;
 }
 
-

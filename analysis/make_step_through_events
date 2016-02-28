@@ -17,7 +17,7 @@ CXXFLAGS = -D ROOT_FILE_OUT_DIR=\"$(ROOTFILEOUTDIR)\" $(MYFLAG) -fpermissive $(R
 MYFLAG = -I./include -I../additional-packages/include -L../additional-packages/lib -fmax-errors=5
 
 LDFLAGS = $(MYFLAG)
-LDLIBS = $(ROOTLIBS) -lpthread -ljson -L$(LIBDIR) -lanalysis
+LDLIBS = -lpthread -ljson -L$(LIBDIR) -lanalysis $(ROOTLIBS) 
 
 EXECS = $(BINDIR)/step_through_events
 _OBJECTS = step_through_events.o Configuration.o
