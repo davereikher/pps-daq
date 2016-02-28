@@ -5,7 +5,7 @@
 #include "TSystem.h"
 #include "TInterpreter.h"
 #include "time.h"
-#include "Analysis.h"
+#include "SignalAnalyzer.h"
 
 
 #define TREE_NAME "DigitizerEvents"

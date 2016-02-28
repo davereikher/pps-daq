@@ -2,7 +2,8 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TApplication.h"
-#include "Analysis.h"
+#include "SignalAnalyzer.h"
+#include "CommonUtils.h"
 #include "Configuration.h"
 
 void Usage(char* a_pProcName)

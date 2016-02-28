@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "Plotter.h"
-#include "Analysis.h"
+#include "CommonUtils.h"
 
 Plotter::Plotter(int argc, char **argv):
 m_bInitialized(false)

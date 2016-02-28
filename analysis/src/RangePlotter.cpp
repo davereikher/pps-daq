@@ -6,6 +6,15 @@ m_pCanvas(new TCanvas("Canvas", "", 800, 600)),
 m_colors{1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 28, 46, 30, 40, 42, 38}
 {}
 
+
+/**
+The purpose of this function is to conveniently plot an event. Each event is plotted on a TCanvas. Divided into as many pads as there are panels. Each pad is a TMultiGraph with a TLegend, and shows the channels of the digitizer connected to the lines of that panel. The grouping into pads must not necessarily be according to panels, but in any other prefered way.
+
+@param a_channels - a vector of a vector of samples, containing all 32 channels
+@ param a_channelsToPadsAssociation - a map from std::string, which is the name of the panel (or group of channels) to be assigned to each pad to a vector if integers, which is the list of channels indices corresponding to indices of channels in the paramater a_channels to associate to a pad
+@param a_samplingFreqGHz - the sampling frequency in GHz of the digitizer, which is used in this function to generate the time axis values
+@param sEventTitle - a string containing the title of the event (for example, the time stamp)
+*/
 void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsAssociation, float a_samplingFreqGHz, std::string sEventTitle)
 {		
 	m_pCanvas->Clear();
