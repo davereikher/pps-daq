@@ -1,9 +1,18 @@
+//#include <unistd.h>
 #include "RangePlotter.h"
+#include "TLine.h"
+#include "TAxis.h"
+#include "TMarker.h"
 #include "CommonUtils.h"
 
-RangePlotter::RangePlotter():
+
+RangePlotter::RangePlotter(float a_fSamplingFreqGHz, float a_fMinVoltage, float a_fMaxVoltage):
 m_pCanvas(new TCanvas("Canvas", "", 800, 600)),
-m_colors{1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 28, 46, 30, 40, 42, 38}
+m_colors{1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 28, 46, 30, 40, 42, 38},
+m_fSamplingFreqGHz(a_fSamplingFreqGHz),
+m_fMinVoltage(a_fMinVoltage),
+//TODO: The 0x00000FFF should be defined outside of this class!
+m_fVoltageDivision((a_fMaxVoltage - a_fMinVoltage)/0x00000FFF)
 {}
 
 
@@ -12,10 +21,9 @@ The purpose of this function is to conveniently plot an event. Each event is plo
 
 @param a_channels - a vector of a vector of samples, containing all 32 channels
 @ param a_channelsToPadsAssociation - a map from std::string, which is the name of the panel (or group of channels) to be assigned to each pad to a vector if integers, which is the list of channels indices corresponding to indices of channels in the paramater a_channels to associate to a pad
-@param a_samplingFreqGHz - the sampling frequency in GHz of the digitizer, which is used in this function to generate the time axis values
 @param sEventTitle - a string containing the title of the event (for example, the time stamp)
 */
-void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsAssociation, float a_samplingFreqGHz, std::string sEventTitle)
+void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsAssociation, std::string sEventTitle)
 {		
 	m_pCanvas->Clear();
 	m_pCanvas->SetTitle(sEventTitle.c_str());
@@ -57,7 +65,8 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 			{
 				printf ("Channel %d to pad %d, ", chanIt, iPadCounter);
 				int iNumOfSamples = a_channels[chanIt].size();
-				TGraph* pGr = new TGraph(iNumOfSamples, &(CommonUtils::GenerateTimeSequence(iNumOfSamples, a_samplingFreqGHz)[0]), &(a_channels[chanIt][0]));
+				std::vector<float> vVoltage = TransformToVoltage(a_channels[chanIt]);
+				TGraph* pGr = new TGraph(iNumOfSamples, &(CommonUtils::GenerateTimeSequence(iNumOfSamples, m_fSamplingFreqGHz)[0]), &(vVoltage[0]));
 				m_vpGraph.push_back(pGr);
 				pGr->SetLineColor(m_colors[i%(sizeof(m_colors)/sizeof(int))]);
 				std::string sMultiGraphTitle = std::string("Panel ") + rangeIt.first;
@@ -89,10 +98,11 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 			{
 				printf ("Channel %d to pad %d", chanIt, iPadCounter);
 				int iNumOfSamples = a_channels[chanIt].size();	
-				std::vector<float> timeSeq = CommonUtils::GenerateTimeSequence(iNumOfSamples, a_samplingFreqGHz);
+				std::vector<float> vTimeSeq = CommonUtils::GenerateTimeSequence(iNumOfSamples, m_fSamplingFreqGHz);	
+				std::vector<float> vVoltage = TransformToVoltage(a_channels[chanIt]);
 				for (int counter = 0; counter < iNumOfSamples; counter++)
 				{
-					m_vpGraph[i]->SetPoint(counter, timeSeq[counter], a_channels[chanIt][counter]);
+					m_vpGraph[i]->SetPoint(counter, vTimeSeq[counter], vVoltage[counter]);
 				}
 				i++;
 			}
@@ -105,8 +115,57 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 		m_pCanvas->Update();
 	}
 }
-/*
-void RangePlotter::AddAnalysisMarkers()
+
+std::vector<float> RangePlotter::TransformToVoltage(std::vector<float> a_vSamples)
 {
+	if(m_fVoltageDivision == 0)
+	{
+		return a_vSamples;
+	}
+
+	std::vector<float> vRes;
+	vRes.resize(a_vSamples.size());
+	for(int i = 0; i < a_vSamples.size(); i++)
+	{
+		vRes[i] = m_fMinVoltage + a_vSamples[i] * m_fVoltageDivision;
+	}
+	return vRes;
+}
+
+void RangePlotter::AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::AnalysisMarkers& a_analysisMarkers)
+{
+	//TODO: MEMORY LEAKS!!!
+	m_pCanvas->cd(a_iPanelIndex + 1);
+	printf("Adding markers. pulse threshold: %d, max x value: %f",  a_analysisMarkers.m_iPulseThreshold, m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax());
+	TLine* pulseThresholdLine = new TLine(0, a_analysisMarkers.m_iPulseThreshold, m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax(), a_analysisMarkers.m_iPulseThreshold);
+	pulseThresholdLine->SetLineStyle(2);
+	TLine* edgeThresholdLine = new TLine(0, a_analysisMarkers.m_iEdgeThreshold, m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax(), a_analysisMarkers.m_iEdgeThreshold);
+	edgeThresholdLine->SetLineStyle(2);
 	
-}*/
+	for (auto& it: a_analysisMarkers.m_vChannelsEdgeAndMinimum)
+	{
+		if (std::get<0>(it).Exists())
+		{
+			TMarker* markerMin = new TMarker(std::get<1>(it).GetX(), std::get<1>(it).GetY(), 2);
+			markerMin->Draw();
+			TMarker* markerEdge = new TMarker(std::get<0>(it).GetX(), std::get<0>(it).GetY(), 3);
+			markerEdge->Draw();
+		}
+	}
+
+	for (auto& it: a_analysisMarkers.m_vChannelsWithPulse)
+	{
+		printf("*****************Channel %d has signal\n*****************", it);
+	}
+
+	pulseThresholdLine->Draw();
+	edgeThresholdLine->Draw();
+
+	m_pCanvas->Update();
+}
+
+void RangePlotter::WaitForDoubleClick()
+{
+	m_pCanvas->cd();
+	m_pCanvas->WaitPrimitive();
+}

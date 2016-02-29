@@ -6,6 +6,7 @@
 #include "TApplication.h"
 #include "RangePlotter.h"
 #include "Configuration.h"
+#include "SignalAnalyzer.h"
 
 
 class TimerHandler: public TObject
@@ -27,7 +28,6 @@ step through the events in the root file. For each event, plot all active channe
 */
 int main(int argc, char* argv[])
 {
-
 	if (argc < 2)
 	{
 		Usage(argv[0]);
@@ -38,10 +38,14 @@ int main(int argc, char* argv[])
 	config.LoadConfiguration(argv[1]);
 
 	std::string sRootFileName(argv[2]);
+//	SignalAnalyzer sigAnalyzer(2.5, -0.5, 0.5);
+	SignalAnalyzer sigAnalyzer(0, 0, 0);
 
 	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
 	TApplication* pApplication = new TApplication("app",&argc,argv);
-	RangePlotter plt;
+//	RangePlotter plt(2.5, -0.5, 0.5);
+	RangePlotter plt(0, 0, 0);
+
 	
 	Range_t ranges = config.GetRanges();
 
@@ -61,11 +65,14 @@ int main(int argc, char* argv[])
 		tree->GetEntry(i);
 
 		printf("Time stamp is %d\n", iTimeStamp);
-		plt.PlotRanges(*channels, ranges, 2.5,  std::string("Event Time Stamp ") + std::to_string(iTimeStamp)); 
-		timer->TurnOn();			
-		timer->Reset();
-		std::cin.get();
-		timer->TurnOff();
+		plt.PlotRanges(*channels, ranges, std::string("Event Time Stamp ") + std::to_string(iTimeStamp)); 
+		sigAnalyzer.FindOriginalPulseInChannelRange(*channels, ranges["A"]);
+		plt.AddAnalysisMarkers(0, sigAnalyzer.GetAnalysisMarkers());
+		plt.WaitForDoubleClick();
+/*		timer->TurnOn();			
+		timer->Reset();*/
+//		std::cin.get();
+//		timer->TurnOff();
 
 /*
 		for (auto& it: ranges)

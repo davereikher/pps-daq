@@ -1,4 +1,5 @@
 #include <iostream>
+#include <tuple>
 #include "EventHandler.h"
 #include "Exception.h"
 #include "linux/limits.h"
@@ -138,18 +139,18 @@ EventHandler::~EventHandler()
 void EventHandler::PerformIntermediateAnalysis()
 {
 	//TODO: in another thread!
-	std::pair<int, float> leadingEdgeAndPulseHeight;
-	SignalAnalyzer sigAnalyzer;
+	std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> leadingEdgeAndPulseExtremum;
+	SignalAnalyzer sigAnalyzer(0, 0, 0);
 	
-	leadingEdgeAndPulseHeight = sigAnalyzer.FindLeadingEdgeAndPulseHeight(m_vChannels[0]);
+	leadingEdgeAndPulseExtremum = sigAnalyzer.FindLeadingEdgeAndPulseExtremum(m_vChannels[0]);
 	
-	if ( (leadingEdgeAndPulseHeight.first == NO_PULSE_EDGE) && (leadingEdgeAndPulseHeight.second == NO_PULSE_MINIMUM_VALUE ) )
+	if ( !(std::get<0>(leadingEdgeAndPulseExtremum).Exists() ) && !(std::get<1>(leadingEdgeAndPulseExtremum).Exists()) )
 	{
 		std::cout << "PULSE NOT DETECTED!" << std::endl;
 	}
 	else
 	{
-		std::cout << "!!!!!!!!!!!!DETECTED Pulse edge = " << leadingEdgeAndPulseHeight.first << " pulse minimum value: " << leadingEdgeAndPulseHeight.second  << std::endl;
+		std::cout << "!!!!!!!!!!!!DETECTED Pulse edge = " << std::get<0>(leadingEdgeAndPulseExtremum).GetXDiscrete() << " pulse minimum value: " << std::get<1>(leadingEdgeAndPulseExtremum).GetYDiscrete()  << std::endl;
 	}
 }
 

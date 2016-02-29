@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 	config.LoadConfiguration(argv[1]);
 
 	std::string sRootFileName(argv[2]);
-	SignalAnalyzer sigAnalyzer;
+	SignalAnalyzer sigAnalyzer(0, 0, 0);
 
 	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
 	TApplication* pApplication = new TApplication("app",&argc,argv);
