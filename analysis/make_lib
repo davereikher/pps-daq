@@ -2,7 +2,7 @@ LIBDIR = ./lib
 TARGET = $(LIBDIR)/libanalysis.a
 
 SRCDIR = ./src
-INCDIR = ./include $(shell root-config --cflags) -I../additional-packages/include
+INCDIR = ./include $(shell root-config --cflags)
 OBJDIR = ./obj
 
 MYFLAGS = -I$(INCDIR) -std=c++11

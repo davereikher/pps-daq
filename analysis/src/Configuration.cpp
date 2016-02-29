@@ -62,36 +62,50 @@ std::map<std::string, std::vector<int> > Configuration::GetRanges()
 
 float Configuration::GetPulseThresholdVolts()
 {
+	return m_configuration["pulse-threshold-volts"].asFloat();
 }
 
 float Configuration::GetEdgeThresholdVolts()
-{}
+{
+	return m_configuration["edge-threshold-volts"].asFloat();
+}
 
 float Configuration::GetVoltMin()
 {
+	return m_configuration["volt-min"].asFloat();
 }
 
 float Configuration::GetVoltMax()
-{}
-
-float Configuration::GetDigitizerResolution()
 {
+	return m_configuration["volt-max"].asFloat();
+}
+
+int Configuration::GetDigitizerResolution()
+{
+	return m_configuration["digitizer-resolution-bits"].asInt();
 }
 
 float Configuration::GetExpectedPulseWidthNs()
 {
+	return m_configuration["expected-pulse-width-ns"].asFloat();
 }
 
 float Configuration::GetMinEdgeSeparationNs()
-{}
+{
+	return m_configuration["min-edge-separation-ns"].asFloat();
+}
 
 float Configuration::GetMaxEdgeJitterNs()
-{}
+{
+	return m_configuration["max-edge-jitter-ns"].asFloat();
+}
 
 float Configuration::GetMaxAmplitudeJitterVolts()
 {
+	return m_configuration["max-amplitude-jitter-volts"].asFloat();
 }
 
 float Configuration::GetSamplingFreqGHz()
 {
+	return m_configuration["sampling-freq-ghz"].asFloat();
 }

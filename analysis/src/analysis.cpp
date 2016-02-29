@@ -15,11 +15,15 @@ void Usage(char* a_pProcName)
 
 int main(int argc, char* argv[])
 {
-	Configuration config;
-	config.LoadConfiguration(argv[1]);
+	Configuration::LoadConfiguration(argv[1]);
 
 	std::string sRootFileName(argv[2]);
-	SignalAnalyzer sigAnalyzer(0, 0, 0);
+	SignalAnalyzer sigAnalyzer(Configuration::GetSamplingFreqGHz(), Configuration::GetVoltMin(), 
+		Configuration::GetVoltMax(), Configuration::GetDigitizerResolution(), Configuration::GetPulseThresholdVolts(), 
+		Configuration::GetEdgeThresholdVolts(), Configuration::GetExpectedPulseWidthNs(), 
+		Configuration::GetMinEdgeSeparationNs(), Configuration::GetMaxEdgeJitterNs(), 
+		Configuration::GetMaxAmplitudeJitterVolts());
+
 
 	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
 	TApplication* pApplication = new TApplication("app",&argc,argv);
@@ -30,7 +34,7 @@ int main(int argc, char* argv[])
 		exit(-1);
 	}
 	
-	std::map<std::string, std::vector<int> > mRanges = config.GetRanges();
+	std::map<std::string, std::vector<int> > mRanges = Configuration::GetRanges();
 
 	std::vector<std::vector<float> > vChannels;
 

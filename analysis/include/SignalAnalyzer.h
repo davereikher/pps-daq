@@ -43,7 +43,9 @@ public:
 		std::vector<int> m_vChannelsWithPulse;
 	};
 public:
-	SignalAnalyzer(float a_fSamplingFreqGHz, float a_fVoltageMin, float a_fVoltageMax);
+	SignalAnalyzer(float a_fSamplingFreqGHz, float a_fVoltageMin, float a_fVoltageMax, int a_iDigitizerResolution,
+		float a_fPulseThresholdVolts, float a_fEdgeThresholdVolts, float a_fExpectedPulsewidthNs, 
+		float a_fMinEdgeSeparationNs, float a_fMaxEdgeJitterNs, float a_fMaxAmplitudeJitterVolts);
 	std::tuple<Point, Point> FindLeadingEdgeAndPulseExtremum(std::vector<float>& a_samplesVector);
 	void FindOriginalPulseInChannelRange(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int>& a_vRange);
 	bool DoesRangeHaveSignal(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int> a_vRange);

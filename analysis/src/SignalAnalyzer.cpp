@@ -1,5 +1,4 @@
 #include "SignalAnalyzer.h"
-#include "Configuration.h"
 std::vector <std::vector<int> > gvPanelChannelRanges;
 static SignalAnalyzer::AnalysisMarkers m_markers;
 
@@ -15,26 +14,33 @@ We loop over all events. For each event, and for each range of channels (each ra
 
 
 //TODO: export these into configuration
-#define PULSE_THRESHOLD 1700 //TODO: set these values
+/*#define PULSE_THRESHOLD 1700 //TODO: set these values
 #define EDGE_THRESHOLD 1840
 #define EXPECTED_PULSE_WIDTH 70
 #define MIN_EDGE_SEPARATION 100
 #define MAX_EDGE_JITTER 50
 #define MAX_AMPLITUDE_JITTER 200
-
+*/
 SignalAnalyzer::SignalAnalyzer(float a_fSamplingFreqGHz, float a_fVoltageMin, float a_fVoltageMax, int a_iDigitizerResolution,
 float a_fPulseThresholdVolts, float a_fEdgeThresholdVolts, float a_fExpectedPulsewidthNs, float a_fMinEdgeSeparationNs, float a_fMaxEdgeJitterNs, float a_fMaxAmplitudeJitterVolts)
 {
-	m_fVoltageDivision_volts = (a_fVoltageMax - a_fVoltageMin)/a_iDigitizerResolution;
+	m_fVoltageDivision_volts = (a_fVoltageMax - a_fVoltageMin)/(float)a_iDigitizerResolution;
 	m_fVoltageStart_volts = a_fVoltageMin;
 	m_fTimeDivision_ns = 1.0/a_fSamplingFreqGHz;
-
 	m_markers.m_iPulseThreshold = (a_fPulseThresholdVolts - m_fVoltageStart_volts) / m_fVoltageDivision_volts;
 	m_markers.m_iEdgeThreshold = (a_fEdgeThresholdVolts - m_fVoltageStart_volts) / m_fVoltageDivision_volts;
 	m_markers.m_iExpectedPulseWidth = a_fExpectedPulsewidthNs / m_fTimeDivision_ns;
 	m_markers.m_iMinEdgeSeparation = a_fMinEdgeSeparationNs / m_fTimeDivision_ns;
 	m_markers.m_iMaxEdgeJitter = a_fMaxEdgeJitterNs / m_fTimeDivision_ns;
 	m_markers.m_iMaxAmplitudeJitter = a_fMaxAmplitudeJitterVolts / m_fVoltageDivision_volts;
+
+	printf("PULSE_THRESHOLD: %d\n", m_markers.m_iPulseThreshold);
+	printf("EDGE_THRESHOLD: %d\n", m_markers.m_iEdgeThreshold);
+	printf("EXPECTED_PULSE_WIDTH: %d\n", m_markers.m_iExpectedPulseWidth);
+	printf("MIN_EDGE_SEPARATION: %d\n", m_markers.m_iMinEdgeSeparation);
+	printf("MAX_EDGE_JITTER: %d\n", m_markers.m_iMaxEdgeJitter);
+	printf("MAX_AMPLITUDE_JITTER: %d\n", m_markers.m_iMaxAmplitudeJitter);
+
 /*	if(a_fSamplingFreqGHz == 0)
 	{
 		m_fTimeDivision_ns = 1;
@@ -64,7 +70,7 @@ std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> SignalAnalyzer::FindLea
 
 	for (auto& it: a_samplesVector)
 	{
-		if (it < PULSE_THRESHOLD)
+		if (it < m_markers.m_iPulseThreshold /*PULSE_THRESHOLD*/)
 		{
 			bChannelHasPulse = true;
 			break;
@@ -78,7 +84,7 @@ std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> SignalAnalyzer::FindLea
 
 	for (i = 0; i < (int)a_samplesVector.size(); i++)
 	{
-		if (a_samplesVector[i] < EDGE_THRESHOLD)
+		if (a_samplesVector[i] < m_markers.m_iEdgeThreshold /*EDGE_THRESHOLD*/)
 		{
 		//Reached a leading edge. This is a pulse on this channel (not necessarily the original pulse). 
 		//Look inside a window EXPECTED_PULSE_WIDTH wide for the lowest value
@@ -95,7 +101,7 @@ std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> SignalAnalyzer::FindLea
 
 	leadingEdgeIndex = i;
 
-	int window_end = i + EXPECTED_PULSE_WIDTH;
+	int window_end = i + m_markers.m_iExpectedPulseWidth ;//EXPECTED_PULSE_WIDTH;
 
 	for ( ; i < window_end; i++)
 	{
@@ -107,7 +113,7 @@ std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> SignalAnalyzer::FindLea
 	}
 	
 
-	return std::make_tuple(SignalAnalyzer::Point(leadingEdgeIndex, EDGE_THRESHOLD, m_fVoltageStart_volts, m_fTimeDivision_ns, m_fVoltageDivision_volts), 
+	return std::make_tuple(SignalAnalyzer::Point(leadingEdgeIndex, m_markers.m_iEdgeThreshold, m_fVoltageStart_volts, m_fTimeDivision_ns, m_fVoltageDivision_volts), 
 			SignalAnalyzer::Point(minValueIndex, minValue, m_fVoltageStart_volts, m_fTimeDivision_ns, m_fVoltageDivision_volts));
 }
 
@@ -161,7 +167,7 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std::vector<flo
 	}
 	printf("Earliest: %d, Next to earliest: %d\n" , iEarliestLeadingEdge, iNextToEarliestLeadingEdge);
 	//The leading pulse is separated by enough time from the following pulses so that it can be considered as the original pulse.
-	if ((iNextToEarliestLeadingEdge - iEarliestLeadingEdge) >= MIN_EDGE_SEPARATION)
+	if ((iNextToEarliestLeadingEdge - iEarliestLeadingEdge) >= m_markers.m_iMinEdgeSeparation /*MIN_EDGE_SEPARATION*/)
 	{
 		m_markers.m_vChannelsWithPulse.push_back(a_vRange[iEarliestLeadingEdgeIndex]);
 		printf("LEADING PULSE FOUND\n");
@@ -187,7 +193,7 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std::vector<flo
 			continue;
 		}
 
-		if ((std::get<0>(m_markers.m_vChannelsEdgeAndMinimum[i]).GetXDiscrete() - iEarliestLeadingEdge) < MAX_EDGE_JITTER)
+		if ((std::get<0>(m_markers.m_vChannelsEdgeAndMinimum[i]).GetXDiscrete() - iEarliestLeadingEdge) < m_markers.m_iMaxEdgeJitter /*MAX_EDGE_JITTER*/)
 		{
 			if (std::get<1>(m_markers.m_vChannelsEdgeAndMinimum[i]).GetYDiscrete() < minPulseValue)
 			{
@@ -200,7 +206,7 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std::vector<flo
 	//look for bunched minima of the pulse within the window MAX_AMPLITUDE_JITTER upwards from the lowest minimum:
 	for (auto& iChannelNum: vChannelsWithBunchedPulses)
 	{
-		if ((std::get<1>(m_markers.m_vChannelsEdgeAndMinimum[iChannelNum]).GetYDiscrete() - minPulseValue) <= MAX_AMPLITUDE_JITTER)
+		if ((std::get<1>(m_markers.m_vChannelsEdgeAndMinimum[iChannelNum]).GetYDiscrete() - minPulseValue) <= m_markers.m_iMaxAmplitudeJitter /*MAX_AMPLITUDE_JITTER*/)
 		{
 			m_markers.m_vChannelsWithPulse.push_back(a_vRange[iChannelNum]);
 		}	

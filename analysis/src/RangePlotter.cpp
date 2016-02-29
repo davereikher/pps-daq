@@ -6,14 +6,15 @@
 #include "CommonUtils.h"
 
 
-RangePlotter::RangePlotter(float a_fSamplingFreqGHz, float a_fMinVoltage, float a_fMaxVoltage):
+RangePlotter::RangePlotter(float a_fSamplingFreqGHz, float a_fMinVoltage, float a_fMaxVoltage, int a_iDigitizerResolution):
 m_pCanvas(new TCanvas("Canvas", "", 800, 600)),
 m_colors{1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 28, 46, 30, 40, 42, 38},
 m_fSamplingFreqGHz(a_fSamplingFreqGHz),
 m_fMinVoltage(a_fMinVoltage),
 //TODO: The 0x00000FFF should be defined outside of this class!
-m_fVoltageDivision((a_fMaxVoltage - a_fMinVoltage)/0x00000FFF)
-{}
+m_fVoltageDivision((a_fMaxVoltage - a_fMinVoltage)/a_iDigitizerResolution)
+{
+}
 
 
 /**
@@ -155,7 +156,7 @@ void RangePlotter::AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::Analysi
 
 	for (auto& it: a_analysisMarkers.m_vChannelsWithPulse)
 	{
-		printf("*****************Channel %d has signal\n*****************", it);
+		printf("*****************Channel %d has signal\n*****************\n", it);
 	}
 
 	pulseThresholdLine->Draw();

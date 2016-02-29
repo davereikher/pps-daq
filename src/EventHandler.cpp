@@ -139,7 +139,7 @@ EventHandler::~EventHandler()
 void EventHandler::PerformIntermediateAnalysis()
 {
 	//TODO: in another thread!
-	std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> leadingEdgeAndPulseExtremum;
+/*	std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> leadingEdgeAndPulseExtremum;
 	SignalAnalyzer sigAnalyzer(0, 0, 0);
 	
 	leadingEdgeAndPulseExtremum = sigAnalyzer.FindLeadingEdgeAndPulseExtremum(m_vChannels[0]);
@@ -151,6 +151,6 @@ void EventHandler::PerformIntermediateAnalysis()
 	else
 	{
 		std::cout << "!!!!!!!!!!!!DETECTED Pulse edge = " << std::get<0>(leadingEdgeAndPulseExtremum).GetXDiscrete() << " pulse minimum value: " << std::get<1>(leadingEdgeAndPulseExtremum).GetYDiscrete()  << std::endl;
-	}
+	}*/
 }
 

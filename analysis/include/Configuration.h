@@ -11,7 +11,7 @@ public:
 	static float GetEdgeThresholdVolts();
 	static float GetVoltMin();
 	static float GetVoltMax();
-	static float GetDigitizerResolution();
+	static int GetDigitizerResolution();
 	static float GetExpectedPulseWidthNs();
 	static float GetMinEdgeSeparationNs();
 	static float GetMaxEdgeJitterNs();

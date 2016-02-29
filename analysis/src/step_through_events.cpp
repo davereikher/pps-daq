@@ -8,7 +8,7 @@
 #include "Configuration.h"
 #include "SignalAnalyzer.h"
 
-
+/*
 class TimerHandler: public TObject
 {
 	Bool_t HandleTimer(TTimer* timer)
@@ -16,7 +16,7 @@ class TimerHandler: public TObject
 		gSystem->ProcessEvents();
 	}
 };
-	
+*/	
 void Usage(char* a_pProcName)
 {
 	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to root file>" << std::endl;
@@ -34,10 +34,10 @@ int main(int argc, char* argv[])
 		exit(-1);
 	}
 
-	Configuration config;
-	config.LoadConfiguration(argv[1]);
+	Configuration::LoadConfiguration(argv[1]);
 
 	std::string sRootFileName(argv[2]);
+//	printf("%d digires\n\n", Configuration::GetDigitizerResolution());
 //	SignalAnalyzer sigAnalyzer(2.5, -0.5, 0.5);
 	SignalAnalyzer sigAnalyzer(Configuration::GetSamplingFreqGHz(), Configuration::GetVoltMin(), 
 		Configuration::GetVoltMax(), Configuration::GetDigitizerResolution(), Configuration::GetPulseThresholdVolts(), 
@@ -48,10 +48,11 @@ int main(int argc, char* argv[])
 	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
 	TApplication* pApplication = new TApplication("app",&argc,argv);
 //	RangePlotter plt(2.5, -0.5, 0.5);
-	RangePlotter plt(0, 0, 0);
+	RangePlotter plt(Configuration::GetSamplingFreqGHz(), Configuration::GetVoltMin(), Configuration::GetVoltMax(),
+		Configuration::GetDigitizerResolution());
 
 	
-	Range_t ranges = config.GetRanges();
+	Range_t ranges = Configuration::GetRanges();
 
 	Channels_t * channels = NULL;
 
@@ -62,8 +63,8 @@ int main(int argc, char* argv[])
 	tree->SetBranchAddress("Event", &channels);
 
 	int iNumOfEntries = tree->GetEntries();
-	TimerHandler timerHandler;
-	TTimer* timer = new TTimer(&timerHandler, 250, 0);
+	//TimerHandler timerHandler;
+	//TTimer* timer = new TTimer(&timerHandler, 250, 0);
 	for (int i = 0; i < iNumOfEntries; i ++)
 	{
 		tree->GetEntry(i);
