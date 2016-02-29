@@ -1,6 +1,7 @@
 #include "SignalAnalyzer.h"
 
 std::vector <std::vector<int> > gvPanelChannelRanges;
+static SignalAnalyzer::AnalysisMarkers m_markers;
 
 /*
 We loop over all events. For each event, and for each range of channels (each range corresponds to a panel), we look for the channel that was hit by the following procedure:
@@ -13,6 +14,7 @@ We loop over all events. For each event, and for each range of channels (each ra
 */
 
 
+//TODO: export these into configuration
 #define PULSE_THRESHOLD 1700 //TODO: set these values
 #define EDGE_THRESHOLD 1840
 #define EXPECTED_PULSE_WIDTH 70
@@ -20,6 +22,15 @@ We loop over all events. For each event, and for each range of channels (each ra
 #define MAX_EDGE_JITTER 50
 #define MAX_AMPLITUDE_JITTER 200
 
+SignalAnalyzer::SignalAnalyzer()
+{
+	m_markers.m_iPulseThreshold = PULSE_THRESHOLD;
+	m_markers.m_iEdgeThreshold = EDGE_THRESHOLD;
+	m_markers.m_iExpectedPulseWidth = EXPECTED_PULSE_WIDTH;
+	m_markers.m_iMinEdgeSeparation = MIN_EDGE_SEPARATION;
+	m_markers.m_iMaxEdgeJitter = MAX_EDGE_JITTER;
+	m_markers.m_iMaxAmplitudeJitter = MAX_AMPLITUDE_JITTER;
+}
 
 
 /**
@@ -80,15 +91,15 @@ Analyzes a range of the channels to find the original pulse.
 		- Otherwise:
 			- Take all channels the leading_edge on which are bundled within a distance MAX_EDGE_JITTER from the first leading_edge and find the channel with the lowest min_pulse_value.
 			- Return all channel numbers the min_pulse_value of which are bundled withing a window of size MAX_AMPLITUDE_JITTER upwards from the lowest min_pulse_value.
+The result, a vector of channels containing the original pulse (ideally there will be just one item), is placed in m_markers.m_vChannelsWithPulse. The pairs returned by FindLeadingEdgeAndPulseHeight are also stored in m_markers.m_vChannelsEdgeAndMinimum.
 
 @param a_vAllChannels - a vector of all 32 channels, where each item is a vector of samples from that channel.
 @param a_vRange - a vector of indices of the interesting channels in the first parameter.
-@return A vector of channels containing the original pulse (ideally there will be just one item)
 */
-std::vector<int> SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int>& a_vRange)
+void SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int>& a_vRange)
 {
 	//Each pair represents a pulse. The first value is the leading edge time and the second is the lowest value of the pulse.
-	std::vector<std::pair<int, float> > pairs;
+//	std::vector<std::pair<int, float> > pairs;
 
 	//Get all channels in the provided range, find the leading edge and minimum value of the pulses and store the result in a vector of pairs. Also, find the earliest and next-to-earliest leading edge in the channels in the range.
 	int iEarliestLeadingEdge = INT_MAX;
@@ -98,7 +109,7 @@ std::vector<int> SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std
 	{
 		std::pair<int, float> p;
 		p = FindLeadingEdgeAndPulseHeight(a_vAllChannels[a_vRange[i]]);
-		pairs.push_back(p);
+		m_markers.m_vChannelsEdgeAndMinimum.push_back(p);
 
 		if (p.first <= iEarliestLeadingEdge)
 		{
@@ -115,9 +126,8 @@ std::vector<int> SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std
 	//The leading pulse is separated by enough time from the following pulses so that it can be considered as the original pulse.
 	if ((iNextToEarliestLeadingEdge - iEarliestLeadingEdge) >= MIN_EDGE_SEPARATION)
 	{
-		std::vector<int> vResult;
-		vResult.push_back(a_vRange[iEarliestLeadingEdgeIndex]);
-		return vResult;
+		m_markers.m_vChannelsWithPulse.push_back(a_vRange[iEarliestLeadingEdgeIndex]);
+		return;
 	}
 
 
@@ -127,29 +137,26 @@ std::vector<int> SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std
 	//However, if some of the bunched pulse's minimum values are too close to the lowest minimum value, we cannot definitely distinguish the original pulse. Therefore, we return all of them.
 	//Find all pulses the leading edges of which are within a window of size MAX_EDGE_JITTER and find the pulse with the largest amplitude.
 	std::vector<int> vChannelsWithBunchedPulses;
-	for (int i = 0; i < (int)pairs.size(); i++)
+	for (int i = 0; i < (int)m_markers.m_vChannelsEdgeAndMinimum.size(); i++)
 	{
-		if ((pairs[i].first - iEarliestLeadingEdge) < MAX_EDGE_JITTER)
+		if ((m_markers.m_vChannelsEdgeAndMinimum[i].first - iEarliestLeadingEdge) < MAX_EDGE_JITTER)
 		{
-			if (pairs[i].second < minPulseValue)
+			if (m_markers.m_vChannelsEdgeAndMinimum[i].second < minPulseValue)
 			{
-				minPulseValue = pairs[i].second;
+				minPulseValue = m_markers.m_vChannelsEdgeAndMinimum[i].second;
 			}
 			vChannelsWithBunchedPulses.push_back(i);
 		}
 	}
 	
-	std::vector<int> vResult;
 	//look for bunched minima of the pulse within the window MAX_AMPLITUDE_JITTER upwards from the lowest minimum:
 	for (auto& iChannelNum: vChannelsWithBunchedPulses)
 	{
-		if ((pairs[iChannelNum].second - minPulseValue) <= MAX_AMPLITUDE_JITTER)
+		if ((m_markers.m_vChannelsEdgeAndMinimum[iChannelNum].second - minPulseValue) <= MAX_AMPLITUDE_JITTER)
 		{
-			vResult.push_back(a_vRange[iChannelNum]);
+			m_markers.m_vChannelsWithPulse.push_back(a_vRange[iChannelNum]);
 		}	
 	}
-
-	return vResult;
 }
 
 /**
@@ -159,5 +166,11 @@ Returns whether a range has a pulse in one of the channels or not. This is good 
 */
 bool SignalAnalyzer::DoesRangeHaveSignal(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int> a_vRange)
 {
-	return FindOriginalPulseInChannelRange(a_vAllChannels, a_vRange).empty();
+	FindOriginalPulseInChannelRange(a_vAllChannels, a_vRange);
+	return !(m_markers.m_vChannelsWithPulse.empty());
+}
+
+SignalAnalyzer::AnalysisMarkers& SignalAnalyzer::GetAnalysisMarkers()
+{
+	return m_markers;
 }

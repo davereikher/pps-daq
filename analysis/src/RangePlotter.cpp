@@ -105,4 +105,8 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 		m_pCanvas->Update();
 	}
 }
-
+/*
+void RangePlotter::AddAnalysisMarkers()
+{
+	
+}*/

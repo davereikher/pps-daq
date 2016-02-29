@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
 	config.LoadConfiguration(argv[1]);
 
 	std::string sRootFileName(argv[2]);
+	SignalAnalyzer sigAnalyzer;
 
 	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
 	TApplication* pApplication = new TApplication("app",&argc,argv);
@@ -43,9 +44,9 @@ int main(int argc, char* argv[])
 		tree->GetEntry(i);
 		for (auto& it: mRanges)
 		{
-			std::vector<int> channels_with_pulses = SignalAnalyzer::FindOriginalPulseInChannelRange(vChannels, it.second);
+			sigAnalyzer.FindOriginalPulseInChannelRange(vChannels, it.second);
 			std::cout << "Panel " << it.first << " has signals on channels " << std::endl;
-			for (auto& chan: channels_with_pulses)
+			for (auto& chan: sigAnalyzer.GetAnalysisMarkers().m_vChannelsWithPulse)
 			{
 				std::cout << chan << std::endl;
 			}

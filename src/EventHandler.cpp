@@ -137,9 +137,12 @@ EventHandler::~EventHandler()
 
 void EventHandler::PerformIntermediateAnalysis()
 {
+	//TODO: in another thread!
 	std::pair<int, float> leadingEdgeAndPulseHeight;
-	leadingEdgeAndPulseHeight = SignalAnalyzer::FindLeadingEdgeAndPulseHeight(m_vChannels[0]);
-
+	SignalAnalyzer sigAnalyzer;
+	
+	leadingEdgeAndPulseHeight = sigAnalyzer.FindLeadingEdgeAndPulseHeight(m_vChannels[0]);
+	
 	if ( (leadingEdgeAndPulseHeight.first == NO_PULSE_EDGE) && (leadingEdgeAndPulseHeight.second == NO_PULSE_MINIMUM_VALUE ) )
 	{
 		std::cout << "PULSE NOT DETECTED!" << std::endl;

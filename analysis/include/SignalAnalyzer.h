@@ -10,8 +10,24 @@
 class SignalAnalyzer
 {
 public:
+	struct AnalysisMarkers
+	{
+		int m_iPulseThreshold;
+		int m_iEdgeThreshold;
+		int m_iExpectedPulseWidth;
+		int m_iMinEdgeSeparation;
+		int m_iMaxEdgeJitter;
+		int m_iMaxAmplitudeJitter;
+		std::vector<std::pair<int, float> > m_vChannelsEdgeAndMinimum;
+		std::vector<int> m_vChannelsWithPulse;
+	};
+public:
+	SignalAnalyzer();
+	std::pair<int, float> FindLeadingEdgeAndPulseHeight(std::vector<float>& a_samplesVector);
+	void FindOriginalPulseInChannelRange(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int>& a_vRange);
+	bool DoesRangeHaveSignal(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int> a_vRange);
+	AnalysisMarkers& GetAnalysisMarkers();
 
-	static std::pair<int, float> FindLeadingEdgeAndPulseHeight(std::vector<float>& a_samplesVector);
-	static std::vector<int> FindOriginalPulseInChannelRange(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int>& a_vRange);
-	static bool DoesRangeHaveSignal(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int> a_vRange);
+private:
+	AnalysisMarkers m_markers;
 };
