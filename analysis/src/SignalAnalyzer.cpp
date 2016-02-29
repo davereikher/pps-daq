@@ -1,5 +1,5 @@
 #include "SignalAnalyzer.h"
-
+#include "Configuration.h"
 std::vector <std::vector<int> > gvPanelChannelRanges;
 static SignalAnalyzer::AnalysisMarkers m_markers;
 
@@ -22,15 +22,20 @@ We loop over all events. For each event, and for each range of channels (each ra
 #define MAX_EDGE_JITTER 50
 #define MAX_AMPLITUDE_JITTER 200
 
-SignalAnalyzer::SignalAnalyzer(float a_fSamplingFreqGHz, float a_fVoltageMin, float a_fVoltageMax)
+SignalAnalyzer::SignalAnalyzer(float a_fSamplingFreqGHz, float a_fVoltageMin, float a_fVoltageMax, int a_iDigitizerResolution,
+float a_fPulseThresholdVolts, float a_fEdgeThresholdVolts, float a_fExpectedPulsewidthNs, float a_fMinEdgeSeparationNs, float a_fMaxEdgeJitterNs, float a_fMaxAmplitudeJitterVolts)
 {
-	m_markers.m_iPulseThreshold = PULSE_THRESHOLD;
-	m_markers.m_iEdgeThreshold = EDGE_THRESHOLD;
-	m_markers.m_iExpectedPulseWidth = EXPECTED_PULSE_WIDTH;
-	m_markers.m_iMinEdgeSeparation = MIN_EDGE_SEPARATION;
-	m_markers.m_iMaxEdgeJitter = MAX_EDGE_JITTER;
-	m_markers.m_iMaxAmplitudeJitter = MAX_AMPLITUDE_JITTER;
-	if(a_fSamplingFreqGHz == 0)
+	m_fVoltageDivision_volts = (a_fVoltageMax - a_fVoltageMin)/a_iDigitizerResolution;
+	m_fVoltageStart_volts = a_fVoltageMin;
+	m_fTimeDivision_ns = 1.0/a_fSamplingFreqGHz;
+
+	m_markers.m_iPulseThreshold = (a_fPulseThresholdVolts - m_fVoltageStart_volts) / m_fVoltageDivision_volts;
+	m_markers.m_iEdgeThreshold = (a_fEdgeThresholdVolts - m_fVoltageStart_volts) / m_fVoltageDivision_volts;
+	m_markers.m_iExpectedPulseWidth = a_fExpectedPulsewidthNs / m_fTimeDivision_ns;
+	m_markers.m_iMinEdgeSeparation = a_fMinEdgeSeparationNs / m_fTimeDivision_ns;
+	m_markers.m_iMaxEdgeJitter = a_fMaxEdgeJitterNs / m_fTimeDivision_ns;
+	m_markers.m_iMaxAmplitudeJitter = a_fMaxAmplitudeJitterVolts / m_fVoltageDivision_volts;
+/*	if(a_fSamplingFreqGHz == 0)
 	{
 		m_fTimeDivision_ns = 1;
 	}
@@ -39,7 +44,7 @@ SignalAnalyzer::SignalAnalyzer(float a_fSamplingFreqGHz, float a_fVoltageMin, fl
 		m_fTimeDivision_ns = 1.0/a_fSamplingFreqGHz;
 	}
 	m_fVoltageDivision_volts = (a_fVoltageMax - a_fVoltageMin)/float(0x00000FFF);
-	m_fVoltageStart_volts = a_fVoltageMin;
+	m_fVoltageStart_volts = a_fVoltageMin;*/
 }
 
 

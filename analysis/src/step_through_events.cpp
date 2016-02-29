@@ -39,7 +39,11 @@ int main(int argc, char* argv[])
 
 	std::string sRootFileName(argv[2]);
 //	SignalAnalyzer sigAnalyzer(2.5, -0.5, 0.5);
-	SignalAnalyzer sigAnalyzer(0, 0, 0);
+	SignalAnalyzer sigAnalyzer(Configuration::GetSamplingFreqGHz(), Configuration::GetVoltMin(), 
+		Configuration::GetVoltMax(), Configuration::GetDigitizerResolution(), Configuration::GetPulseThresholdVolts(), 
+		Configuration::GetEdgeThresholdVolts(), Configuration::GetExpectedPulseWidthNs(), 
+		Configuration::GetMinEdgeSeparationNs(), Configuration::GetMaxEdgeJitterNs(), 
+		Configuration::GetMaxAmplitudeJitterVolts());
 
 	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
 	TApplication* pApplication = new TApplication("app",&argc,argv);

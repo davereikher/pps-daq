@@ -3,6 +3,7 @@
 #include "Configuration.h"
 
 Json::Value Configuration::m_configuration;
+bool Configuration::m_bInitialized = false;
 
 void Configuration::LoadConfiguration(const char* a_pFilename) {
 	//TODO: check exceptions
@@ -35,7 +36,9 @@ void Configuration::LoadConfiguration(const char* a_pFilename) {
 	}*/
 	std::cout << "OK" <<std::endl;
 	in.close();
+	m_bInitialized = true;
 }
+
 
 std::map<std::string, std::vector<int> > Configuration::GetRanges()
 {
@@ -57,3 +60,38 @@ std::map<std::string, std::vector<int> > Configuration::GetRanges()
 	return vRanges;
 }
 
+float Configuration::GetPulseThresholdVolts()
+{
+}
+
+float Configuration::GetEdgeThresholdVolts()
+{}
+
+float Configuration::GetVoltMin()
+{
+}
+
+float Configuration::GetVoltMax()
+{}
+
+float Configuration::GetDigitizerResolution()
+{
+}
+
+float Configuration::GetExpectedPulseWidthNs()
+{
+}
+
+float Configuration::GetMinEdgeSeparationNs()
+{}
+
+float Configuration::GetMaxEdgeJitterNs()
+{}
+
+float Configuration::GetMaxAmplitudeJitterVolts()
+{
+}
+
+float Configuration::GetSamplingFreqGHz()
+{
+}
