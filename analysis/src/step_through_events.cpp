@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 		plt.PlotRanges(*channels, ranges, std::string("Event Time Stamp ") + std::to_string(iTimeStamp)); 
 		sigAnalyzer.FindOriginalPulseInChannelRange(*channels, ranges["A"]);
 		plt.AddAnalysisMarkers(0, sigAnalyzer.GetAnalysisMarkers());
-		plt.WaitForDoubleClick();
+		plt.Wait();
 /*		timer->TurnOn();			
 		timer->Reset();*/
 //		std::cin.get();

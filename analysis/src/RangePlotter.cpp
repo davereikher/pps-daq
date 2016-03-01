@@ -11,7 +11,6 @@ m_pCanvas(new TCanvas("Canvas", "", 800, 600)),
 m_colors{1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 28, 46, 30, 40, 42, 38},
 m_fSamplingFreqGHz(a_fSamplingFreqGHz),
 m_fMinVoltage(a_fMinVoltage),
-//TODO: The 0x00000FFF should be defined outside of this class!
 m_fVoltageDivision((a_fMaxVoltage - a_fMinVoltage)/a_iDigitizerResolution)
 {
 }
@@ -137,19 +136,18 @@ void RangePlotter::AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::Analysi
 {
 	//TODO: MEMORY LEAKS!!!
 	m_pCanvas->cd(a_iPanelIndex + 1);
-	printf("Adding markers. pulse threshold: %d, max x value: %f",  a_analysisMarkers.m_iPulseThreshold, m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax());
-	TLine* pulseThresholdLine = new TLine(0, a_analysisMarkers.m_iPulseThreshold, m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax(), a_analysisMarkers.m_iPulseThreshold);
+	TLine* pulseThresholdLine = new TLine(0, a_analysisMarkers.GetPulseThreshold().Continuous(), m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax(), a_analysisMarkers.GetPulseThreshold().Continuous());
 	pulseThresholdLine->SetLineStyle(2);
-	TLine* edgeThresholdLine = new TLine(0, a_analysisMarkers.m_iEdgeThreshold, m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax(), a_analysisMarkers.m_iEdgeThreshold);
+	TLine* edgeThresholdLine = new TLine(0, a_analysisMarkers.GetEdgeThreshold().Continuous(), m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax(), a_analysisMarkers.GetEdgeThreshold().Continuous());
 	edgeThresholdLine->SetLineStyle(2);
 	
 	for (auto& it: a_analysisMarkers.m_vChannelsEdgeAndMinimum)
 	{
-		if (std::get<0>(it).Exists())
+		if (std::get<EDGE_THRES_INDEX>(it).Exists())
 		{
-			TMarker* markerMin = new TMarker(std::get<1>(it).GetX(), std::get<1>(it).GetY(), 2);
+			TMarker* markerMin = new TMarker(std::get<MIN_PULSE_INDEX>(it).GetX(), std::get<MIN_PULSE_INDEX>(it).GetY(), 2);
 			markerMin->Draw();
-			TMarker* markerEdge = new TMarker(std::get<0>(it).GetX(), std::get<0>(it).GetY(), 3);
+			TMarker* markerEdge = new TMarker(std::get<EDGE_THRES_INDEX>(it).GetX(), std::get<EDGE_THRES_INDEX>(it).GetY(), 3);
 			markerEdge->Draw();
 		}
 	}
@@ -165,7 +163,7 @@ void RangePlotter::AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::Analysi
 	m_pCanvas->Update();
 }
 
-void RangePlotter::WaitForDoubleClick()
+void RangePlotter::Wait()
 {
 	m_pCanvas->cd();
 	m_pCanvas->WaitPrimitive();

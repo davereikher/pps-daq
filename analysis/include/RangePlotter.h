@@ -17,7 +17,7 @@ public:
 	RangePlotter(float a_fSamplingFreqGHz, float a_fMinVoltage, float a_fMaxVoltage, int a_iDigitizerResolution);
 	void PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsAssociation, std::string sEventTitle);
 	void AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::AnalysisMarkers& a_analysisMarkers);
-	void WaitForDoubleClick();
+	void Wait();
 private:
 	std::vector<float> TransformToVoltage(std::vector<float> a_vSamples);
 private:
