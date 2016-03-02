@@ -7,20 +7,28 @@ Creates a time sequence for the time axis, for plotting, based on the provided s
 @param a_iSamplingFrequencyGHz sampling frequency in GHz. If it's 0, the result will be just a sequence (0 to a_iNumOfSamples). Default value is 0.
 @return a vector of time values, in nanoseconds
 */
-std::vector<float> CommonUtils::GenerateTimeSequence(unsigned int a_iNumOfSamples, float a_iSamplingFrequencyGHz)
+std::vector<float>& CommonUtils::GenerateTimeSequence(unsigned int a_iNumOfSamples, float a_fSamplingFrequencyGHz)
 {
-	float fTimeStep = 1.0/a_iSamplingFrequencyGHz;
-	if (0 == a_iSamplingFrequencyGHz)
+	static std::vector<float> vTimeSeq;
+	static int iLastNumOfsamples = -1;
+	static float fLastSamplingFrequencyGHz = -1;
+
+	if((a_iNumOfSamples == iLastNumOfsamples) && (a_fSamplingFrequencyGHz == fLastSamplingFrequencyGHz))
 	{
-		fTimeStep = 1;
+		return vTimeSeq;
 	}
-	std::vector<float> vResult;
-	vResult.resize(a_iNumOfSamples);
+
+	iLastNumOfsamples = a_iNumOfSamples;
+	fLastSamplingFrequencyGHz = a_fSamplingFrequencyGHz;
+
+	float fTimeStep = 1.0/a_fSamplingFrequencyGHz;
+	
+	vTimeSeq.resize(a_iNumOfSamples);
 	for (int i = 0; i < (int)a_iNumOfSamples; i++)
 	{
-		//vResult[i] = i * 0.4;
-		vResult[i] = i * fTimeStep;
+		vTimeSeq[i] = i * fTimeStep;
 	}
-	return vResult;
+
+	return vTimeSeq;
 }
 

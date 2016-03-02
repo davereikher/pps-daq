@@ -7,7 +7,7 @@ Constructor.
 
 @param a_fSamplingFreqGHz - sampling frequency in GHz.
 @param a_fVoltageMin - lowest voltage in the dynamic range of the digitizer.
-@param a_fVoltageMax - highest coltage in the dynamic range of the digitizer.
+@param a_fVoltageMax - highest voltage in the dynamic range of the digitizer.
 @param a_iDigitizerResolution - resolution of the digitizer (i.e. 0x00000fff for 12 bit).
 @param a_fPulseThresholdVolts - if a sample in a channel is found below it, this channel will be considered to have a pulse.
 @param a_fEdgeThresholdVolts - the time at which the signal in a channel first reaches it will be the time of the leading edge of the first pulse in that channel.
@@ -148,7 +148,6 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std::vector<flo
 		std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> p;
 		p = FindLeadingEdgeAndPulseExtremum(a_vAllChannels[a_vRange[i]]);
 		m_markers.m_vChannelsEdgeAndMinimum.push_back(p);
-		printf("X=%d, ",	std::get<EDGE_THRES_INDEX>(p).GetXDiscrete());
 		if(!std::get<EDGE_THRES_INDEX>(p).Exists())
 		{
 			continue;
@@ -164,7 +163,6 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std::vector<flo
 			iNextToEarliestLeadingEdge = std::get<EDGE_THRES_INDEX>(p).GetXDiscrete();
 		}
 	}
-	printf("Earliest: %d, Next to earliest: %d\n" , iEarliestLeadingEdge, iNextToEarliestLeadingEdge);
 	//The leading pulse is separated by enough time from the following pulses so that it can be considered as the original pulse.
 	if ((iNextToEarliestLeadingEdge - iEarliestLeadingEdge) >= m_markers.GetMinEdgeSeparation().Discrete())
 	{

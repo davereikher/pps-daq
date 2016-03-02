@@ -19,14 +19,15 @@ public:
 	void AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::AnalysisMarkers& a_analysisMarkers);
 	void Wait();
 private:
-	std::vector<float> TransformToVoltage(std::vector<float> a_vSamples);
+	inline float TransformToVoltage(float a_fSample);
 private:
 	std::unique_ptr<TCanvas> m_pCanvas;
 	int m_colors[16];
 	float m_fSamplingFreqGHz;
 	float m_fMinVoltage;
+	float m_fMaxVoltage;
 	float m_fVoltageDivision;
-	std::vector <TGraph*> m_vpGraph;
+	std::map <int, TGraph*> m_vpGraph;
 	std::vector <std::unique_ptr<TMultiGraph> > m_vpMultiGraph;
 	std::vector <std::unique_ptr<TLegend> > m_vpLegends;
 };

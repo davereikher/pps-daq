@@ -2,6 +2,7 @@
 #include "RangePlotter.h"
 #include "TLine.h"
 #include "TAxis.h"
+#include "TBox.h"
 #include "TMarker.h"
 #include "CommonUtils.h"
 
@@ -11,6 +12,7 @@ m_pCanvas(new TCanvas("Canvas", "", 800, 600)),
 m_colors{1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 28, 46, 30, 40, 42, 38},
 m_fSamplingFreqGHz(a_fSamplingFreqGHz),
 m_fMinVoltage(a_fMinVoltage),
+m_fMaxVoltage(a_fMaxVoltage),
 m_fVoltageDivision((a_fMaxVoltage - a_fMinVoltage)/a_iDigitizerResolution)
 {
 }
@@ -39,12 +41,10 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 		if ( fPads1 > fPads2)
 		{
 			m_pCanvas->Divide((int)fPads1, (int)fPads2);	
-			printf("horiz pads = %d, vert pads = %d\n", (int)fPads1, (int)fPads2);
 		}
 		else
 		{
 			m_pCanvas->Divide((int)fPads2, (int)fPads1);
-			printf("horiz pads = %d, vert pads = %d\n", (int)fPads2, (int)fPads1);
 		}
 	}
 	
@@ -53,7 +53,7 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 	{
 		for (auto& rangeIt: a_channelsToPadsAssociation)
 		{	
-			TMultiGraph* pMg = new TMultiGraph("mg", "mg");
+			TMultiGraph* pMg = new TMultiGraph("mg", "mg");	
 			m_vpMultiGraph.push_back(std::unique_ptr<TMultiGraph>(pMg));
 
 			m_pCanvas->cd(iPadCounter + 1);
@@ -63,15 +63,19 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 			m_vpLegends.push_back(std::unique_ptr<TLegend>(legend));
 			for (auto& chanIt: rangeIt.second)
 			{
-				printf ("Channel %d to pad %d, ", chanIt, iPadCounter);
 				int iNumOfSamples = a_channels[chanIt].size();
-				std::vector<float> vVoltage = TransformToVoltage(a_channels[chanIt]);
-				TGraph* pGr = new TGraph(iNumOfSamples, &(CommonUtils::GenerateTimeSequence(iNumOfSamples, m_fSamplingFreqGHz)[0]), &(vVoltage[0]));
-				m_vpGraph.push_back(pGr);
+				TGraph* pGr = new TGraph(iNumOfSamples);
+				std::vector<float> vTimeSeq = CommonUtils::GenerateTimeSequence(iNumOfSamples, m_fSamplingFreqGHz);
+				for (int counter = 0; counter < iNumOfSamples; counter++)
+				{
+					pGr->SetLineWidth(1);
+					pGr->SetPoint(counter, vTimeSeq[counter], TransformToVoltage(a_channels[chanIt][counter]));
+				}
+
+				m_vpGraph[chanIt] = pGr;
 				pGr->SetLineColor(m_colors[i%(sizeof(m_colors)/sizeof(int))]);
 				std::string sMultiGraphTitle = std::string("Panel ") + rangeIt.first;
 				pGr->SetName((std::string("Panel_") + rangeIt.first).c_str());
-				printf("NAME: %s\n", (std::string("Channel_") + std::to_string(chanIt)).c_str());
 				std::string sGraphTitle = std::string("Channel ") + std::to_string(chanIt);
 				pGr->SetTitle(sGraphTitle.c_str());
 				legend->AddEntry(pGr,std::to_string(chanIt).c_str(), "l");
@@ -82,79 +86,88 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 			}
 			
 			pMg->Draw("AC");
+
+			gPad->Modified();
+
+			pMg->SetMinimum(m_fMinVoltage);
+			pMg->SetMaximum(m_fMaxVoltage);
 			legend->Draw();
 			iPadCounter++;
-			printf("\n");
 		}
 		m_pCanvas->Update();
 	}
 	else
 	{
-		int i = 0;
 		for (auto& rangeIt: a_channelsToPadsAssociation)
 		{
 			m_pCanvas->cd(iPadCounter + 1);
 			for (auto& chanIt: rangeIt.second)
 			{
-				printf ("Channel %d to pad %d", chanIt, iPadCounter);
+				//TODO: num of samples is constant per run at least!
 				int iNumOfSamples = a_channels[chanIt].size();	
 				std::vector<float> vTimeSeq = CommonUtils::GenerateTimeSequence(iNumOfSamples, m_fSamplingFreqGHz);	
-				std::vector<float> vVoltage = TransformToVoltage(a_channels[chanIt]);
 				for (int counter = 0; counter < iNumOfSamples; counter++)
 				{
-					m_vpGraph[i]->SetPoint(counter, vTimeSeq[counter], vVoltage[counter]);
+					m_vpGraph[chanIt]->SetLineWidth(1);
+					double x = -1, y = -1;
+					int err = 0;
+					err = m_vpGraph[chanIt]->GetPoint(counter, x, y);
+					(m_vpGraph[chanIt]->GetY())[counter] = TransformToVoltage(a_channels[chanIt][counter]);
+					err = m_vpGraph[chanIt]->GetPoint(counter, x, y);
 				}
-				i++;
+				gPad->Modified();
 			}
 
 			m_vpMultiGraph[iPadCounter]->Draw("AC");
 			m_vpLegends[iPadCounter]->Draw();
 			iPadCounter++;
-			printf("\n");
 		}
 		m_pCanvas->Update();
 	}
 }
 
-std::vector<float> RangePlotter::TransformToVoltage(std::vector<float> a_vSamples)
+float RangePlotter::TransformToVoltage(float a_fSample)
 {
-	if(m_fVoltageDivision == 0)
-	{
-		return a_vSamples;
-	}
 
-	std::vector<float> vRes;
-	vRes.resize(a_vSamples.size());
-	for(int i = 0; i < a_vSamples.size(); i++)
-	{
-		vRes[i] = m_fMinVoltage + a_vSamples[i] * m_fVoltageDivision;
-	}
-	return vRes;
+	return  m_fMinVoltage + a_fSample * m_fVoltageDivision;
 }
 
 void RangePlotter::AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::AnalysisMarkers& a_analysisMarkers)
 {
-	//TODO: MEMORY LEAKS!!!
+
 	m_pCanvas->cd(a_iPanelIndex + 1);
 	TLine* pulseThresholdLine = new TLine(0, a_analysisMarkers.GetPulseThreshold().Continuous(), m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax(), a_analysisMarkers.GetPulseThreshold().Continuous());
 	pulseThresholdLine->SetLineStyle(2);
+	pulseThresholdLine->SetBit(kCanDelete);
 	TLine* edgeThresholdLine = new TLine(0, a_analysisMarkers.GetEdgeThreshold().Continuous(), m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax(), a_analysisMarkers.GetEdgeThreshold().Continuous());
 	edgeThresholdLine->SetLineStyle(2);
+	edgeThresholdLine->SetBit(kCanDelete);
 	
+	int i = 0;
 	for (auto& it: a_analysisMarkers.m_vChannelsEdgeAndMinimum)
 	{
+		int color = ((TGraph*) m_vpMultiGraph[a_iPanelIndex]->GetListOfGraphs()->At(i))->GetLineColor();
+		float fYMin = m_vpMultiGraph[a_iPanelIndex]->GetYaxis()->GetXmin();
+		float fYMax = m_vpMultiGraph[a_iPanelIndex]->GetYaxis()->GetXmax();
+
 		if (std::get<EDGE_THRES_INDEX>(it).Exists())
-		{
-			TMarker* markerMin = new TMarker(std::get<MIN_PULSE_INDEX>(it).GetX(), std::get<MIN_PULSE_INDEX>(it).GetY(), 2);
+		{	
+			TMarker* markerMin = new TMarker(std::get<MIN_PULSE_INDEX>(it).GetX(), std::get<MIN_PULSE_INDEX>(it).GetY(), 22);
+			markerMin->SetMarkerColor(color);
+			markerMin->SetMarkerSize(2);
 			markerMin->Draw();
-			TMarker* markerEdge = new TMarker(std::get<EDGE_THRES_INDEX>(it).GetX(), std::get<EDGE_THRES_INDEX>(it).GetY(), 3);
-			markerEdge->Draw();
+
+		/*	TBox* pulseWindow = new TBox(std::get<EDGE_THRES_INDEX>(it).GetX(), fYMin, std::get<EDGE_THRES_INDEX>(it).GetX() + a_analysisMarkers.GetExpectedPulseWidth().Continuous(), fYMax);
+			pulseWindow->SetFillColor(color);
+			pulseWindow->SetFillStyle(3004);
+			pulseWindow->Draw();*/
 		}
+		i++;
 	}
 
 	for (auto& it: a_analysisMarkers.m_vChannelsWithPulse)
-	{
-		printf("*****************Channel %d has signal\n*****************\n", it);
+	{		
+		m_vpGraph[it]->SetLineWidth(3);
 	}
 
 	pulseThresholdLine->Draw();

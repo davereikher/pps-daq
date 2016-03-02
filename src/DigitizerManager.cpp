@@ -19,17 +19,6 @@
 #define MAXNB 1 /* Number of connected boards */
 #define SAMPLING_FREQUENCY CAEN_DGTZ_DRS4_2_5GHz
 
-void LogEvent(char* eventptr, int size)
-{
-	FILE *write_ptr;
-	char name[256];
-
-	snprintf(name, 256, "/tmp/vme/%ld-%ld", time(0), random());
-	write_ptr = fopen(name,"wb");  
-
-	fwrite(eventptr,size,1,write_ptr);
-	fclose(write_ptr);
-}
 /*
 void hexDump (char *desc, void *addr, int len) {
 	int i;
@@ -84,7 +73,7 @@ void hexDump (char *desc, void *addr, int len) {
 }
 */
 
-
+/*
 void PrintEvent(Event& event)
 {
 	printf("Event size in bytes: %d\n", event.m_iEventSizeBytes);
@@ -93,7 +82,7 @@ void PrintEvent(Event& event)
 	printf("group mask : %08x\n", event.m_iGroupMask);
 	printf("event counter: %d\n", event.m_iEventCounter);
 	printf("event time tag: %d\n", event.m_iEventTimeTag);		
-}
+}*/
 /*
 */
 /**
@@ -201,28 +190,14 @@ void DigitizerManager::Start()
 
 int DigitizerManager::Acquire()
 {
-//	int count = 0;
 	char * evtptr = NULL;
 	uint32_t bsize;
 	uint32_t iNumEvents;
 	
-	
-/*	printf("\n\nPress 's' to start the acquisition\n");
-	printf("Press 'k' to stop  the acquisition\n");
-	printf("Press 'q' to quit  the application\n\n");
-	while (1) {
-		c = checkCommand();
-		if (c == 9) break;
-		if (c == 2) return 0;
-		Sleep(100);
-	}
-*/
-
 	ASSERT_SUCCESS(CAEN_DGTZ_ReadData(m_iHandle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, m_pBuffer,&bsize), "Failed to read data");
 
 	ASSERT_SUCCESS(CAEN_DGTZ_GetNumEvents(m_iHandle,m_pBuffer,bsize,&iNumEvents), "Failed to get number of events");
 
-	//count +=numEvents;
 	for (uint32_t i=0; i < iNumEvents; i++) {
 		/* Get the Infos and pointer to the event */
 		ASSERT_SUCCESS(CAEN_DGTZ_GetEventInfo(m_iHandle,m_pBuffer,bsize,i,&m_eventInfo,&evtptr), "Failed to get event info");
@@ -232,32 +207,5 @@ int DigitizerManager::Acquire()
 
 	return iNumEvents;
 
-//Continue:
-//printf("\nRetrieved %d Events\n", count);
-//goto QuitProgram;
-
-/* Quit program routine */
-//QuitProgram:
-// Free the buffers and close the digitizers
-//ret = CAEN_DGTZ_FreeReadoutBuffer(&buffer);
-//ret = CAEN_DGTZ_CloseDigitizer(m_iHandle);
-//CAEN_DGTZ_FreeEvent(m_iHandle, (void**)&pEvent);
-//printf("Press 'Enter' key to exit\n");
-//c = getchar();
 }
-/*
-int main(int argc, char* argv[])
-{
-	TApplication app ("app",&argc,argv);
-	try
-	{
-		DoMain();
-	}
-	catch (EventParsingException& ex)
-	{
-		printf (ex.What().c_str());
-		return -1;
-	}
 
-	return 0;
-}*/

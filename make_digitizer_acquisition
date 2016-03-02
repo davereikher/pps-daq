@@ -1,15 +1,15 @@
 ROOTLIBS = $(shell root-config --libs) -lRooFitCore -lMinuit -lEG 
 ROOTINCS = $(shell root-config --cflags) 
 ROOTLIBS = -L$(ROOTSYS)/lib  -lHtml -lCore -lTreePlayer -lRIO -lNet -lssl -lcrypto -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lm -ldl -rdynamic -lGenVector -lTMVA
-MYFLAG = -I./include -I./analysis/include
+MYFLAG = -I./include -I./analysis/include -I./additional-packages/include 
 #CXX = g++
 DEBUG =
 ROOTFILEOUTDIR = ./root
-CXXFLAGS = -D ROOT_FILE_OUT_DIR=\"$(ROOTFILEOUTDIR)\" $(MYFLAG) -fpermissive $(ROOTINCS) -Wall -Wno-return-type -Wunused -Wno-deprecated
+CXXFLAGS = $(MYFLAG) -fpermissive $(ROOTINCS) -Wall -Wno-return-type -Wunused -Wno-deprecated
 #CXXFLAGS        =-I$(ROOTSYS)/include -O -Wall -fPIC
 LD = $(CXX)
 ###LDLIBS = $(ROOTLIBS) -lz -lpthread
-LDLIBS = $(ROOTLIBS) -lpthread -lCAENDigitizer -L./analysis/lib -lanalysis
+LDLIBS = -lanalysis $(ROOTLIBS) -lpthread -L./additional-packages/lib -ljson -lCAENDigitizer -L./analysis/lib
 LDFLAGS = $(MYFLAG)
 
 OBJDIR = obj
@@ -20,8 +20,8 @@ ROOTOUTDIR = root
 LIBDIR = lib
 
 EXECS = $(BINDIR)/v1742-readout
-_OBJECTS = Plotter.o keyb.o ProprietaryUtils.o EventHandler.o Exception.o dict.o DigitizerManager.o main.o
-OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
+_OBJECTS = keyb.o ProprietaryUtils.o EventHandler.o Exception.o dict.o DigitizerManager.o main.o 
+OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS)) ./analysis/obj/Configuration.o
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx
 

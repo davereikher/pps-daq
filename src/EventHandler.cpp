@@ -1,5 +1,6 @@
 #include <iostream>
 #include <tuple>
+#include <chrono>
 #include "EventHandler.h"
 #include "Exception.h"
 #include "linux/limits.h"
@@ -7,19 +8,22 @@
 #include "TInterpreter.h"
 #include "time.h"
 #include "SignalAnalyzer.h"
-
+#include "RangePlotter.h"
+#include "Configuration.h"
+#include "TApplication.h"
 
 #define TREE_NAME "DigitizerEvents"
 #define TREE_DESCRIPTION "Events from V1742 CAEN digitizer"
 #define FILE_NAME_FORMAT "pps-events-%d.root"
 #define TOTAL_NUM_OF_CHANNELS MAX_X742_GROUP_SIZE * (MAX_X742_CHANNEL_SIZE - 1)
 
-EventHandler::EventHandler(int argc, char** argv):
-m_pRootFile(new TFile(GenerateFileName().c_str(), "RECREATE","", 3)),
+EventHandler::EventHandler(std::string a_sRootOutFolder):
+m_pRootFile(new TFile(GenerateFileName(a_sRootOutFolder).c_str(), "RECREATE","", 3)),
 m_pRootTree(new TTree(TREE_NAME, TREE_DESCRIPTION)),
 m_bEventAddrSet(false),
 m_bEventInfoSet(false),
-m_plotter(argc, argv)
+m_analysisThread(std::bind(&MainAnalysisThreadFunc, this)),
+m_bStopAnalysisThread(false)
 {}
 
 void EventHandler::SetEventAddress(CAEN_DGTZ_X742_EVENT_t* a_pEvent)
@@ -67,8 +71,7 @@ void EventHandler::PrintEventInfo(CAEN_DGTZ_EventInfo_t* p_eventInfo)
 void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_t* a_pEventInfo)
 {
 
-	PrintEventInfo(a_pEventInfo);
-	m_plotter.Plot(a_pEvent);
+	//PrintEventInfo(a_pEventInfo);
 	
 	AssertReady();
 	
@@ -97,19 +100,12 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_
 		}
 	}
 
-	PerformIntermediateAnalysis();
+	PerformIntermediateAnalysis(a_pEventInfo);
 
-/*	std::vector<float> vec;
-	vec.push_back((float)time(0));
-	vec.push_back((float)time(0) /100);
-	m_vChannels.clear();
-	m_vChannels.push_back(vec);*/
-	m_pRootTree->Fill();
-	
-//	m_pRootTree->Write();
+	m_pRootTree->Fill();	
 }
 
-std::string EventHandler::GenerateFileName()
+std::string EventHandler::GenerateFileName(std::string a_sRootOutFolder)
 {
 	char sFileName [NAME_MAX];
 	if (snprintf(sFileName, NAME_MAX, FILE_NAME_FORMAT, (int)time(0)) <= 0)
@@ -117,8 +113,8 @@ std::string EventHandler::GenerateFileName()
 		throw EventHandlerException(__LINE__, "TFile name generation failed");
 	}
 
-	//ROOT_FILE_OUT_DIR is defined in Makefile	
-	std::string sStr = ROOT_FILE_OUT_DIR;
+	std::string sStr = a_sRootOutFolder;
+
 	if(sStr[sStr.size() - 1] != '/')
 	{
 		sStr += "/";
@@ -136,21 +132,54 @@ EventHandler::~EventHandler()
 	m_pRootTree->Write();
 }
 
-void EventHandler::PerformIntermediateAnalysis()
+void EventHandler::PerformIntermediateAnalysis(CAEN_DGTZ_EventInfo_t* a_pEventInfo)
 {
-	//TODO: in another thread!
-/*	std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> leadingEdgeAndPulseExtremum;
-	SignalAnalyzer sigAnalyzer(0, 0, 0);
-	
-	leadingEdgeAndPulseExtremum = sigAnalyzer.FindLeadingEdgeAndPulseExtremum(m_vChannels[0]);
-	
-	if ( !(std::get<0>(leadingEdgeAndPulseExtremum).Exists() ) && !(std::get<1>(leadingEdgeAndPulseExtremum).Exists()) )
-	{
-		std::cout << "PULSE NOT DETECTED!" << std::endl;
-	}
-	else
-	{
-		std::cout << "!!!!!!!!!!!!DETECTED Pulse edge = " << std::get<0>(leadingEdgeAndPulseExtremum).GetXDiscrete() << " pulse minimum value: " << std::get<1>(leadingEdgeAndPulseExtremum).GetYDiscrete()  << std::endl;
-	}*/
+	m_queue.push(std::pair<int, std::vector<std::vector<float> > >(a_pEventInfo->TriggerTimeTag, m_vChannels)) ;
 }
 
+void EventHandler::MainAnalysisThreadFunc(EventHandler* a_pEventHandler)
+{
+	SignalAnalyzer sigAnalyzer(Configuration::GetSamplingFreqGHz(), Configuration::GetVoltMin(), 
+		Configuration::GetVoltMax(), Configuration::GetDigitizerResolution(), Configuration::GetPulseThresholdVolts(), 
+		Configuration::GetEdgeThresholdVolts(), Configuration::GetExpectedPulseWidthNs(), 
+		Configuration::GetMinEdgeSeparationNs(), Configuration::GetMaxEdgeJitterNs(), 
+		Configuration::GetMaxAmplitudeJitterVolts());
+
+	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
+	TApplication* pApplication = new TApplication("app",0, 0);
+
+	RangePlotter plt(Configuration::GetSamplingFreqGHz(), Configuration::GetVoltMin(), Configuration::GetVoltMax(),
+		Configuration::GetDigitizerResolution());
+	
+	Range_t ranges = Configuration::GetRanges();
+
+	bool bDone = false;
+	while(!bDone)
+	{
+		printf("queue size: %d, ", a_pEventHandler->m_queue.size());
+		auto pair = a_pEventHandler->m_queue.pop();
+		int iTimeStamp = pair.first;
+
+		std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+		plt.PlotRanges(pair.second, ranges, std::string("Event Time Stamp ") + std::to_string(iTimeStamp)); 
+		std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
+		printf("duration: %d\n", duration);
+
+		sigAnalyzer.FindOriginalPulseInChannelRange(pair.second, ranges["A"]);
+		plt.AddAnalysisMarkers(0, sigAnalyzer.GetAnalysisMarkers());
+		//open new block for lock_guard
+		{
+			std::lock_guard<std::mutex> lockGuard(a_pEventHandler->m_mutex);
+			bDone = a_pEventHandler->m_bStopAnalysisThread;
+		}		
+		gSystem->ProcessEvents();
+	}
+}
+
+void EventHandler::Stop()
+{
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
+	m_bStopAnalysisThread = true;
+	m_analysisThread.join();
+}
