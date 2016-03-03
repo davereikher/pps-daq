@@ -3,6 +3,12 @@
 #include <cfloat>
 #include <limits.h>
 #include <tuple>
+#include <chrono>
+#include <thread>
+#include <mutex>
+#include "Types.h"
+#include "Queue.h"
+#include "TriggerTimingSupervisor.h"
 
 #define NO_PULSE_EDGE INT_MAX
 #define NO_PULSE_MINIMUM_VALUE FLT_MAX
@@ -10,6 +16,7 @@
 #define EDGE_THRES_INDEX 0
 #define MIN_PULSE_INDEX 1
 
+using namespace std::chrono;
 
 class SignalAnalyzer
 {
@@ -90,18 +97,37 @@ public:
 		std::vector<std::tuple<Point, Point> > m_vChannelsEdgeAndMinimum;
 		std::vector<int> m_vChannelsWithPulse;
 	};
+
+	enum AnalysisFlags
+	{
+		ETriggerTimingSupervisor = 1
+	};
 public:
 	SignalAnalyzer(float a_fSamplingFreqGHz, float a_fVoltageMin, float a_fVoltageMax, int a_iDigitizerResolution,
 		float a_fPulseThresholdVolts, float a_fEdgeThresholdVolts, float a_fExpectedPulseWidthNs, 
 		float a_fMinEdgeSeparationNs, float a_fMaxEdgeJitterNs, float a_fMaxAmplitudeJitterVolts);
 	std::tuple<Point, Point> FindLeadingEdgeAndPulseExtremum(std::vector<float>& a_samplesVector);
-	void FindOriginalPulseInChannelRange(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int>& a_vRange);
-	bool DoesRangeHaveSignal(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int> a_vRange);
+	void FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels, std::vector<int>& a_vRange);
+	bool DoesRangeHaveSignal(Channels_t& a_vAllChannels, std::vector<int> a_vRange);
+	void Analyze(time_point<high_resolution_clock> a_tp, Channels_t& a_vChannels);
+
 	AnalysisMarkers& GetAnalysisMarkers();
+	void Start();
+	void Stop();
+	void SetFlags(int a_iFlags);
+
+private:
+	static void MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer);
 
 private:
 	AnalysisMarkers m_markers;
 	float m_fTimeDivisionNs;
 	float m_fVoltageDivisionVolts;
 	float m_fVoltageStartVolts;
+	int m_iFlags;
+	bool m_bStopAnalysisThread;
+	std::thread m_analysisThread;
+	std::mutex m_mutex;
+	Queue<std::pair<time_point<high_resolution_clock>, Channels_t> > m_queue;
+	std::unique_ptr<TriggerTimingSupervisor> m_pTriggerTimingSupervisor;
 };

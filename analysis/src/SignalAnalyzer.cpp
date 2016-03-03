@@ -1,6 +1,13 @@
+#include <chrono>
+#include "TSystem.h"
 #include "SignalAnalyzer.h"
+#include "TApplication.h"
+
 std::vector <std::vector<int> > gvPanelChannelRanges;
 static SignalAnalyzer::AnalysisMarkers m_markers;
+
+//using std;
+using namespace std::chrono;
 
 /**
 Constructor.
@@ -17,7 +24,10 @@ Constructor.
 @param a_fMaxAmplitudeJitterVolts - the distance (in pulse amplitude units) from the lowest value of the largest pulse within which another pulse, if found, is not weak enough to be dismissed as a signal, and therefore all signals the lowest points of which fall within this window will be considered as potential pulses.
 */
 SignalAnalyzer::SignalAnalyzer(float a_fSamplingFreqGHz, float a_fVoltageMin, float a_fVoltageMax, int a_iDigitizerResolution,
-float a_fPulseThresholdVolts, float a_fEdgeThresholdVolts, float a_fExpectedPulseWidthNs, float a_fMinEdgeSeparationNs, float a_fMaxEdgeJitterNs, float a_fMaxAmplitudeJitterVolts)
+float a_fPulseThresholdVolts, float a_fEdgeThresholdVolts, float a_fExpectedPulseWidthNs, float a_fMinEdgeSeparationNs, float a_fMaxEdgeJitterNs, float a_fMaxAmplitudeJitterVolts):
+m_iFlags(0),
+m_bStopAnalysisThread(false),
+m_pTriggerTimingSupervisor(new TriggerTimingSupervisor(milliseconds(10000)))
 {
 	m_fVoltageStartVolts = a_fVoltageMin;
 	m_fVoltageDivisionVolts = (a_fVoltageMax - a_fVoltageMin)/(float)a_iDigitizerResolution;
@@ -52,6 +62,10 @@ float a_fPulseThresholdVolts, float a_fEdgeThresholdVolts, float a_fExpectedPuls
 	m_fVoltageStart_volts = a_fVoltageMin;*/
 }
 
+void SignalAnalyzer::Start()
+{
+	m_analysisThread = std::thread(std::bind(&MainAnalysisThreadFunc, this));
+}
 
 /**
 Maps a vector of samples to a tuple of values - the location of the leading edge of the first occurence of a pulse and the location of the lowest point on the pulse.
@@ -132,7 +146,7 @@ The result, a vector of channels containing the original pulse (ideally there wi
 @param a_vAllChannels - a vector of all 32 channels, where each item is a vector of samples from that channel.
 @param a_vRange - a vector of indices of the interesting channels in the first parameter.
 */
-void SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int>& a_vRange)
+void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels, std::vector<int>& a_vRange)
 {
 
 	//Get all channels in the provided range, find the leading edge and minimum value of the pulses and store the result in a vector of tuples. Also, find the earliest and next-to-earliest leading edge in the channels in the range.
@@ -179,7 +193,7 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(std::vector<std::vector<flo
 
 	float minPulseValue = FLT_MAX;
 	//Leading edges of first two signals are too close to determine which one came first
-	//Analyse the amplitude of the bunched pulses to find the pulse with the largest one. That is (most likely) the original pulse.
+	//Analyze the amplitude of the bunched pulses to find the pulse with the largest one. That is (most likely) the original pulse.
 	//However, if some of the bunched pulse's minimum values are too close to the lowest minimum value, we cannot definitely distinguish the original pulse. Therefore, we return all of them.
 	//Find all pulses the leading edges of which are within a window of size MAX_EDGE_JITTER and find the pulse with the largest amplitude.
 	std::vector<int> vChannelsWithBunchedPulses;
@@ -215,7 +229,7 @@ Returns whether a range has a pulse in one of the channels or not. This is good 
 @param a_vRange - the range of channels defining a panel
 @return Whether a pulse was detected on one of the panels
 */
-bool SignalAnalyzer::DoesRangeHaveSignal(std::vector<std::vector<float> >& a_vAllChannels, std::vector<int> a_vRange)
+bool SignalAnalyzer::DoesRangeHaveSignal(Channels_t& a_vAllChannels, std::vector<int> a_vRange)
 {
 	FindOriginalPulseInChannelRange(a_vAllChannels, a_vRange);
 	return !(m_markers.m_vChannelsWithPulse.empty());
@@ -348,3 +362,57 @@ SignalAnalyzer::AnalysisMarkers::Value SignalAnalyzer::AnalysisMarkers::GetMaxAm
 	return Value(m_iMaxAmplitudeJitter, m_fMaxAmplitudeJitter);
 }
 
+void SignalAnalyzer::MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer)
+{
+	static int iEventNum = 0;
+	
+	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
+	TApplication* pApplication = new TApplication("app",0, 0);
+
+	int iFlags = a_pSignalAnalyzer->m_iFlags;
+
+	while(true)
+	{
+		//separate block for lock_guard
+		{
+			std::lock_guard<std::mutex> lockGuard(a_pSignalAnalyzer->m_mutex);
+			if (a_pSignalAnalyzer->m_bStopAnalysisThread)
+			{
+				break;
+			}
+		}
+//		printf("queue size: %d, ", a_pEventHandler->m_queue.size());
+		auto pair = a_pSignalAnalyzer->m_queue.pop();
+
+		if (iFlags & AnalysisFlags::ETriggerTimingSupervisor)
+		{
+			a_pSignalAnalyzer->m_pTriggerTimingSupervisor->GotTrigger(pair.first);
+		}
+		gSystem->ProcessEvents();
+	}
+}
+
+void SignalAnalyzer::Stop()
+{
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
+	m_bStopAnalysisThread = true;
+	m_analysisThread.join();
+}
+
+/**
+Set which actions must be performed during analysis
+
+@param: a_iFlags. Can take the following values:
+	AVG_TRIG_RATE - every X seconds, plot the average trigger rate.
+	AVG_PANEL_COINCIDENCE_RATES - every Y seconds, plot the average rate of coincidence for each panel with the trigger, on a split canvas.
+	AVG_TRACK_DETECTION_RATE - every Z seconds, plot 
+*/
+void SignalAnalyzer::SetFlags(int a_iFlags)
+{
+	m_iFlags = a_iFlags;
+}
+
+void SignalAnalyzer::Analyze(time_point<high_resolution_clock> a_tp, Channels_t& a_vChannels)
+{	
+	m_queue.push(std::pair<time_point<high_resolution_clock>, std::vector<std::vector<float> > >(a_tp, a_vChannels));
+}

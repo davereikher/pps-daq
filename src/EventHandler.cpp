@@ -12,6 +12,8 @@
 #include "Configuration.h"
 #include "TApplication.h"
 
+using namespace std::chrono;
+
 #define TREE_NAME "DigitizerEvents"
 #define TREE_DESCRIPTION "Events from V1742 CAEN digitizer"
 #define FILE_NAME_FORMAT "pps-events-%d.root"
@@ -22,11 +24,20 @@ m_pRootFile(new TFile(GenerateFileName(a_sRootOutFolder).c_str(), "RECREATE","",
 m_pRootTree(new TTree(TREE_NAME, TREE_DESCRIPTION)),
 m_bEventAddrSet(false),
 m_bEventInfoSet(false),
-m_analysisThread(std::bind(&MainAnalysisThreadFunc, this)),
-m_bStopAnalysisThread(false)
-{}
+m_pSignalAnalyzer(new SignalAnalyzer(Configuration::GetSamplingFreqGHz(), Configuration::GetVoltMin(), 
+		Configuration::GetVoltMax(), Configuration::GetDigitizerResolution(), Configuration::GetPulseThresholdVolts(), 
+		Configuration::GetEdgeThresholdVolts(), Configuration::GetExpectedPulseWidthNs(), 
+		Configuration::GetMinEdgeSeparationNs(), Configuration::GetMaxEdgeJitterNs(), 
+		Configuration::GetMaxAmplitudeJitterVolts()))
+{
+	m_pRootTree->Branch("Event", &m_vChannels);
+	m_pRootTree->Branch("ArrivalTime", &m_now);
 
-void EventHandler::SetEventAddress(CAEN_DGTZ_X742_EVENT_t* a_pEvent)
+	m_pSignalAnalyzer->SetFlags(SignalAnalyzer::ETriggerTimingSupervisor);
+	m_pSignalAnalyzer->Start();
+}
+
+/*void EventHandler::SetEventAddress()
 {
 	if(m_bEventAddrSet)
 	{
@@ -37,25 +48,25 @@ void EventHandler::SetEventAddress(CAEN_DGTZ_X742_EVENT_t* a_pEvent)
 	m_bEventAddrSet = true;
 }
 
-void EventHandler::SetEventInfoAddress(CAEN_DGTZ_EventInfo_t* a_pEventInfo)
+void EventHandler::SetEventInfoAddress()
 {
 	if(m_bEventInfoSet)
 	{
 		throw EventHandlerException(__LINE__, "Event info already set");
 	}
 	//m_pRootTree->Branch("EventInfo", a_pEventInfo, "EventSize/i:BoardId:Pattern:ChannelMask:EventCounter:TriggerTimeTag");
-	m_pRootTree->Branch("EventInfo", &(a_pEventInfo->TriggerTimeTag), "TriggerTimeTag/i");
+//	m_pRootTree->Branch("EventInfo", &(a_pEventInfo->TriggerTimeTag), "TriggerTimeTag/i");
+	m_pRootTree->Branch("EventInfo", &m_now);
 	m_bEventInfoSet = true;
 }
-
-
-void EventHandler::AssertReady()
+*/
+/*void EventHandler::AssertReady()
 {
 	if (!(m_bEventAddrSet && m_bEventInfoSet))
 	{
 		throw EventHandlerException(__LINE__, "Not ready");
 	}
-}
+}*/
 
 void EventHandler::PrintEventInfo(CAEN_DGTZ_EventInfo_t* p_eventInfo)
 {
@@ -68,12 +79,12 @@ void EventHandler::PrintEventInfo(CAEN_DGTZ_EventInfo_t* p_eventInfo)
 	printf("Triger time stamp: %u\n\n", p_eventInfo->TriggerTimeTag);
 }
 
-void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_t* a_pEventInfo)
+void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, time_point<high_resolution_clock> a_tp)
 {
 
 	//PrintEventInfo(a_pEventInfo);
 	
-	AssertReady();
+//	AssertReady();
 	
 	m_vChannels.clear();
 	for (int iGroupCount = 0; iGroupCount < MAX_X742_GROUP_SIZE; iGroupCount++)
@@ -100,7 +111,8 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, CAEN_DGTZ_EventInfo_
 		}
 	}
 
-	PerformIntermediateAnalysis(a_pEventInfo);
+	PerformIntermediateAnalysis();
+	m_now = a_tp;
 
 	m_pRootTree->Fill();	
 }
@@ -132,18 +144,15 @@ EventHandler::~EventHandler()
 	m_pRootTree->Write();
 }
 
-void EventHandler::PerformIntermediateAnalysis(CAEN_DGTZ_EventInfo_t* a_pEventInfo)
+void EventHandler::PerformIntermediateAnalysis()
 {
-	m_queue.push(std::pair<int, std::vector<std::vector<float> > >(a_pEventInfo->TriggerTimeTag, m_vChannels)) ;
+	m_pSignalAnalyzer->Analyze(high_resolution_clock::now(), m_vChannels);
 }
 
+/*
 void EventHandler::MainAnalysisThreadFunc(EventHandler* a_pEventHandler)
 {
-	SignalAnalyzer sigAnalyzer(Configuration::GetSamplingFreqGHz(), Configuration::GetVoltMin(), 
-		Configuration::GetVoltMax(), Configuration::GetDigitizerResolution(), Configuration::GetPulseThresholdVolts(), 
-		Configuration::GetEdgeThresholdVolts(), Configuration::GetExpectedPulseWidthNs(), 
-		Configuration::GetMinEdgeSeparationNs(), Configuration::GetMaxEdgeJitterNs(), 
-		Configuration::GetMaxAmplitudeJitterVolts());
+	static int iEventNum = 0;
 
 	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
 	TApplication* pApplication = new TApplication("app",0, 0);
@@ -156,18 +165,27 @@ void EventHandler::MainAnalysisThreadFunc(EventHandler* a_pEventHandler)
 	bool bDone = false;
 	while(!bDone)
 	{
-		printf("queue size: %d, ", a_pEventHandler->m_queue.size());
+//		printf("queue size: %d, ", a_pEventHandler->m_queue.size());
 		auto pair = a_pEventHandler->m_queue.pop();
 		int iTimeStamp = pair.first;
 
 		std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-		plt.PlotRanges(pair.second, ranges, std::string("Event Time Stamp ") + std::to_string(iTimeStamp)); 
+//		plt.PlotRanges(pair.second, ranges, std::string("Event Time Stamp ") + std::to_string(iTimeStamp)); 
 		std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
-		printf("duration: %d\n", duration);
+//		printf("duration: %d\n", duration);
 
 		sigAnalyzer.FindOriginalPulseInChannelRange(pair.second, ranges["A"]);
-		plt.AddAnalysisMarkers(0, sigAnalyzer.GetAnalysisMarkers());
+		if(sigAnalyzer.GetAnalysisMarkers().m_vChannelsWithPulse.size() > 0)
+		{
+			printf("GOT pulse at event %d in channels:\n", iEventNum);
+			iEventNum ++;
+			for (auto& itrtr: sigAnalyzer.GetAnalysisMarkers().m_vChannelsWithPulse)
+			{
+				printf("\t%d\n", itrtr);
+			}
+		}
+		//plt.AddAnalysisMarkers(0, sigAnalyzer.GetAnalysisMarkers());
 		//open new block for lock_guard
 		{
 			std::lock_guard<std::mutex> lockGuard(a_pEventHandler->m_mutex);
@@ -176,10 +194,10 @@ void EventHandler::MainAnalysisThreadFunc(EventHandler* a_pEventHandler)
 		gSystem->ProcessEvents();
 	}
 }
+*/
 
 void EventHandler::Stop()
 {
-	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	m_bStopAnalysisThread = true;
-	m_analysisThread.join();
+	m_pRootTree->Write();
+	m_pSignalAnalyzer->Stop();
 }

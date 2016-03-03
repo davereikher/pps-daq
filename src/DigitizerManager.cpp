@@ -179,8 +179,8 @@ void DigitizerManager::InitAndConfigure()
 	ASSERT_SUCCESS(CAEN_DGTZ_MallocReadoutBuffer(m_iHandle,&m_pBuffer,&size), "Failed to allocate readout buffer");
 	ASSERT_SUCCESS(CAEN_DGTZ_AllocateEvent(m_iHandle, (void**)&m_pEvent), "Failed to allocate event");
 
-	m_eventHandler.SetEventInfoAddress(&m_eventInfo);
-	m_eventHandler.SetEventAddress(m_pEvent);
+/*	m_eventHandler.SetEventInfoAddress(&m_eventInfo);
+	m_eventHandler.SetEventAddress(m_pEvent);*/
 }
 
 void DigitizerManager::Start()
@@ -197,12 +197,13 @@ int DigitizerManager::Acquire()
 	ASSERT_SUCCESS(CAEN_DGTZ_ReadData(m_iHandle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, m_pBuffer,&bsize), "Failed to read data");
 
 	ASSERT_SUCCESS(CAEN_DGTZ_GetNumEvents(m_iHandle,m_pBuffer,bsize,&iNumEvents), "Failed to get number of events");
+	time_point<high_resolution_clock> arrivalTime;
 
 	for (uint32_t i=0; i < iNumEvents; i++) {
 		/* Get the Infos and pointer to the event */
 		ASSERT_SUCCESS(CAEN_DGTZ_GetEventInfo(m_iHandle,m_pBuffer,bsize,i,&m_eventInfo,&evtptr), "Failed to get event info");
 		ASSERT_SUCCESS(CAEN_DGTZ_DecodeEvent(m_iHandle, m_pBuffer, (void**)&m_pEvent), "Failed to decode event");
-		m_eventHandler.Handle(m_pEvent, &m_eventInfo);
+		m_eventHandler.Handle(m_pEvent, arrivalTime);
 	}
 
 	return iNumEvents;
