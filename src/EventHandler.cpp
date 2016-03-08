@@ -1,6 +1,5 @@
 #include <iostream>
 #include <tuple>
-#include <chrono>
 #include "EventHandler.h"
 #include "Exception.h"
 #include "linux/limits.h"
@@ -11,8 +10,7 @@
 #include "RangePlotter.h"
 #include "Configuration.h"
 #include "TApplication.h"
-
-using namespace std::chrono;
+#include "TROOT.h"
 
 #define TREE_NAME "DigitizerEvents"
 #define TREE_DESCRIPTION "Events from V1742 CAEN digitizer"
@@ -31,7 +29,8 @@ m_pSignalAnalyzer(new SignalAnalyzer(Configuration::GetSamplingFreqGHz(), Config
 		Configuration::GetMaxAmplitudeJitterVolts()))
 {
 	m_pRootTree->Branch("Event", &m_vChannels);
-	m_pRootTree->Branch("ArrivalTime", &m_now);
+	m_pRootTree->Branch("ArrivalTimeMSB", &m_iNowMSB);
+	m_pRootTree->Branch("ArrivalTimeLSB", &m_iNowLSB);
 
 	m_pSignalAnalyzer->SetFlags(SignalAnalyzer::ETriggerTimingSupervisor);
 	m_pSignalAnalyzer->Start();
@@ -79,7 +78,7 @@ void EventHandler::PrintEventInfo(CAEN_DGTZ_EventInfo_t* p_eventInfo)
 	printf("Triger time stamp: %u\n\n", p_eventInfo->TriggerTimeTag);
 }
 
-void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, time_point<high_resolution_clock> a_tp)
+void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventTime)
 {
 
 	//PrintEventInfo(a_pEventInfo);
@@ -111,8 +110,13 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, time_point<high_reso
 		}
 	}
 
-	PerformIntermediateAnalysis();
-	m_now = a_tp;
+	PerformIntermediateAnalysis(a_eventTime);
+	//printf("%ld, now\t", (duration_cast<milliseconds>(a_tp.time_since_epoch()).count()));
+	m_iNowLSB = (unsigned int) (duration_cast<milliseconds>(a_eventTime).count()) & 0x00000000FFFFFFFF;
+	//printf("%ld, nowLSB\t", m_iNowLSB);
+//	m_iNowLSB = (unsigned int) (duration_cast<nanoseconds>(a_tp.time_since_epoch()).count());
+	m_iNowMSB = (unsigned int) (duration_cast<nanoseconds>(a_eventTime).count()) & 0xFFFFFFFF00000000 >> 32;
+	//printf("%ld, nowMSB\n", m_iNowMSB);
 
 	m_pRootTree->Fill();	
 }
@@ -144,9 +148,9 @@ EventHandler::~EventHandler()
 	m_pRootTree->Write();
 }
 
-void EventHandler::PerformIntermediateAnalysis()
+void EventHandler::PerformIntermediateAnalysis(nanoseconds a_eventTime)
 {
-	m_pSignalAnalyzer->Analyze(high_resolution_clock::now(), m_vChannels);
+	m_pSignalAnalyzer->Analyze(a_eventTime, m_vChannels);
 }
 
 /*
@@ -198,6 +202,8 @@ void EventHandler::MainAnalysisThreadFunc(EventHandler* a_pEventHandler)
 
 void EventHandler::Stop()
 {
+	printf ("In %s, Stop called\n", __FUNCTION__);
 	m_pRootTree->Write();
+	m_pRootFile->Close();
 	m_pSignalAnalyzer->Stop();
 }

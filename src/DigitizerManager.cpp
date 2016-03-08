@@ -11,6 +11,7 @@
 #include "ProprietaryUtils.h"
 #include "Exception.h"
 #include "DigitizerManager.h"
+#include "TimeManager.h"
 
 #define UNIX_PATH_MAX    108
 #define CAEN_USE_DIGITIZERS
@@ -193,17 +194,19 @@ int DigitizerManager::Acquire()
 	char * evtptr = NULL;
 	uint32_t bsize;
 	uint32_t iNumEvents;
-	
+
 	ASSERT_SUCCESS(CAEN_DGTZ_ReadData(m_iHandle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, m_pBuffer,&bsize), "Failed to read data");
 
 	ASSERT_SUCCESS(CAEN_DGTZ_GetNumEvents(m_iHandle,m_pBuffer,bsize,&iNumEvents), "Failed to get number of events");
-	time_point<high_resolution_clock> arrivalTime;
 
 	for (uint32_t i=0; i < iNumEvents; i++) {
 		/* Get the Infos and pointer to the event */
 		ASSERT_SUCCESS(CAEN_DGTZ_GetEventInfo(m_iHandle,m_pBuffer,bsize,i,&m_eventInfo,&evtptr), "Failed to get event info");
+		//printf("Time tag: %08x, %u\n",m_eventInfo.TriggerTimeTag & 0x7FFFFFFF,  m_eventInfo.TriggerTimeTag & 0x7FFFFFFF);	
 		ASSERT_SUCCESS(CAEN_DGTZ_DecodeEvent(m_iHandle, m_pBuffer, (void**)&m_pEvent), "Failed to decode event");
-		m_eventHandler.Handle(m_pEvent, arrivalTime);
+		nanoseconds secs = TimeManager::ConvertPrecisionTime(m_eventInfo.TriggerTimeTag);
+		printf("TIME TAG: %d, in nano: %llu, in seconds: %f\n", m_eventInfo.TriggerTimeTag, secs.count(), secs.count() / (1e9));
+		m_eventHandler.Handle(m_pEvent, secs);
 	}
 
 	return iNumEvents;

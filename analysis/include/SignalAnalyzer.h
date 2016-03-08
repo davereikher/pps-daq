@@ -109,7 +109,7 @@ public:
 	std::tuple<Point, Point> FindLeadingEdgeAndPulseExtremum(std::vector<float>& a_samplesVector);
 	void FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels, std::vector<int>& a_vRange);
 	bool DoesRangeHaveSignal(Channels_t& a_vAllChannels, std::vector<int> a_vRange);
-	void Analyze(time_point<high_resolution_clock> a_tp, Channels_t& a_vChannels);
+	void Analyze(nanoseconds a_eventTimeFromStart, Channels_t& a_vChannels);
 
 	AnalysisMarkers& GetAnalysisMarkers();
 	void Start();
@@ -128,6 +128,6 @@ private:
 	bool m_bStopAnalysisThread;
 	std::thread m_analysisThread;
 	std::mutex m_mutex;
-	Queue<std::pair<time_point<high_resolution_clock>, Channels_t> > m_queue;
+	Queue<std::pair<nanoseconds, Channels_t> > m_queue;
 	std::unique_ptr<TriggerTimingSupervisor> m_pTriggerTimingSupervisor;
 };

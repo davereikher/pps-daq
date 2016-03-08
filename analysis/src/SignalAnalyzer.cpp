@@ -27,7 +27,7 @@ SignalAnalyzer::SignalAnalyzer(float a_fSamplingFreqGHz, float a_fVoltageMin, fl
 float a_fPulseThresholdVolts, float a_fEdgeThresholdVolts, float a_fExpectedPulseWidthNs, float a_fMinEdgeSeparationNs, float a_fMaxEdgeJitterNs, float a_fMaxAmplitudeJitterVolts):
 m_iFlags(0),
 m_bStopAnalysisThread(false),
-m_pTriggerTimingSupervisor(new TriggerTimingSupervisor(milliseconds(10000)))
+m_pTriggerTimingSupervisor(new TriggerTimingSupervisor(milliseconds(60000)))
 {
 	m_fVoltageStartVolts = a_fVoltageMin;
 	m_fVoltageDivisionVolts = (a_fVoltageMax - a_fVoltageMin)/(float)a_iDigitizerResolution;
@@ -412,7 +412,7 @@ void SignalAnalyzer::SetFlags(int a_iFlags)
 	m_iFlags = a_iFlags;
 }
 
-void SignalAnalyzer::Analyze(time_point<high_resolution_clock> a_tp, Channels_t& a_vChannels)
+void SignalAnalyzer::Analyze(nanoseconds a_eventTimeFromStart, Channels_t& a_vChannels)
 {	
-	m_queue.push(std::pair<time_point<high_resolution_clock>, std::vector<std::vector<float> > >(a_tp, a_vChannels));
+	m_queue.push(std::pair<nanoseconds, std::vector<std::vector<float> > >(a_eventTimeFromStart, a_vChannels));
 }

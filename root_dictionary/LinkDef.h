@@ -4,10 +4,9 @@
 #pragma link off all functions;
 #pragma link C++ nestedclasses;
 
+using namespace std;
+
 #include <vector>
-#include <chrono>
 
-#pragma link C++ class std::vector<std::vector<float> >+;
-#pragma link C++ class std::chrono::time_point<std::chrono::high_resolution_clock> +;
-
+#pragma link C++ class vector<vector<float> >+;
 #endif
