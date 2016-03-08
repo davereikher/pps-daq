@@ -28,7 +28,7 @@ nanoseconds TimeManager::ConvertPrecisionTime(int a_iPreciseDurationTicks)
 //TODO: implement a more elaborate time synchronization scheme by dividing the period of time from the current time point to the last one by the maximum precise duration and correcting by a_iPreciseDurationTicks
 	time_point<high_resolution_clock> tp = high_resolution_clock::now();
 
-	a_iPreciseDurationTicks &= 0x7FFFFFFF;
+//	a_iPreciseDurationTicks &= 0x7FFFFFFF;
 
 	if (m_iLastPreciseDurationTicks == -1)
 	{
@@ -38,7 +38,7 @@ nanoseconds TimeManager::ConvertPrecisionTime(int a_iPreciseDurationTicks)
 		return nanoseconds(0);
 	}
 
-	nanoseconds d = tp - m_lastTimePoint;
+/*	nanoseconds d = tp - m_lastTimePoint;
 	
 	if (d < m_maxTicks)
 	{
@@ -56,7 +56,7 @@ nanoseconds TimeManager::ConvertPrecisionTime(int a_iPreciseDurationTicks)
 		m_iLastPreciseDurationTicks = a_iPreciseDurationTicks;
 		return m_lastTimePoint - m_totalStartTime;
 	}
-
+*/
 	m_lastTimePoint = tp;
 
 	return m_lastTimePoint - m_totalStartTime;

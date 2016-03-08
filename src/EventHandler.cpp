@@ -112,10 +112,10 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventT
 
 	PerformIntermediateAnalysis(a_eventTime);
 	//printf("%ld, now\t", (duration_cast<milliseconds>(a_tp.time_since_epoch()).count()));
-	m_iNowLSB = (unsigned int) (duration_cast<milliseconds>(a_eventTime).count()) & 0x00000000FFFFFFFF;
+	m_iNowLSB = (unsigned int) (duration_cast<nanoseconds>(a_eventTime).count()) & 0x00000000FFFFFFFF;
 	//printf("%ld, nowLSB\t", m_iNowLSB);
 //	m_iNowLSB = (unsigned int) (duration_cast<nanoseconds>(a_tp.time_since_epoch()).count());
-	m_iNowMSB = (unsigned int) (duration_cast<nanoseconds>(a_eventTime).count()) & 0xFFFFFFFF00000000 >> 32;
+	m_iNowMSB = (unsigned int) ((duration_cast<nanoseconds>(a_eventTime).count()) & 0xFFFFFFFF00000000) >> 32;
 	//printf("%ld, nowMSB\n", m_iNowMSB);
 
 	m_pRootTree->Fill();	
