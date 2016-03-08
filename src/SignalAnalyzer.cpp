@@ -416,3 +416,4 @@ void SignalAnalyzer::Analyze(nanoseconds a_eventTimeFromStart, Channels_t& a_vCh
 {	
 	m_queue.push(std::pair<nanoseconds, std::vector<std::vector<float> > >(a_eventTimeFromStart, a_vChannels));
 }
+

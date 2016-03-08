@@ -7,9 +7,9 @@ DICTSRC = $(patsubst %, $(DICTDIR)/%.cxx, $(DICTNAME))
 DICTOBJ = $(patsubst %, $(OBJDIR)/%.o, $(DICTNAME))
 
 all:	$(BINDIR) $(OBJDIR) $(DICTOBJ)
-	@cd ./analysis; make -f make_lib
-	@make -f ./make_digitizer_acquisition
-	@cd ./analysis; make
+	@make -f make_digitizer_acquisition
+	@make -f make_analysis
+	@make -f make_step_through_events
 
 $(DICTSRC): $(DICTDIR)/LinkDef.h
 	@rootcint -f $@ -p $^
@@ -25,13 +25,17 @@ $(OBJDIR):
 	@mkdir $(OBJDIR)
 
 clean:
-	@make -f ./make_digitizer_acquisition clean
-	@cd ./analysis; make clean
+	-make -f make_digitizer_acquisition clean
+	-make -f make_analysis clean
+	-make -f make_step_through_events clean
 	-rm $(DICTDIR)/dict.cxx
 	-rm $(BINDIR)/dict_rdict.pcm
 
 
+
 clobber:	
-	@make -f ./make_digitizer_acquisition clobber
-	@cd ./analysis; make clobber
+	-make -f ./make_digitizer_acquisition clobber
+	-make -f ./make_analysis clobber
+	-make -f ./make_step_through_events clobber
+
 

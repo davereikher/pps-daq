@@ -9,28 +9,27 @@ LD = $(CXX)
 
 OBJDIR = obj
 SOURCEDIR = src
-BINDIR = ../bin
-LIBDIR = ./lib
-
+BINDIR = bin
+LIBDIR = lib
 
 CXXFLAGS = -D ROOT_FILE_OUT_DIR=\"$(ROOTFILEOUTDIR)\" $(MYFLAG) -fpermissive $(ROOTINCS) -Wall -Wno-return-type -Wunused -Wno-deprecated
-MYFLAG = -I./include -I../additional-packages/include -L../additional-packages/lib -fmax-errors=5
+MYFLAG = -I./include -I./additional-packages/include -L./additional-packages/lib -fmax-errors=5
 
 LDFLAGS = $(MYFLAG)
-LDLIBS = -lpthread -ljson -L$(LIBDIR) -lanalysis $(ROOTLIBS) 
+LDLIBS = -lpthread -ljson  $(ROOTLIBS)
 
-EXECS = $(BINDIR)/step_through_events
-_OBJECTS = step_through_events.o Configuration.o
+EXECS = $(BINDIR)/analysis
+_OBJECTS = analysis.o keyb.o CommonUtils.o Configuration.o TriggerTimingSupervisor.o SignalAnalyzer.o 
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx
 
-all : $(EXECS) $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR)
+all : $(EXECS)
 
-$(EXECS):  $(OBJECTS) $(LIBDIR)/libanalysis.a
+$(EXECS): $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR) $(OBJECTS)
 	@echo "=> linking $@"	
 	@echo $(LDFLAGS) 
-	$(LD) $(LDFLAGS) $(OBJECTS) ../obj/dict.o $(LDLIBS) -o $@
+	$(LD) $(LDFLAGS) $(OBJECTS) $(OBJDIR)/dict.o $(LDLIBS) -o $@
 
 $(OBJDIR):
 	@mkdir $@
@@ -40,9 +39,6 @@ $(BINDIR):
 
 $(ROOTOUTDIR):
 	@mkdir $@
-
-$(LIBDIR)/libanalysis.a:
-	make -f make_lib
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/%.C 
 	@echo "=> compiling $<"
@@ -67,8 +63,7 @@ $(OBJDIR)/%.o: $(SOURCEDIR)/%.c
 .PHONY : clean clobber
 clean :
 	@echo "=> removing object files"
-	-rm -f $(OBJDIR)/*.o 
-	-make -f make_lib clean
+	-rm $(OBJDIR)/*.o 
 
 clobber : clean
 	@echo "=> removing executables"
