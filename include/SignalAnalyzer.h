@@ -8,7 +8,10 @@
 #include <mutex>
 #include "Types.h"
 #include "Queue.h"
+#include "PanelSupervisor.h"
 #include "TriggerTimingSupervisor.h"
+#include "PanelSupervisor.h"
+
 
 #define NO_PULSE_EDGE INT_MAX
 #define NO_PULSE_MINIMUM_VALUE FLT_MAX
@@ -100,12 +103,12 @@ public:
 
 	enum AnalysisFlags
 	{
-		ETriggerTimingSupervisor = 1
+		EAsynchronous = 1,
+		ETriggerTimingSupervisor = 2,
+		EPanelSupervisor = 4
 	};
 public:
-	SignalAnalyzer(float a_fSamplingFreqGHz, float a_fVoltageMin, float a_fVoltageMax, int a_iDigitizerResolution,
-		float a_fPulseThresholdVolts, float a_fEdgeThresholdVolts, float a_fExpectedPulseWidthNs, 
-		float a_fMinEdgeSeparationNs, float a_fMaxEdgeJitterNs, float a_fMaxAmplitudeJitterVolts);
+	SignalAnalyzer();
 	std::tuple<Point, Point> FindLeadingEdgeAndPulseExtremum(std::vector<float>& a_samplesVector);
 	void FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels, std::vector<int>& a_vRange);
 	bool DoesRangeHaveSignal(Channels_t& a_vAllChannels, std::vector<int> a_vRange);
@@ -115,9 +118,11 @@ public:
 	void Start();
 	void Stop();
 	void SetFlags(int a_iFlags);
+	void Flush();
 
 private:
 	static void MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer);
+	void DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_channels);
 
 private:
 	AnalysisMarkers m_markers;
@@ -130,4 +135,5 @@ private:
 	std::mutex m_mutex;
 	Queue<std::pair<nanoseconds, Channels_t> > m_queue;
 	std::unique_ptr<TriggerTimingSupervisor> m_pTriggerTimingSupervisor;
+	std::vector<std::unique_ptr<PanelSupervisor> > m_vpPanelSupervisors;
 };

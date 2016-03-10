@@ -109,3 +109,8 @@ float Configuration::GetSamplingFreqGHz()
 {
 	return m_configuration["sampling-freq-ghz"].asFloat();
 }
+
+int Configuration::GetNumberOfEventsToDrawAfter()
+{
+	return m_configuration["number-of-events-to-draw-after"].asInt();
+}

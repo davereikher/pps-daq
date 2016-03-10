@@ -1,7 +1,9 @@
 #include <chrono>
+#include <unistd.h>
 #include "TSystem.h"
 #include "SignalAnalyzer.h"
 #include "TApplication.h"
+#include "Configuration.h"
 
 std::vector <std::vector<int> > gvPanelChannelRanges;
 static SignalAnalyzer::AnalysisMarkers m_markers;
@@ -11,7 +13,7 @@ using namespace std::chrono;
 
 /**
 Constructor.
-
+//TODO: move this comment somewhere else. It does not describe the params of the function anymore...
 @param a_fSamplingFreqGHz - sampling frequency in GHz.
 @param a_fVoltageMin - lowest voltage in the dynamic range of the digitizer.
 @param a_fVoltageMax - highest voltage in the dynamic range of the digitizer.
@@ -22,26 +24,31 @@ Constructor.
 @param a_fMinEdgeSeparationNs - the minimum amount of time the first detected pulse in a range of channels arrives before the following one in that same range for that pulse to be considered as the original one.
 @param a_fMaxEdgeJitterNs - the length of the window from the leading edge of the first pulse inside which pulses are considered to be "inseperable", that is, we cannot say just by the leading edge position which pulse comes first.
 @param a_fMaxAmplitudeJitterVolts - the distance (in pulse amplitude units) from the lowest value of the largest pulse within which another pulse, if found, is not weak enough to be dismissed as a signal, and therefore all signals the lowest points of which fall within this window will be considered as potential pulses.
+@param a_iDrawAftrNumOfevents - If any flags are set that tell SignalAnalyzer to plot anything, this is the number of events after which the canvases will be updated. Canvases should not be updated after every event because it's very slow.
 */
-SignalAnalyzer::SignalAnalyzer(float a_fSamplingFreqGHz, float a_fVoltageMin, float a_fVoltageMax, int a_iDigitizerResolution,
-float a_fPulseThresholdVolts, float a_fEdgeThresholdVolts, float a_fExpectedPulseWidthNs, float a_fMinEdgeSeparationNs, float a_fMaxEdgeJitterNs, float a_fMaxAmplitudeJitterVolts):
+SignalAnalyzer::SignalAnalyzer():
 m_iFlags(0),
 m_bStopAnalysisThread(false),
 m_pTriggerTimingSupervisor(new TriggerTimingSupervisor(milliseconds(60000)))
 {
-	m_fVoltageStartVolts = a_fVoltageMin;
-	m_fVoltageDivisionVolts = (a_fVoltageMax - a_fVoltageMin)/(float)a_iDigitizerResolution;
-	m_fTimeDivisionNs = 1.0/a_fSamplingFreqGHz;
+	m_fVoltageStartVolts = Configuration::GetVoltMin();
+	m_fVoltageDivisionVolts = (Configuration::GetVoltMax() - m_fVoltageStartVolts)/(float)Configuration::GetDigitizerResolution();
+	m_fTimeDivisionNs = 1.0/Configuration::GetSamplingFreqGHz();
 
-	m_markers.ConfigureVoltageConversion(a_fVoltageMin, a_fVoltageMax, a_iDigitizerResolution);
-	m_markers.ConfigureTimeConversion(a_fSamplingFreqGHz);
+	m_markers.ConfigureVoltageConversion(m_fVoltageStartVolts, Configuration::GetVoltMax(), Configuration::GetDigitizerResolution());
+	m_markers.ConfigureTimeConversion(Configuration::GetSamplingFreqGHz());
 	
-	m_markers.SetPulseThreshold(a_fPulseThresholdVolts);
-	m_markers.SetEdgeThreshold(a_fEdgeThresholdVolts);
-	m_markers.SetExpectedPulseWidth(a_fExpectedPulseWidthNs);
-	m_markers.SetMinEdgeSeparation(a_fMinEdgeSeparationNs);
-	m_markers.SetMaxEdgeJitter(a_fMaxEdgeJitterNs);
-	m_markers.SetMaxAmplitudeJitter(a_fMaxAmplitudeJitterVolts);
+	m_markers.SetPulseThreshold(Configuration::GetPulseThresholdVolts());
+	m_markers.SetEdgeThreshold(Configuration::GetEdgeThresholdVolts());
+	m_markers.SetExpectedPulseWidth(Configuration::GetExpectedPulseWidthNs());
+	m_markers.SetMinEdgeSeparation(Configuration::GetMinEdgeSeparationNs());
+	m_markers.SetMaxEdgeJitter(Configuration::GetMaxEdgeJitterNs());
+	m_markers.SetMaxAmplitudeJitter(Configuration::GetMaxAmplitudeJitterVolts());
+
+	for (auto it : Configuration::GetRanges())
+	{
+		m_vpPanelSupervisors.push_back(std::unique_ptr<PanelSupervisor>(new PanelSupervisor(it.first)));
+	}
 
 	printf("PULSE_THRESHOLD: %f, %d\n", m_markers.GetPulseThreshold().Continuous(), m_markers.GetPulseThreshold().Discrete());
 	printf("EDGE_THRESHOLD: %f, %d\n", m_markers.GetEdgeThreshold().Continuous(), m_markers.GetEdgeThreshold().Discrete());
@@ -49,22 +56,18 @@ m_pTriggerTimingSupervisor(new TriggerTimingSupervisor(milliseconds(60000)))
 	printf("MIN_EDGE_SEPARATION: %f, %d\n", m_markers.GetMinEdgeSeparation().Continuous(), m_markers.GetMinEdgeSeparation().Discrete());
 	printf("MAX_EDGE_JITTER: %f, %d\n", m_markers.GetMaxEdgeJitter().Continuous(), m_markers.GetMaxEdgeJitter().Discrete());
 	printf("MAX_AMPLITUDE_JITTER: %f, %d\n", m_markers.GetMaxAmplitudeJitter().Continuous(), m_markers.GetMaxAmplitudeJitter().Discrete());
-
-/*	if(a_fSamplingFreqGHz == 0)
-	{
-		m_fTimeDivision_ns = 1;
-	}
-	else
-	{
-		m_fTimeDivision_ns = 1.0/a_fSamplingFreqGHz;
-	}
-	m_fVoltageDivision_volts = (a_fVoltageMax - a_fVoltageMin)/float(0x00000FFF);
-	m_fVoltageStart_volts = a_fVoltageMin;*/
 }
 
 void SignalAnalyzer::Start()
 {
-	m_analysisThread = std::thread(std::bind(&MainAnalysisThreadFunc, this));
+	if(m_iFlags & EAsynchronous)
+	{
+		m_analysisThread = std::thread(std::bind(&MainAnalysisThreadFunc, this));
+	}
+	else
+	{
+		TApplication* pApplication = new TApplication("app",0, 0);
+	}	
 }
 
 /**
@@ -224,6 +227,14 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,
 	}
 }
 
+void SignalAnalyzer::Flush()
+{
+	if(m_iFlags & ETriggerTimingSupervisor)
+	{
+		m_pTriggerTimingSupervisor->Flush();
+	}
+}
+
 /**
 Returns whether a range has a pulse in one of the channels or not. This is good for panel efficiency measurements, for example.
 @param a_vRange - the range of channels defining a panel
@@ -369,34 +380,60 @@ void SignalAnalyzer::MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer)
 	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
 	TApplication* pApplication = new TApplication("app",0, 0);
 
-	int iFlags = a_pSignalAnalyzer->m_iFlags;
-
 	while(true)
 	{
-		//separate block for lock_guard
+		auto pair = a_pSignalAnalyzer->m_queue.pop();
 		{
 			std::lock_guard<std::mutex> lockGuard(a_pSignalAnalyzer->m_mutex);
+			//printf("stopAnalysisthread = %d\n", a_pSignalAnalyzer->m_bStopAnalysisThread);
 			if (a_pSignalAnalyzer->m_bStopAnalysisThread)
 			{
+			//	printf("breaking\n");
 				break;
 			}
 		}
-//		printf("queue size: %d, ", a_pEventHandler->m_queue.size());
-		auto pair = a_pSignalAnalyzer->m_queue.pop();
 
-		if (iFlags & AnalysisFlags::ETriggerTimingSupervisor)
-		{
-			a_pSignalAnalyzer->m_pTriggerTimingSupervisor->GotTrigger(pair.first);
-		}
+//		printf("AFTER RELEASE\n");
+
+		a_pSignalAnalyzer->DoAnalysis(pair.first, pair.second);
+
 		gSystem->ProcessEvents();
+	}
+}
+
+void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_channels)
+{
+	if (m_iFlags & AnalysisFlags::ETriggerTimingSupervisor)
+	{
+		m_pTriggerTimingSupervisor->GotTrigger(a_timeStamp);
+	}
+	if (m_iFlags & AnalysisFlags::EPanelSupervisor)
+	{
+		int i = 0;
+		for (auto it: Configuration::GetRanges())
+		{
+			FindOriginalPulseInChannelRange(a_channels, it.second);
+			m_vpPanelSupervisors[i]->GotEvent(a_timeStamp, m_markers.m_vChannelsWithPulse);
+			i++;
+		}
+		
 	}
 }
 
 void SignalAnalyzer::Stop()
 {
-	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	m_bStopAnalysisThread = true;
-	m_analysisThread.join();
+	if(m_iFlags & EAsynchronous)
+	{	//separate block for lock_guard
+		{	
+			std::lock_guard<std::mutex> lockGuard(m_mutex);
+			//printf("Setting\n");
+			m_bStopAnalysisThread = true;
+			m_queue.unlock();
+		}	
+		//printf("joining\n");
+		m_analysisThread.join();
+		//printf("after joining\n");
+	}
 }
 
 /**
@@ -414,6 +451,14 @@ void SignalAnalyzer::SetFlags(int a_iFlags)
 
 void SignalAnalyzer::Analyze(nanoseconds a_eventTimeFromStart, Channels_t& a_vChannels)
 {	
-	m_queue.push(std::pair<nanoseconds, std::vector<std::vector<float> > >(a_eventTimeFromStart, a_vChannels));
+	if(m_iFlags & EAsynchronous)
+	{
+		m_queue.push(std::pair<nanoseconds, std::vector<std::vector<float> > >(a_eventTimeFromStart, a_vChannels));
+	}
+	else
+	{
+		//printf("synchronous\n");
+		DoAnalysis(a_eventTimeFromStart, a_vChannels);
+	}
 }
 

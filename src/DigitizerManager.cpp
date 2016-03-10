@@ -205,7 +205,7 @@ int DigitizerManager::Acquire()
 		//printf("Time tag: %08x, %u\n",m_eventInfo.TriggerTimeTag & 0x7FFFFFFF,  m_eventInfo.TriggerTimeTag & 0x7FFFFFFF);	
 		ASSERT_SUCCESS(CAEN_DGTZ_DecodeEvent(m_iHandle, m_pBuffer, (void**)&m_pEvent), "Failed to decode event");
 		nanoseconds secs = TimeManager::ConvertPrecisionTime(m_eventInfo.TriggerTimeTag);
-		printf("TIME TAG: %d, in nano: %llu, in seconds: %f\n", m_eventInfo.TriggerTimeTag, secs.count(), secs.count() / (1e9));
+//		printf("TIME TAG: %d, in nano: %llu, in seconds: %f\n", m_eventInfo.TriggerTimeTag, secs.count(), secs.count() / (1e9));
 		m_eventHandler.Handle(m_pEvent, secs);
 	}
 

@@ -22,17 +22,13 @@ m_pRootFile(new TFile(GenerateFileName(a_sRootOutFolder).c_str(), "RECREATE","",
 m_pRootTree(new TTree(TREE_NAME, TREE_DESCRIPTION)),
 m_bEventAddrSet(false),
 m_bEventInfoSet(false),
-m_pSignalAnalyzer(new SignalAnalyzer(Configuration::GetSamplingFreqGHz(), Configuration::GetVoltMin(), 
-		Configuration::GetVoltMax(), Configuration::GetDigitizerResolution(), Configuration::GetPulseThresholdVolts(), 
-		Configuration::GetEdgeThresholdVolts(), Configuration::GetExpectedPulseWidthNs(), 
-		Configuration::GetMinEdgeSeparationNs(), Configuration::GetMaxEdgeJitterNs(), 
-		Configuration::GetMaxAmplitudeJitterVolts()))
+m_pSignalAnalyzer(new SignalAnalyzer())
 {
 	m_pRootTree->Branch("Event", &m_vChannels);
 	m_pRootTree->Branch("ArrivalTimeMSB", &m_iNowMSB);
 	m_pRootTree->Branch("ArrivalTimeLSB", &m_iNowLSB);
 
-	m_pSignalAnalyzer->SetFlags(SignalAnalyzer::ETriggerTimingSupervisor);
+	m_pSignalAnalyzer->SetFlags(SignalAnalyzer::ETriggerTimingSupervisor | SignalAnalyzer::EAsynchronous);
 	m_pSignalAnalyzer->Start();
 }
 
@@ -112,10 +108,10 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventT
 
 	PerformIntermediateAnalysis(a_eventTime);
 	//printf("%ld, now\t", (duration_cast<milliseconds>(a_tp.time_since_epoch()).count()));
-	m_iNowLSB = (unsigned int) (duration_cast<nanoseconds>(a_eventTime).count()) & 0x00000000FFFFFFFF;
+	m_iNowLSB = (unsigned int) ((duration_cast<nanoseconds>(a_eventTime).count()) & 0x00000000FFFFFFFF);
 	//printf("%ld, nowLSB\t", m_iNowLSB);
 //	m_iNowLSB = (unsigned int) (duration_cast<nanoseconds>(a_tp.time_since_epoch()).count());
-	m_iNowMSB = (unsigned int) ((duration_cast<nanoseconds>(a_eventTime).count()) & 0xFFFFFFFF00000000) >> 32;
+	m_iNowMSB = (unsigned int) (((duration_cast<nanoseconds>(a_eventTime).count()) & 0xFFFFFFFF00000000) >> 32);
 	//printf("%ld, nowMSB\n", m_iNowMSB);
 
 	m_pRootTree->Fill();	
@@ -145,7 +141,6 @@ std::string EventHandler::GenerateFileName(std::string a_sRootOutFolder)
 
 EventHandler::~EventHandler()
 {
-	m_pRootTree->Write();
 }
 
 void EventHandler::PerformIntermediateAnalysis(nanoseconds a_eventTime)
@@ -202,8 +197,9 @@ void EventHandler::MainAnalysisThreadFunc(EventHandler* a_pEventHandler)
 
 void EventHandler::Stop()
 {
-	printf ("In %s, Stop called\n", __FUNCTION__);
 	m_pRootTree->Write();
 	m_pRootFile->Close();
+//	printf("Stoppin\n");
 	m_pSignalAnalyzer->Stop();
+//	printf("After stoppin\n");
 }

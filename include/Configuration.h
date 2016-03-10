@@ -17,6 +17,7 @@ public:
 	static float GetMaxEdgeJitterNs();
 	static float GetMaxAmplitudeJitterVolts();
 	static float GetSamplingFreqGHz();
+	static int GetNumberOfEventsToDrawAfter();
 
 private:
 	static bool m_bInitialized;

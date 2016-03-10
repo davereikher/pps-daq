@@ -20,7 +20,7 @@ ROOTOUTDIR = root
 LIBDIR = lib
 
 EXECS = $(BINDIR)/v1742-readout
-_OBJECTS = keyb.o ProprietaryUtils.o EventHandler.o Exception.o dict.o DigitizerManager.o main.o Configuration.o TriggerTimingSupervisor.o SignalAnalyzer.o TimeManager.o
+_OBJECTS = keyb.o ProprietaryUtils.o EventHandler.o Exception.o dict.o DigitizerManager.o main.o Configuration.o TriggerTimingSupervisor.o PanelSupervisor.o SignalAnalyzer.o TimeManager.o
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS)) 
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx

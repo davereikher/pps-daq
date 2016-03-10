@@ -58,10 +58,18 @@ int main(int argc, char** argv)
 			if (c == 1) break;
 		}
 		eventHandler.Stop();
+
+		std::cout << "Press 'q' again to quit..."<< std::endl;
+		fflush(stdout);
+
+		do
+		{
+			c = getch();
+		}while (c != 'q');
 	}
 	catch(ExceptionBase& ex)
 	{
-		std::cout << "CAUGHT EXCEPTION. Details:\t" << ex.What() << std::endl <<"Exiting..." << std::endl;
+		std::cout << "CAUGHT EXCEPTION. Details:\t" << ex.What() << std::endl << "Exiting..." << std::endl;
 		return -1;
 	}
 

@@ -31,7 +31,7 @@ private:
 
 private:
 	std::unique_ptr<TFile> m_pRootFile;
-	std::unique_ptr<TTree> m_pRootTree;
+	TTree* m_pRootTree;
 	//TODO: typedef this complex nested template
 	std::vector<std::vector<float> > m_vChannels;
 	unsigned int m_iNowMSB;

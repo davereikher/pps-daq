@@ -11,22 +11,24 @@ OBJDIR = obj
 SOURCEDIR = src
 BINDIR = bin
 LIBDIR = lib
+INCDIR = include
 
 CXXFLAGS = -D ROOT_FILE_OUT_DIR=\"$(ROOTFILEOUTDIR)\" $(MYFLAG) -fpermissive $(ROOTINCS) -Wall -Wno-return-type -Wunused -Wno-deprecated
-MYFLAG = -I./include -I./additional-packages/include -L./additional-packages/lib -fmax-errors=5
+MYFLAG = -I$(INCDIR) -I./additional-packages/include -L./additional-packages/lib -fmax-errors=5
 
 LDFLAGS = $(MYFLAG)
 LDLIBS = -lpthread -ljson  $(ROOTLIBS)
 
 EXECS = $(BINDIR)/analysis
-_OBJECTS = analysis.o keyb.o CommonUtils.o Configuration.o TriggerTimingSupervisor.o SignalAnalyzer.o 
+_OBJECTS = analysis.o keyb.o CommonUtils.o Configuration.o TriggerTimingSupervisor.o PanelSupervisor.o SignalAnalyzer.o 
+INC_DEPS = $(INCDIR)/Queue.h
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx
 
 all : $(EXECS)
 
-$(EXECS): $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR) $(OBJECTS)
+$(EXECS): $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR) $(OBJECTS) $(INC_DEPS)
 	@echo "=> linking $@"	
 	@echo $(LDFLAGS) 
 	$(LD) $(LDFLAGS) $(OBJECTS) $(OBJDIR)/dict.o $(LDLIBS) -o $@

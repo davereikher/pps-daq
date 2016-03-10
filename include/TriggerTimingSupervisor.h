@@ -3,8 +3,6 @@
 #include <chrono>
 #include "TCanvas.h"
 #include "TGraph.h"
-#include "TMultiGraph.h"
-#include "TLegend.h"
 #include "TH1.h"
 
 using namespace std::chrono;
@@ -17,14 +15,17 @@ public:
 	void InitGraphics();
 	void AddDurationToHistogram(nanoseconds a_eventTime);
 	void AddPointToRatePlot(nanoseconds a_eventTime);
+	void Flush();
 
 private:
 	std::unique_ptr<TCanvas> m_pCanvas;
-	std::unique_ptr<TGraph> m_pRateGraph;
-	std::unique_ptr<TH1> m_pTimingHist;
+	TGraph* m_pRateGraph;
+	TH1* m_pTimingHist;
 	milliseconds m_periodDuration;
 	nanoseconds m_totalStartTime;
 	nanoseconds m_periodStartTime;
 	nanoseconds m_lastTriggerTime;
 	int m_iTriggersAccumulator;
+	int m_iDrawAfterNumOfEvents;
+	int m_iNumOfEventsAccumulator;
 };

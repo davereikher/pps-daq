@@ -29,17 +29,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
 #include <mutex>
 #include <condition_variable>
 
+#define MAX_QUEUE_SIZE 100
+
 template <typename T>
 class Queue
 {
  public:
+	Queue():
+	m_bShouldLock(true)
+	{}
 
   T pop() 
   {
     std::unique_lock<std::mutex> mlock(mutex_);
     while (queue_.empty())
     {
-      cond_.wait(mlock);
+	bool bShouldLock;
+	bool_mutex_.lock();
+	bShouldLock = m_bShouldLock;
+	bool_mutex_.unlock();
+	if(!bShouldLock)
+	{
+	//	printf("Returning\n");
+		return T();
+	}
+	if(bShouldLock)
+	{
+	      cond_pop_.wait(mlock);
+	}
+	//printf("released\n");
     }
     auto val = queue_.front();
     queue_.pop();
@@ -51,7 +69,18 @@ class Queue
     std::unique_lock<std::mutex> mlock(mutex_);
     while (queue_.empty())
     {
-      cond_.wait(mlock);
+	bool bShouldLock;
+	bool_mutex_.lock();
+	bShouldLock = m_bShouldLock;
+	bool_mutex_.unlock();
+	if(!bShouldLock)
+	{
+		return T();
+	}
+/*	if(bShouldLock)
+	{*/
+	      cond_pop_.wait(mlock);
+//	}
     }
     item = queue_.front();
     queue_.pop();
@@ -62,7 +91,7 @@ class Queue
     std::unique_lock<std::mutex> mlock(mutex_);
     queue_.push(item);
     mlock.unlock();
-    cond_.notify_one();
+    cond_pop_.notify_one();
   }
 
   int size()
@@ -71,16 +100,26 @@ class Queue
     std::unique_lock<std::mutex> mlock(mutex_);
     size = queue_.size();
     mlock.unlock();
-    cond_.notify_one();
     return size;
   }
-  Queue()=default;
+
+  int unlock()
+  {
+     //printf("releasing\n");
+	bool_mutex_.lock();
+	m_bShouldLock = false;
+	bool_mutex_.unlock();
+	cond_pop_.notify_one();
+  }
+//  Queue()=default;
   Queue(const Queue&) = delete;            // disable copying
   Queue& operator=(const Queue&) = delete; // disable assignment
   
  private:
   std::queue<T> queue_;
   std::mutex mutex_;
-  std::condition_variable cond_;
+  std::condition_variable cond_pop_;
+ std::mutex bool_mutex_;
+  bool m_bShouldLock;
 };
 
