@@ -30,19 +30,22 @@ void Usage(char* a_pProcName)
 	std::vector<float> vec = CommonUtils::GenerateTimeSequence(5);
 }
 
-void ShowProgress(float progress)
+void ShowProgress(int a_iCurrentEntry, int a_iTotalEntries)
 {
-	static int lastProgress = -1;
-	if((int)progress == lastProgress)
+	static float lastPos = -1;
+//	printf("progress: %d, lastProgress: %d\n", progress, lastProgress);
+
+	float progress = ((float)a_iCurrentEntry)/a_iTotalEntries;
+	int barWidth = 70;
+	int pos = barWidth * progress;
+
+	if(lastPos == pos)
 	{
 		return;
 	}
-
-	lastProgress =(int)progress;
-	int barWidth = 70;
+	lastPos = pos;
 
 	std::cout << "[";
-	int pos = barWidth * progress;
 	for (int i = 0; i < barWidth; ++i) 
 	{
 		if (i < pos) 
@@ -102,14 +105,14 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < iNumOfEntries; i ++)
 	{
 		Logger::Instance().NewEntry(i);
-		//ShowProgress(i/((float)iNumOfEntries));
+		ShowProgress(i, iNumOfEntries);
 		
 		tree->GetEntry(i);
 
 		int64_t iTimeStampNano = (((uint64_t)iArrivalTimeMSB) << 32) | iArrivalTimeLSB;
 		//printf("MSB: %u, LSB: %u, time stamp: %llu\n", iArrivalTimeMSB, iArrivalTimeLSB, iTimeStampNano);
 		sigAnalyzer.Analyze(nanoseconds(iTimeStampNano), *vChannels);
-		c=getch();
+//		c=getch();
 		c = checkCommand();
 		if (c == 1) break;
 

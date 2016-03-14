@@ -1,0 +1,18 @@
+{
+"panel-ranges":
+	{
+	"A":[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12]
+	},
+"volt-min" : -0.5,
+"volt-max" : 0.5,
+"sampling-freq-ghz" : 2.5,
+"pulse-threshold-volts" : -0.11,
+"edge-threshold-volts": -0.09,
+"expected-pulse-width-ns": 5,
+"min-edge-separation-ns": 5,
+"max-edge-jitter-ns": 2,
+"max-amplitude-jitter-volts": 0.04,
+"digitizer-resolution-bits": 4095,
+"number-of-events-to-draw-after": 10000,
+"trigger-rate-averaging-duration-seconds": 60
+}
