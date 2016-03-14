@@ -1,9 +1,19 @@
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include "Configuration.h"
 
-Json::Value Configuration::m_configuration;
-bool Configuration::m_bInitialized = false;
+Configuration Configuration::m_instance;
+
+Configuration::Configuration():
+m_bInitialized(false)
+{
+}
+
+Configuration& Configuration::Instance()
+{
+	return m_instance;
+}
 
 void Configuration::LoadConfiguration(const char* a_pFilename) {
 	//TODO: check exceptions
@@ -113,4 +123,16 @@ float Configuration::GetSamplingFreqGHz()
 int Configuration::GetNumberOfEventsToDrawAfter()
 {
 	return m_configuration["number-of-events-to-draw-after"].asInt();
+}
+
+seconds Configuration::GetTriggerRateAveragingDurationSecs()
+{
+	return seconds(m_configuration["trigger-rate-averaging-duration-seconds"].asInt());
+}
+
+std::string Configuration::GetDump()
+{
+	std::stringstream stream;
+	stream << m_configuration;
+	return std::string("\nConfiguration Dump \n-------------------------------------------\n") + stream.str() + "\n\n";
 }

@@ -19,7 +19,7 @@ class TimerHandler: public TObject
 */	
 void Usage(char* a_pProcName)
 {
-	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to root file>" << std::endl;
+	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to root file> <start index>" << std::endl;
 }
 
 
@@ -28,13 +28,13 @@ step through the events in the root file. For each event, plot all active channe
 */
 int main(int argc, char* argv[])
 {
-	if (argc < 2)
+	if (argc < 3)
 	{
 		Usage(argv[0]);
 		exit(-1);
 	}
 
-	Configuration::LoadConfiguration(argv[1]);
+	Configuration::Instance().LoadConfiguration(argv[1]);
 
 	std::string sRootFileName(argv[2]);
 //	printf("%d digires\n\n", Configuration::GetDigitizerResolution());
@@ -44,29 +44,27 @@ int main(int argc, char* argv[])
 	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
 	TApplication* pApplication = new TApplication("app",&argc,argv);
 //	RangePlotter plt(2.5, -0.5, 0.5);
-	RangePlotter plt(Configuration::GetSamplingFreqGHz(), Configuration::GetVoltMin(), Configuration::GetVoltMax(),
-		Configuration::GetDigitizerResolution());
+	RangePlotter plt(Configuration::Instance().GetSamplingFreqGHz(), Configuration::Instance().GetVoltMin(), Configuration::Instance().GetVoltMax(),
+		Configuration::Instance().GetDigitizerResolution());
 
 	
-	Range_t ranges = Configuration::GetRanges();
+	Range_t ranges = Configuration::Instance().GetRanges();
 
 	Channels_t * channels = NULL;
 
 	TFile f(sRootFileName.c_str());
 	TTree* tree = (TTree*)f.Get("DigitizerEvents");
-	unsigned int iTimeStamp = 0;
-	tree->SetBranchAddress("TriggerTimeTag", &iTimeStamp);
 	tree->SetBranchAddress("Event", &channels);
 
 	int iNumOfEntries = tree->GetEntries();
+	int iStartingIndex = std::stoi(argv[3]);
 	//TimerHandler timerHandler;
 	//TTimer* timer = new TTimer(&timerHandler, 250, 0);
-	for (int i = 0; i < iNumOfEntries; i ++)
+	for (int i = iStartingIndex; i < iNumOfEntries; i ++)
 	{
 		tree->GetEntry(i);
 
-		printf("Time stamp is %d\n", iTimeStamp);
-		plt.PlotRanges(*channels, ranges, std::string("Event Time Stamp ") + std::to_string(iTimeStamp)); 
+		plt.PlotRanges(*channels, ranges, std::string("Event  ") + std::to_string(i)); 
 		sigAnalyzer.FindOriginalPulseInChannelRange(*channels, ranges["A"]);
 		plt.AddAnalysisMarkers(0, sigAnalyzer.GetAnalysisMarkers());
 		plt.Wait();

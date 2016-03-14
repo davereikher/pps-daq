@@ -5,7 +5,7 @@ TriggerTimingSupervisor::TriggerTimingSupervisor(milliseconds a_periodDuration):
 m_periodDuration(a_periodDuration),
 m_lastTriggerTime(0),
 m_iTriggersAccumulator(0),
-m_iDrawAfterNumOfEvents(Configuration::GetNumberOfEventsToDrawAfter()),
+m_iDrawAfterNumOfEvents(Configuration::Instance().GetNumberOfEventsToDrawAfter()),
 m_iNumOfEventsAccumulator(0)
 {}
 
@@ -51,7 +51,7 @@ void TriggerTimingSupervisor::InitGraphics()
 	m_pRateGraph->SetMarkerSize(1);
 	m_pRateGraph->SetMarkerColor(4);
 	m_pRateGraph->SetMarkerStyle(21);
-	m_pTimingHist = new TH1F("TriggerTimingHist", "Duration Between Subsequent Triggers", 1000, 1, 5000);
+	m_pTimingHist = new TH1F("TriggerTimingHist", "Duration Between Subsequent Triggers", 1000, 1, 500);
 	m_pCanvas->Divide(1,2);
 }
 

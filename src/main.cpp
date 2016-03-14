@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 	{
 		printf("size of int64: %d, %d", sizeof(uint64_t), sizeof(int64_t));
 		int c = 0;
-		Configuration::LoadConfiguration(argv[1]);
+		Configuration::Instance().LoadConfiguration(argv[1]);
 		EventHandler eventHandler(argv[2]);
 		DigitizerManager digitizerManager(eventHandler);
 		digitizerManager.InitAndConfigure();

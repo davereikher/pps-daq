@@ -4,6 +4,7 @@
 #include "SignalAnalyzer.h"
 #include "TApplication.h"
 #include "Configuration.h"
+#include "Logger.h"
 
 std::vector <std::vector<int> > gvPanelChannelRanges;
 static SignalAnalyzer::AnalysisMarkers m_markers;
@@ -29,23 +30,23 @@ Constructor.
 SignalAnalyzer::SignalAnalyzer():
 m_iFlags(0),
 m_bStopAnalysisThread(false),
-m_pTriggerTimingSupervisor(new TriggerTimingSupervisor(milliseconds(60000)))
+m_pTriggerTimingSupervisor(new TriggerTimingSupervisor(milliseconds(Configuration::Instance().GetTriggerRateAveragingDurationSecs())))
 {
-	m_fVoltageStartVolts = Configuration::GetVoltMin();
-	m_fVoltageDivisionVolts = (Configuration::GetVoltMax() - m_fVoltageStartVolts)/(float)Configuration::GetDigitizerResolution();
-	m_fTimeDivisionNs = 1.0/Configuration::GetSamplingFreqGHz();
+	m_fVoltageStartVolts = Configuration::Instance().GetVoltMin();
+	m_fVoltageDivisionVolts = (Configuration::Instance().GetVoltMax() - m_fVoltageStartVolts)/(float)Configuration::Instance().GetDigitizerResolution();
+	m_fTimeDivisionNs = 1.0/Configuration::Instance().GetSamplingFreqGHz();
 
-	m_markers.ConfigureVoltageConversion(m_fVoltageStartVolts, Configuration::GetVoltMax(), Configuration::GetDigitizerResolution());
-	m_markers.ConfigureTimeConversion(Configuration::GetSamplingFreqGHz());
+	m_markers.ConfigureVoltageConversion(m_fVoltageStartVolts, Configuration::Instance().GetVoltMax(), Configuration::Instance().GetDigitizerResolution());
+	m_markers.ConfigureTimeConversion(Configuration::Instance().GetSamplingFreqGHz());
 	
-	m_markers.SetPulseThreshold(Configuration::GetPulseThresholdVolts());
-	m_markers.SetEdgeThreshold(Configuration::GetEdgeThresholdVolts());
-	m_markers.SetExpectedPulseWidth(Configuration::GetExpectedPulseWidthNs());
-	m_markers.SetMinEdgeSeparation(Configuration::GetMinEdgeSeparationNs());
-	m_markers.SetMaxEdgeJitter(Configuration::GetMaxEdgeJitterNs());
-	m_markers.SetMaxAmplitudeJitter(Configuration::GetMaxAmplitudeJitterVolts());
+	m_markers.SetPulseThreshold(Configuration::Instance().GetPulseThresholdVolts());
+	m_markers.SetEdgeThreshold(Configuration::Instance().GetEdgeThresholdVolts());
+	m_markers.SetExpectedPulseWidth(Configuration::Instance().GetExpectedPulseWidthNs());
+	m_markers.SetMinEdgeSeparation(Configuration::Instance().GetMinEdgeSeparationNs());
+	m_markers.SetMaxEdgeJitter(Configuration::Instance().GetMaxEdgeJitterNs());
+	m_markers.SetMaxAmplitudeJitter(Configuration::Instance().GetMaxAmplitudeJitterVolts());
 
-	for (auto it : Configuration::GetRanges())
+	for (auto it : Configuration::Instance().GetRanges())
 	{
 		m_vpPanelSupervisors.push_back(std::unique_ptr<PanelSupervisor>(new PanelSupervisor(it.first)));
 	}
@@ -184,7 +185,9 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,
 	if ((iNextToEarliestLeadingEdge - iEarliestLeadingEdge) >= m_markers.GetMinEdgeSeparation().Discrete())
 	{
 		m_markers.m_vChannelsWithPulse.push_back(a_vRange[iEarliestLeadingEdgeIndex]);
-		printf("LEADING PULSE FOUND\n");
+//		printf("LEADING PULSE FOUND\n");
+		Logger().Instance().SetWriteCurrentMessage();
+		Logger::Instance().AddMessage(std::string("Leading pulse, channel ") + std::to_string(a_vRange[iEarliestLeadingEdgeIndex]));
 		return;
 	}
 	else if (iEarliestLeadingEdge == INT_MAX)
@@ -397,7 +400,7 @@ void SignalAnalyzer::MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer)
 
 		a_pSignalAnalyzer->DoAnalysis(pair.first, pair.second);
 
-		gSystem->ProcessEvents();
+//		gSystem->ProcessEvents();
 	}
 }
 
@@ -410,7 +413,7 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_channels)
 	if (m_iFlags & AnalysisFlags::EPanelSupervisor)
 	{
 		int i = 0;
-		for (auto it: Configuration::GetRanges())
+		for (auto it: Configuration::Instance().GetRanges())
 		{
 			FindOriginalPulseInChannelRange(a_channels, it.second);
 			m_vpPanelSupervisors[i]->GotEvent(a_timeStamp, m_markers.m_vChannelsWithPulse);
@@ -418,6 +421,8 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_channels)
 		}
 		
 	}
+
+	gSystem->ProcessEvents();
 }
 
 void SignalAnalyzer::Stop()

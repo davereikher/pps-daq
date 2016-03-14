@@ -1,25 +1,34 @@
 #pragma once
 
+#include <chrono>
 #include "json/json.h"
+
+using namespace std::chrono;
 
 class Configuration
 {
 public:
-	static void LoadConfiguration(const char* a_pFilename);
-	static std::map<std::string, std::vector<int> > GetRanges();
-	static float GetPulseThresholdVolts();
-	static float GetEdgeThresholdVolts();
-	static float GetVoltMin();
-	static float GetVoltMax();
-	static int GetDigitizerResolution();
-	static float GetExpectedPulseWidthNs();
-	static float GetMinEdgeSeparationNs();
-	static float GetMaxEdgeJitterNs();
-	static float GetMaxAmplitudeJitterVolts();
-	static float GetSamplingFreqGHz();
-	static int GetNumberOfEventsToDrawAfter();
+	static Configuration& Instance();
+	Configuration();
+	void LoadConfiguration(const char* a_pFilename);
+	std::map<std::string, std::vector<int> > GetRanges();
+	float GetPulseThresholdVolts();
+	float GetEdgeThresholdVolts();
+	float GetVoltMin();
+	float GetVoltMax();
+	int GetDigitizerResolution();
+	float GetExpectedPulseWidthNs();
+	float GetMinEdgeSeparationNs();
+	float GetMaxEdgeJitterNs();
+	float GetMaxAmplitudeJitterVolts();
+	float GetSamplingFreqGHz();
+	int GetNumberOfEventsToDrawAfter();
+	seconds GetTriggerRateAveragingDurationSecs();
+
+	std::string GetDump();
 
 private:
-	static bool m_bInitialized;
-	static Json::Value m_configuration;
+	bool m_bInitialized;
+	Json::Value m_configuration;
+	static Configuration m_instance;
 };
