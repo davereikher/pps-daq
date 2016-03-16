@@ -150,7 +150,7 @@ The result, a vector of channels containing the original pulse (ideally there wi
 @param a_vAllChannels - a vector of all 32 channels, where each item is a vector of samples from that channel.
 @param a_vRange - a vector of indices of the interesting channels in the first parameter.
 */
-void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels, std::vector<int>& a_vRange)
+void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,  std::vector<int>& a_vRange)
 {
 
 	//Get all channels in the provided range, find the leading edge and minimum value of the pulses and store the result in a vector of tuples. Also, find the earliest and next-to-earliest leading edge in the channels in the range.
@@ -236,6 +236,97 @@ void SignalAnalyzer::Flush()
 	{
 		m_pTriggerTimingSupervisor->Flush();
 	}
+}
+
+/*
+The purpose of this function is to compensate for small, constant (between event to event) DC offsets in the channels. These offsets can come, for example, from small differences in the resistances inside the attenuators used to connect cables to the digitizer. After normalization, all lines should have 0 DC offset.
+*/
+Channels_t SignalAnalyzer::NormalizeChannels(Channels_t& a_vChannels)
+{
+	int i = 0;
+	Channels_t vNormalizedChannels;
+	float fVoltMin = Configuration::Instance().GetVoltMin();
+	float fVoltMax = Configuration::Instance().GetVoltMax();
+	float iDigitizerRes = (float)Configuration::Instance().GetDigitizerResolution();
+	float fZeroLocation = iDigitizerRes * ((-1) * fVoltMin / (fVoltMax - fVoltMin) );
+	for (auto chan: a_vChannels)
+	{
+		float fCorrection = fZeroLocation - FindOffsetVoltage(chan, i);
+		std::vector<float> vChannel;
+		for (auto sample: chan)
+		{
+			vChannel.push_back(sample + fCorrection);
+		}
+		vNormalizedChannels.push_back(vChannel);
+		i++;
+	}
+
+	return vNormalizedChannels;
+}
+
+/*
+Find the zero voltage of a channel in an event by looking for a straight line - one that doesn't change by more than idle-fluctuations-amplitude-volts configuration field, of length idle-line-duration-fraction of the total length of the acquisition window.
+Operation principle:
+	- Divide the samples vector into sections of samples of length idle-line-duration-fraction of the entire vector length, suppose there are N such sections
+	- For each section in the N sections, calculate the highest and lowest values in this section.
+		- If the difference between those values (the amplitude) is smaller than idle-fluctuation-amplitude-volts, return the average value of samples in that section	
+
+@param a_vSamples - a vector of all samples from a single channel
+@return the discretized (that is, in the raw format, before the conversion to volts) absolute value of the dc voltage for this channel
+*/
+float SignalAnalyzer::FindOffsetVoltage(std::vector<float> a_vSamples, int a_iChannelNum)
+{
+	int iStartIndex = 0;
+	int iEndIndex = 0;
+	
+	int iNumberOfSamplesInSection = (int) (a_vSamples.size() * Configuration::Instance().GetIdleLineDurationFraction());
+	float fMaximumAmplitude = Configuration::Instance().GetIdleFluctuationsAmplitude();
+	bool bDone = false;
+	while (!bDone)
+	{
+		iEndIndex = iStartIndex + iNumberOfSamplesInSection - 1;
+		if ( iEndIndex >= (int)a_vSamples.size() - 1)
+		{
+			bDone = true;
+			iEndIndex = (int)a_vSamples.size() - 1;
+		}
+
+		float fMaxValueInSection = FLT_MIN;
+		float fMinValueInSection = FLT_MAX;
+		float fAccumulator = 0;
+		int i = iStartIndex;
+
+		for (; i <= iEndIndex; i++)
+		{
+			fAccumulator += a_vSamples[i];
+
+			if (a_vSamples[i] > fMaxValueInSection)
+			{
+				fMaxValueInSection = a_vSamples[i];
+			}
+			if (a_vSamples[i] < fMinValueInSection)
+			{
+				fMinValueInSection = a_vSamples[i];
+			}
+			if( fMaximumAmplitude - fMinValueInSection > fMaximumAmplitude)
+			{
+				break;
+			}
+		}
+
+		if (i > iEndIndex)
+		{
+		//stable section found, returning the average value of samples on that section.
+			return fAccumulator/(iEndIndex - iStartIndex);
+		}
+
+		iStartIndex = iEndIndex + 1;
+	}
+
+	//If no stable section found, return 0 and log.
+	Logger::Instance().AddMessage(std::string("On channel ") + std::to_string(a_iChannelNum) + std::string(", stable section not found. Reference voltage is assumed 0."));
+	Logger::Instance().SetWriteCurrentMessage();
+	return 0;
 }
 
 /**
@@ -404,8 +495,9 @@ void SignalAnalyzer::MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer)
 	}
 }
 
-void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_channels)
+void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels)
 {
+	Channels_t vNormalizedChannels = NormalizeChannels(a_vChannels);
 	if (m_iFlags & AnalysisFlags::ETriggerTimingSupervisor)
 	{
 		m_pTriggerTimingSupervisor->GotTrigger(a_timeStamp);
@@ -415,7 +507,7 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_channels)
 		int i = 0;
 		for (auto it: Configuration::Instance().GetRanges())
 		{
-			FindOriginalPulseInChannelRange(a_channels, it.second);
+			FindOriginalPulseInChannelRange(vNormalizedChannels, it.second);
 			m_vpPanelSupervisors[i]->GotEvent(a_timeStamp, m_markers.m_vChannelsWithPulse);
 			i++;
 		}

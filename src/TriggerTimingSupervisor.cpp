@@ -51,7 +51,7 @@ void TriggerTimingSupervisor::InitGraphics()
 	m_pRateGraph->SetMarkerSize(1);
 	m_pRateGraph->SetMarkerColor(4);
 	m_pRateGraph->SetMarkerStyle(21);
-	m_pTimingHist = new TH1F("TriggerTimingHist", "Duration Between Subsequent Triggers", 1000, 1, 500);
+	m_pTimingHist = new TH1F("TriggerTimingHist", "Duration Between Subsequent Triggers", 1000, 1, 5000);
 	m_pCanvas->Divide(1,2);
 }
 
@@ -67,6 +67,11 @@ void TriggerTimingSupervisor::AddPointToRatePlot(nanoseconds a_eventTime)
 	m_pCanvas->cd(2);
 	float fRate = float(m_iTriggersAccumulator) / duration_cast<seconds>(a_eventTime - m_periodStartTime).count();
 	m_pRateGraph->SetPoint(m_pRateGraph->GetN(), duration_cast<seconds>(a_eventTime).count(), fRate);
+/*	m_pRateGraph->GetXaxis()->SetTitle("Time [seconds]");
+	m_pRateGraph->GetYaxis()->SetTitle("Rate [Hz]");
+	m_pRateGraph->GetXaxis()->CenterTitle();
+	m_pRateGraph->GetYaxis()->CenterTitle();
+*/
 	m_pRateGraph->Draw("ALP");
 }
 

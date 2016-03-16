@@ -130,6 +130,16 @@ seconds Configuration::GetTriggerRateAveragingDurationSecs()
 	return seconds(m_configuration["trigger-rate-averaging-duration-seconds"].asInt());
 }
 
+float Configuration::GetIdleFluctuationsAmplitude()
+{
+	return m_configuration["idle-fluctuation-amplitude-volts"].asFloat();
+}
+
+float Configuration::GetIdleLineDurationFraction()
+{
+	return m_configuration["idle-line-duration-fraction"].asFloat();
+}
+
 std::string Configuration::GetDump()
 {
 	std::stringstream stream;

@@ -24,6 +24,8 @@ public:
 	float GetSamplingFreqGHz();
 	int GetNumberOfEventsToDrawAfter();
 	seconds GetTriggerRateAveragingDurationSecs();
+	float GetIdleFluctuationsAmplitude();
+	float GetIdleLineDurationFraction();
 
 	std::string GetDump();
 

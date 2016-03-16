@@ -119,10 +119,13 @@ public:
 	void Stop();
 	void SetFlags(int a_iFlags);
 	void Flush();
+	float FindOffsetVoltage(std::vector<float> a_vSamples, int a_iChannelNum);
+	Channels_t NormalizeChannels(Channels_t& a_vChannels);
+
 
 private:
 	static void MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer);
-	void DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_channels);
+	void DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels);
 
 private:
 	AnalysisMarkers m_markers;

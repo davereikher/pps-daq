@@ -28,7 +28,7 @@ m_pSignalAnalyzer(new SignalAnalyzer())
 	m_pRootTree->Branch("ArrivalTimeMSB", &m_iNowMSB);
 	m_pRootTree->Branch("ArrivalTimeLSB", &m_iNowLSB);
 
-	m_pSignalAnalyzer->SetFlags(SignalAnalyzer::ETriggerTimingSupervisor | SignalAnalyzer::EAsynchronous);
+	m_pSignalAnalyzer->SetFlags(SignalAnalyzer::ETriggerTimingSupervisor | SignalAnalyzer::EAsynchronous | SignalAnalyzer::EPanelSupervisor);
 	m_pSignalAnalyzer->Start();
 }
 

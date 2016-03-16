@@ -26,7 +26,7 @@ void PanelSupervisor::InitGraphics()
 	m_pSimultaneousChannelGraph->SetMarkerSize(1);
 	m_pSimultaneousChannelGraph->SetMarkerColor(4);
 	m_pSimultaneousChannelGraph->SetMarkerStyle(21);
-	m_pChannelsHist = new TH1F("ChannelHist", "Number of Original Pulses vs Channel", 20, 1, 20);
+	m_pChannelsHist = new TH1F("ChannelHist", "Number of Original Pulses vs Channel", 30, 1, 20);
 	m_pCanvas->Divide(1,2);
 
 }
@@ -49,6 +49,8 @@ void PanelSupervisor::AddToChannelsHistogram(std::vector<int>& a_vChannels)
 
 	Logger::Instance().SetWriteCurrentMessage();
 	Logger::Instance().AddMessage(sLogMessage);
+	m_pChannelsHist->GetXaxis()->SetTitle("Channel no.");
+	m_pChannelsHist->GetXaxis()->CenterTitle();
 	m_pChannelsHist->Draw();
 }
 
@@ -61,6 +63,11 @@ void PanelSupervisor::AddToSimultaneousChannelsPlot(nanoseconds a_eventTime, int
 	}
 	m_pCanvas->cd(2);
 	m_pSimultaneousChannelGraph->SetPoint(m_pSimultaneousChannelGraph->GetN(), duration_cast<seconds>(a_eventTime).count(), a_iNumberOfSimultaneousChannels);
-	m_pSimultaneousChannelGraph->Draw("ALP");
+	m_pSimultaneousChannelGraph->GetXaxis()->SetTitle("Number of Channels w/ Pulses");
+	m_pSimultaneousChannelGraph->GetYaxis()->SetTitle("Time [seconds]");
+	m_pSimultaneousChannelGraph->GetXaxis()->CenterTitle();
+	m_pSimultaneousChannelGraph->GetYaxis()->CenterTitle();
+
+	m_pSimultaneousChannelGraph->Draw("AP");
 }
 

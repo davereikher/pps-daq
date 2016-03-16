@@ -63,9 +63,9 @@ int main(int argc, char* argv[])
 	for (int i = iStartingIndex; i < iNumOfEntries; i ++)
 	{
 		tree->GetEntry(i);
-
-		plt.PlotRanges(*channels, ranges, std::string("Event  ") + std::to_string(i)); 
-		sigAnalyzer.FindOriginalPulseInChannelRange(*channels, ranges["A"]);
+		Channels_t vNormalizedChannels = sigAnalyzer.NormalizeChannels(*channels);
+		plt.PlotRanges(vNormalizedChannels, ranges, std::string("Event  ") + std::to_string(i)); 
+		sigAnalyzer.FindOriginalPulseInChannelRange(vNormalizedChannels, ranges["A"]);
 		plt.AddAnalysisMarkers(0, sigAnalyzer.GetAnalysisMarkers());
 		plt.Wait();
 /*		timer->TurnOn();			
