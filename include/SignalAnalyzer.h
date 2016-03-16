@@ -121,7 +121,7 @@ public:
 	void Flush();
 	float FindOffsetVoltage(std::vector<float> a_vSamples, int a_iChannelNum);
 	Channels_t NormalizeChannels(Channels_t& a_vChannels);
-
+	void ProcessEvents();
 
 private:
 	static void MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer);

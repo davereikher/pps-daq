@@ -5,6 +5,7 @@
 #include "TApplication.h"
 #include "Configuration.h"
 #include "Logger.h"
+#include "keyb.h"
 
 std::vector <std::vector<int> > gvPanelChannelRanges;
 static SignalAnalyzer::AnalysisMarkers m_markers;
@@ -243,8 +244,15 @@ The purpose of this function is to compensate for small, constant (between event
 */
 Channels_t SignalAnalyzer::NormalizeChannels(Channels_t& a_vChannels)
 {
-	int i = 0;
+
 	Channels_t vNormalizedChannels;
+	if ( !Configuration::Instance().ShouldNormalizeChannels() )
+	{
+		vNormalizedChannels = a_vChannels;
+		return vNormalizedChannels;
+	}
+
+	int i = 0;
 	float fVoltMin = Configuration::Instance().GetVoltMin();
 	float fVoltMax = Configuration::Instance().GetVoltMax();
 	float iDigitizerRes = (float)Configuration::Instance().GetDigitizerResolution();
@@ -514,6 +522,11 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 		
 	}
 
+	ProcessEvents();
+}
+
+void SignalAnalyzer::ProcessEvents()
+{
 	gSystem->ProcessEvents();
 }
 

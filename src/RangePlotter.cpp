@@ -7,13 +7,14 @@
 #include "CommonUtils.h"
 
 
-RangePlotter::RangePlotter(float a_fSamplingFreqGHz, float a_fMinVoltage, float a_fMaxVoltage, int a_iDigitizerResolution):
-m_pCanvas(new TCanvas("Canvas", "", 800, 600)),
+RangePlotter::RangePlotter(float a_fSamplingFreqGHz, float a_fMinVoltage, float a_fMaxVoltage, int a_iDigitizerResolution, std::string a_sInstanceName):
+m_pCanvas(new TCanvas((a_sInstanceName + "Canvas").c_str(), "", 800, 600)),
 m_colors{1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 28, 46, 30, 40, 42, 38},
 m_fSamplingFreqGHz(a_fSamplingFreqGHz),
 m_fMinVoltage(a_fMinVoltage),
 m_fMaxVoltage(a_fMaxVoltage),
-m_fVoltageDivision((a_fMaxVoltage - a_fMinVoltage)/a_iDigitizerResolution)
+m_fVoltageDivision((a_fMaxVoltage - a_fMinVoltage)/a_iDigitizerResolution),
+m_sInstanceName(a_sInstanceName)
 {
 }
 
@@ -53,7 +54,7 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 	{
 		for (auto& rangeIt: a_channelsToPadsAssociation)
 		{	
-			TMultiGraph* pMg = new TMultiGraph("mg", "mg");	
+			TMultiGraph* pMg = new TMultiGraph();	
 			m_vpMultiGraph.push_back(std::unique_ptr<TMultiGraph>(pMg));
 
 			m_pCanvas->cd(iPadCounter + 1);
@@ -75,7 +76,7 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 				m_vpGraph[chanIt] = pGr;
 				pGr->SetLineColor(m_colors[i%(sizeof(m_colors)/sizeof(int))]);
 				std::string sMultiGraphTitle = std::string("Panel ") + rangeIt.first;
-				pGr->SetName((std::string("Panel_") + rangeIt.first).c_str());
+				pGr->SetName((m_sInstanceName + std::string("Panel_") + rangeIt.first).c_str());
 				std::string sGraphTitle = std::string("Channel ") + std::to_string(chanIt);
 				pGr->SetTitle(sGraphTitle.c_str());
 				legend->AddEntry(pGr,std::to_string(chanIt).c_str(), "l");

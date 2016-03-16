@@ -26,6 +26,7 @@ public:
 	seconds GetTriggerRateAveragingDurationSecs();
 	float GetIdleFluctuationsAmplitude();
 	float GetIdleLineDurationFraction();
+	bool ShouldNormalizeChannels();
 
 	std::string GetDump();
 

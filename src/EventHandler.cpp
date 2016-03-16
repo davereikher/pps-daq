@@ -203,3 +203,8 @@ void EventHandler::Stop()
 	m_pSignalAnalyzer->Stop();
 //	printf("After stoppin\n");
 }
+
+void EventHandler::ProcessEvents()
+{
+	m_pSignalAnalyzer->ProcessEvents();
+}

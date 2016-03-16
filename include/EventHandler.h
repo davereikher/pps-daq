@@ -21,6 +21,7 @@ public:
 /*	void SetEventAddress();
 	void SetEventInfoAddress();*/
 	void Stop();
+	void ProcessEvents();
 
 private:
 	void PerformIntermediateAnalysis(nanoseconds a_eventTime);

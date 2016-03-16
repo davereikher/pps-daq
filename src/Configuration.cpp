@@ -146,3 +146,9 @@ std::string Configuration::GetDump()
 	stream << m_configuration;
 	return std::string("\nConfiguration Dump \n-------------------------------------------\n") + stream.str() + "\n\n";
 }
+
+bool Configuration::ShouldNormalizeChannels()
+{
+	return m_configuration["normalize-channels"].asBool();
+}
+ 

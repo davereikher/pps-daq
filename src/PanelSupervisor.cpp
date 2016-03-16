@@ -26,7 +26,7 @@ void PanelSupervisor::InitGraphics()
 	m_pSimultaneousChannelGraph->SetMarkerSize(1);
 	m_pSimultaneousChannelGraph->SetMarkerColor(4);
 	m_pSimultaneousChannelGraph->SetMarkerStyle(21);
-	m_pChannelsHist = new TH1F("ChannelHist", "Number of Original Pulses vs Channel", 30, 1, 20);
+	m_pChannelsHist = new TH1F("ChannelHist", "Number of Original Pulses vs Channel", 100, 1, 20);
 	m_pCanvas->Divide(1,2);
 
 }

@@ -125,8 +125,9 @@ int main(int argc, char* argv[])
 	printf("press q again to quit...\n");
 	do
 	{
-		c = getch();
-	} while(c != 'q');
+		c = checkCommand();
+		sigAnalyzer.ProcessEvents();
+	} while(c != 1);
 
 	sigAnalyzer.Stop();
 	return 0;

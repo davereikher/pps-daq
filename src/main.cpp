@@ -64,8 +64,9 @@ int main(int argc, char** argv)
 
 		do
 		{
-			c = getch();
-		}while (c != 'q');
+			c = checkCommand();
+			eventHandler.ProcessEvents();
+		}while (c != 1);
 	}
 	catch(ExceptionBase& ex)
 	{
