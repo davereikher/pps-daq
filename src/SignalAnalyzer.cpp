@@ -46,6 +46,7 @@ m_pTriggerTimingSupervisor(new TriggerTimingSupervisor(milliseconds(Configuratio
 	m_markers.SetMinEdgeSeparation(Configuration::Instance().GetMinEdgeSeparationNs());
 	m_markers.SetMaxEdgeJitter(Configuration::Instance().GetMaxEdgeJitterNs());
 	m_markers.SetMaxAmplitudeJitter(Configuration::Instance().GetMaxAmplitudeJitterVolts());
+	m_markers.SetPulseStartThreshold(Configuration::Instance().GetPulseStartThresholdVolts());
 
 	for (auto it : Configuration::Instance().GetRanges())
 	{
@@ -85,13 +86,28 @@ std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> SignalAnalyzer::FindLea
 	int leadingEdgeIndex = -1;
 	int i = -1;	
 	bool bChannelHasPulse = false;
+	int iFluctuationStart = -1;
 
 	for (auto& it: a_samplesVector)
 	{
-		if (it < m_markers.GetPulseThreshold().Discrete())
+		i++;
+		if (it < m_markers.GetPulseStartThreshold().Discrete())
 		{
-			bChannelHasPulse = true;
-			break;
+			iFluctuationStart = i;
+		}
+
+		if (iFluctuationStart != -1)
+		{
+			if (it < m_markers.GetPulseThreshold().Discrete())
+			{
+				bChannelHasPulse = true;
+				break;
+			}
+	
+			if ( (i - iFluctuationStart) > m_markers.GetExpectedPulseWidth().Discrete())
+			{
+				break;
+			}
 		}
 	}
 
@@ -166,11 +182,13 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,
 	//Each tuple represents a pulse. The first value is the location of the leading edge time, the second is the location of the lowest value of the pulse
 		std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> p;
 		p = FindLeadingEdgeAndPulseExtremum(a_vAllChannels[a_vRange[i]]);
+		//printf("On channel %d\n", a_vRange[i]);
 		m_markers.m_vChannelsEdgeAndMinimum.push_back(p);
 		if(!std::get<EDGE_THRES_INDEX>(p).Exists())
 		{
 			continue;
 		}
+		//printf("\tLeading Edge at %f, %f, Pulse Extremum at %f, %f\n", std::get<EDGE_THRES_INDEX>(p).GetX(), std::get<EDGE_THRES_INDEX>(p).GetY(), std::get<MIN_PULSE_INDEX>(p).GetX(), std::get<MIN_PULSE_INDEX>(p).GetY());
 		if (std::get<EDGE_THRES_INDEX>(p).GetXDiscrete() <= iEarliestLeadingEdge)
 		{
 			iNextToEarliestLeadingEdge = iEarliestLeadingEdge;
@@ -189,6 +207,7 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,
 //		printf("LEADING PULSE FOUND\n");
 		Logger().Instance().SetWriteCurrentMessage();
 		Logger::Instance().AddMessage(std::string("Leading pulse, channel ") + std::to_string(a_vRange[iEarliestLeadingEdgeIndex]));
+		//printf ("\tLeading pulse, channel %d\n", a_vRange[iEarliestLeadingEdgeIndex]);
 		return;
 	}
 	else if (iEarliestLeadingEdge == INT_MAX)
@@ -413,6 +432,12 @@ void SignalAnalyzer::AnalysisMarkers::SetPulseThreshold(float a_fPulseThresholdV
 	m_fPulseThreshold = a_fPulseThresholdVolts;
 }
 
+void SignalAnalyzer::AnalysisMarkers::SetPulseStartThreshold(float a_fPulseStartThresholdVolts)
+{
+	m_iPulseStartThreshold = (a_fPulseStartThresholdVolts - m_fVoltageStartVolts) / m_fVoltageDivisionVolts;
+	m_fPulseStartThreshold = a_fPulseStartThresholdVolts;
+}
+
 void SignalAnalyzer::AnalysisMarkers::SetEdgeThreshold(float a_fEdgeThresholdVolts)
 {
 	m_iEdgeThreshold = (a_fEdgeThresholdVolts - m_fVoltageStartVolts) / m_fVoltageDivisionVolts;
@@ -473,6 +498,11 @@ SignalAnalyzer::AnalysisMarkers::Value SignalAnalyzer::AnalysisMarkers::GetMaxEd
 SignalAnalyzer::AnalysisMarkers::Value SignalAnalyzer::AnalysisMarkers::GetMaxAmplitudeJitter()
 {
 	return Value(m_iMaxAmplitudeJitter, m_fMaxAmplitudeJitter);
+}
+
+SignalAnalyzer::AnalysisMarkers::Value SignalAnalyzer::AnalysisMarkers::GetPulseStartThreshold()
+{
+	return Value(m_iPulseStartThreshold, m_fPulseStartThreshold);
 }
 
 void SignalAnalyzer::MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer)

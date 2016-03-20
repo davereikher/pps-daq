@@ -152,3 +152,7 @@ bool Configuration::ShouldNormalizeChannels()
 	return m_configuration["normalize-channels"].asBool();
 }
  
+float Configuration::GetPulseStartThresholdVolts()
+{
+	return m_configuration["pulse-start-threshold-volts"].asFloat();
+}

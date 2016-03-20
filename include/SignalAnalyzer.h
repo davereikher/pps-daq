@@ -66,6 +66,7 @@ public:
 		void SetMinEdgeSeparation(float a_fMinEdgeSeparationNs);
 		void SetMaxEdgeJitter(float a_fMaxEdgeJitterNs);
 		void SetMaxAmplitudeJitter(float a_fMaxAmplitudeJitterVolts);
+		void SetPulseStartThreshold(float a_fPulseStartThresholdVolts);
 
 		Value GetPulseThreshold();
 		Value GetEdgeThreshold();
@@ -73,6 +74,7 @@ public:
 		Value GetMinEdgeSeparation();
 		Value GetMaxEdgeJitter();
 		Value GetMaxAmplitudeJitter();
+		Value GetPulseStartThreshold();
 
 	public:
 		float m_fVoltageDivisionVolts;
@@ -97,6 +99,9 @@ public:
 		int m_iMaxAmplitudeJitter;
 		float m_fMaxAmplitudeJitter;
 
+		int m_iPulseStartThreshold;
+		float m_fPulseStartThreshold;
+	
 		std::vector<std::tuple<Point, Point> > m_vChannelsEdgeAndMinimum;
 		std::vector<int> m_vChannelsWithPulse;
 	};

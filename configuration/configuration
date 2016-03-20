@@ -1,21 +1,22 @@
 {
 "panel-ranges":
 	{
-	"A":[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12]
+	"A":[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 	},
 "volt-min" : -0.5,
 "volt-max" : 0.5,
 "sampling-freq-ghz" : 2.5,
 "idle-fluctuation-amplitude-volts" : 0.05,
 "idle-line-duration-fraction" : 0.05,
-"pulse-threshold-volts" : -0.02,
-"edge-threshold-volts": -0.09,
-"expected-pulse-width-ns": 5,
-"min-edge-separation-ns": 5,
+"pulse-threshold-volts" : -0.17,
+"edge-threshold-volts": -0.15,
+"pulse-start-threshold-volts": -0.02,
+"expected-pulse-width-ns": 3,
+"min-edge-separation-ns": 3,
 "max-edge-jitter-ns": 2,
-"max-amplitude-jitter-volts": 0.04,
+"max-amplitude-jitter-volts": 0.1,
 "digitizer-resolution-bits": 4095,
-"number-of-events-to-draw-after": 5,
+"number-of-events-to-draw-after": 1000,
 "trigger-rate-averaging-duration-seconds": 600,
 "normalize-channels": true
 }

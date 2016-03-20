@@ -86,7 +86,11 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 				i++;
 			}
 			
-			pMg->Draw("AC");
+			pMg->Draw("AL");
+			pMg->GetXaxis()->SetTitle("Time [nanoseconds]");
+			pMg->GetXaxis()->CenterTitle();
+			pMg->GetYaxis()->SetTitle("Voltage [volts]");
+			pMg->GetYaxis()->CenterTitle();
 
 			gPad->Modified();
 
@@ -158,10 +162,10 @@ void RangePlotter::AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::Analysi
 			markerMin->SetMarkerSize(2);
 			markerMin->Draw();
 
-		/*	TBox* pulseWindow = new TBox(std::get<EDGE_THRES_INDEX>(it).GetX(), fYMin, std::get<EDGE_THRES_INDEX>(it).GetX() + a_analysisMarkers.GetExpectedPulseWidth().Continuous(), fYMax);
+			TBox* pulseWindow = new TBox(std::get<EDGE_THRES_INDEX>(it).GetX(), fYMin, std::get<EDGE_THRES_INDEX>(it).GetX() + a_analysisMarkers.GetExpectedPulseWidth().Continuous(), fYMax);
 			pulseWindow->SetFillColor(color);
 			pulseWindow->SetFillStyle(3004);
-			pulseWindow->Draw();*/
+			pulseWindow->Draw();
 		}
 		i++;
 	}

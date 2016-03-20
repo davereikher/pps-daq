@@ -27,6 +27,8 @@ public:
 	float GetIdleFluctuationsAmplitude();
 	float GetIdleLineDurationFraction();
 	bool ShouldNormalizeChannels();
+	float GetPulseStartThresholdVolts();
+
 
 	std::string GetDump();
 

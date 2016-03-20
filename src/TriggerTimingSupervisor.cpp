@@ -42,7 +42,6 @@ void TriggerTimingSupervisor::GotTrigger(nanoseconds a_eventTime)
 
 void TriggerTimingSupervisor::InitGraphics()
 {
-	//TODO: set axis labels
 	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas("TriggerSupervisor", "Trigger Supervisor", 800, 600));
 	m_pRateGraph = new TGraph(0);
 	char sNum[10];
@@ -51,15 +50,20 @@ void TriggerTimingSupervisor::InitGraphics()
 	m_pRateGraph->SetMarkerSize(1);
 	m_pRateGraph->SetMarkerColor(4);
 	m_pRateGraph->SetMarkerStyle(21);
-	m_pTimingHist = new TH1F("TriggerTimingHist", "Duration Between Subsequent Triggers", 1000, 1, 5000);
+	m_pTimingHist = new TH1F("TriggerTimingHist", "Duration Between Subsequent Triggers", 1000, 0, 0);
 	m_pCanvas->Divide(1,2);
 }
 
 void TriggerTimingSupervisor::AddDurationToHistogram(nanoseconds a_eventTime)
 {
 	m_pCanvas->cd(1);
-	m_pTimingHist->Fill(duration_cast<milliseconds>(a_eventTime - m_lastTriggerTime).count());
+	duration<float> fsec = a_eventTime - m_lastTriggerTime;
+	m_pTimingHist->Fill(fsec.count());
+	m_pTimingHist->GetXaxis()->SetTitle("Time [seconds]");
+	m_pTimingHist->GetXaxis()->CenterTitle();
+	m_pTimingHist->SetCanExtend(TH1::kXaxis);
 	m_pTimingHist->Draw();
+	
 }
 
 void TriggerTimingSupervisor::AddPointToRatePlot(nanoseconds a_eventTime)
@@ -67,11 +71,11 @@ void TriggerTimingSupervisor::AddPointToRatePlot(nanoseconds a_eventTime)
 	m_pCanvas->cd(2);
 	float fRate = float(m_iTriggersAccumulator) / duration_cast<seconds>(a_eventTime - m_periodStartTime).count();
 	m_pRateGraph->SetPoint(m_pRateGraph->GetN(), duration_cast<seconds>(a_eventTime).count(), fRate);
-/*	m_pRateGraph->GetXaxis()->SetTitle("Time [seconds]");
+	m_pRateGraph->GetXaxis()->SetTitle("Time [seconds]");
 	m_pRateGraph->GetYaxis()->SetTitle("Rate [Hz]");
 	m_pRateGraph->GetXaxis()->CenterTitle();
 	m_pRateGraph->GetYaxis()->CenterTitle();
-*/
+
 	m_pRateGraph->Draw("ALP");
 }
 

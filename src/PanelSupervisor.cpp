@@ -19,14 +19,13 @@ void PanelSupervisor::GotEvent(nanoseconds a_eventTime, std::vector<int> a_vChan
 
 void PanelSupervisor::InitGraphics()
 {
-	//TODO: set axis labels
-	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas("PanelSupervisor", "Panel Supervisor", 800, 600));
+	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_PanelSupervisor").c_str(), "Panel Supervisor", 800, 600));
 	m_pSimultaneousChannelGraph = new TGraph(0);
 	m_pSimultaneousChannelGraph->SetTitle("Number of Channels w/ Simultaneously Detected Pulses per Event");
 	m_pSimultaneousChannelGraph->SetMarkerSize(1);
 	m_pSimultaneousChannelGraph->SetMarkerColor(4);
 	m_pSimultaneousChannelGraph->SetMarkerStyle(21);
-	m_pChannelsHist = new TH1F("ChannelHist", "Number of Original Pulses vs Channel", 100, 1, 20);
+	m_pChannelsHist = new TH1F((m_sPanelName + "ChannelHist").c_str() , "Number of Primary Pulses vs Channel", 100, 0, 0);
 	m_pCanvas->Divide(1,2);
 
 }
@@ -43,7 +42,10 @@ void PanelSupervisor::AddToChannelsHistogram(std::vector<int>& a_vChannels)
 	
 	for (auto it: a_vChannels)
 	{
-		m_pChannelsHist->Fill(it);
+		if (a_vChannels.size() == 1)
+		{
+			m_pChannelsHist->Fill(it);
+		}
 		sLogMessage += std::to_string(it) + " ";
 	}
 
@@ -51,7 +53,8 @@ void PanelSupervisor::AddToChannelsHistogram(std::vector<int>& a_vChannels)
 	Logger::Instance().AddMessage(sLogMessage);
 	m_pChannelsHist->GetXaxis()->SetTitle("Channel no.");
 	m_pChannelsHist->GetXaxis()->CenterTitle();
-	m_pChannelsHist->Draw();
+	m_pChannelsHist->Draw("bar");
+	m_pChannelsHist->SetCanExtend(TH1::kXaxis);
 }
 
 void PanelSupervisor::AddToSimultaneousChannelsPlot(nanoseconds a_eventTime, int a_iNumberOfSimultaneousChannels)
