@@ -29,6 +29,7 @@ private:
 //	void AssertReady();
 	std::string GenerateFileName(std::string a_sRootOutFolder);
 	static void MainAnalysisThreadFunc(EventHandler* a_pEventHandler);
+	bool IsEventEmpty();
 
 private:
 	std::unique_ptr<TFile> m_pRootFile;
@@ -39,6 +40,8 @@ private:
 	unsigned int m_iNowLSB;
 	bool m_bEventAddrSet;
 	bool m_bEventInfoSet;
+//	bool m_bEventEmpty;
 	std::unique_ptr<SignalAnalyzer> m_pSignalAnalyzer;
+	int m_iEventCounter;
 };
 

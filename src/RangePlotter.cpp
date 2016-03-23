@@ -148,7 +148,7 @@ void RangePlotter::AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::Analysi
 	edgeThresholdLine->SetLineStyle(2);
 	edgeThresholdLine->SetBit(kCanDelete);
 	
-	int i = 0;
+/*	int i = 0;
 	for (auto& it: a_analysisMarkers.m_vChannelsEdgeAndMinimum)
 	{
 		int color = ((TGraph*) m_vpMultiGraph[a_iPanelIndex]->GetListOfGraphs()->At(i))->GetLineColor();
@@ -169,7 +169,7 @@ void RangePlotter::AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::Analysi
 		}
 		i++;
 	}
-
+*/
 	for (auto& it: a_analysisMarkers.m_vChannelsWithPulse)
 	{		
 		m_vpGraph[it]->SetLineWidth(3);

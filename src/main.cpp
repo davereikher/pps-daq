@@ -6,6 +6,7 @@
 #include "keyb.h"
 #include "TApplication.h"
 #include "Configuration.h"
+#include "Logger.h"
 
 int checkCommand() {
 	int c = 0;
@@ -23,7 +24,7 @@ int checkCommand() {
 
 void Usage(char* a_pProcName)
 {
-	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to folder where output root file will be saved>" << std::endl;
+	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to folder where output root file will be saved> <path to log file>" << std::endl;
 }
 
 
@@ -32,7 +33,7 @@ int main(int argc, char** argv)
 	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
 //	TApplication* pApplication = new TApplication("app",&argc,argv);
 	
-	if (argc < 2)
+	if (argc < 3)
 	{
 		Usage(argv[0]);
 		exit(-1);
@@ -43,6 +44,9 @@ int main(int argc, char** argv)
 		printf("size of int64: %d, %d", sizeof(uint64_t), sizeof(int64_t));
 		int c = 0;
 		Configuration::Instance().LoadConfiguration(argv[1]);
+		//TODO: generate log file automatically. Fix the bug that root file path doesn't appear in log file by moving the log init into EventHandler and generating the log file name automatically, based on the root file name.
+		Logger::Instance().Init(argv[3], argv[2]);
+		Logger::Instance().AddNecessaryMessage(Configuration::Instance().GetDump());
 		EventHandler eventHandler(argv[2]);
 		DigitizerManager digitizerManager(eventHandler);
 		digitizerManager.InitAndConfigure();
@@ -52,7 +56,7 @@ int main(int argc, char** argv)
 		{
 			if(digitizerManager.Acquire() > 0)
 			{
-//				i++;
+		//		i++;
 			}
 			c = checkCommand();
 			if (c == 1) break;

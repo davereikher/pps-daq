@@ -9,6 +9,7 @@
 #include "SignalAnalyzer.h"
 #include "RangePlotter.h"
 #include "Configuration.h"
+#include "Logger.h"
 #include "TApplication.h"
 #include "TROOT.h"
 
@@ -22,9 +23,11 @@ m_pRootFile(new TFile(GenerateFileName(a_sRootOutFolder).c_str(), "RECREATE","",
 m_pRootTree(new TTree(TREE_NAME, TREE_DESCRIPTION)),
 m_bEventAddrSet(false),
 m_bEventInfoSet(false),
-m_pSignalAnalyzer(new SignalAnalyzer())
+m_pSignalAnalyzer(new SignalAnalyzer()),
+m_iEventCounter(0)
 {
 	m_pRootTree->Branch("Event", &m_vChannels);
+//	m_pRootTree->Branch("Empty", &m_bEventEmpty);
 	m_pRootTree->Branch("ArrivalTimeMSB", &m_iNowMSB);
 	m_pRootTree->Branch("ArrivalTimeLSB", &m_iNowLSB);
 
@@ -81,6 +84,8 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventT
 	
 //	AssertReady();
 	
+	Logger::Instance().NewEntry(m_iEventCounter);
+	m_iEventCounter ++;
 	m_vChannels.clear();
 	for (int iGroupCount = 0; iGroupCount < MAX_X742_GROUP_SIZE; iGroupCount++)
 	{
@@ -106,6 +111,13 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventT
 		}
 	}
 
+	if (IsEventEmpty())
+	{
+		m_vChannels.clear();
+		m_vChannels.push_back(std::vector<float>());
+	}
+
+
 	PerformIntermediateAnalysis(a_eventTime);
 	//printf("%ld, now\t", (duration_cast<milliseconds>(a_tp.time_since_epoch()).count()));
 	m_iNowLSB = (unsigned int) ((duration_cast<nanoseconds>(a_eventTime).count()) & 0x00000000FFFFFFFF);
@@ -113,6 +125,7 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventT
 //	m_iNowLSB = (unsigned int) (duration_cast<nanoseconds>(a_tp.time_since_epoch()).count());
 	m_iNowMSB = (unsigned int) (((duration_cast<nanoseconds>(a_eventTime).count()) & 0xFFFFFFFF00000000) >> 32);
 	//printf("%ld, nowMSB\n", m_iNowMSB);
+
 
 	m_pRootTree->Fill();	
 }
@@ -141,6 +154,40 @@ std::string EventHandler::GenerateFileName(std::string a_sRootOutFolder)
 
 EventHandler::~EventHandler()
 {
+}
+
+bool EventHandler::IsEventEmpty()
+{
+	float fThreshold = Configuration::Instance().GetDigitizerResolution() * (Configuration::Instance().GetIdleFluctuationsAmplitude()/(Configuration::Instance().GetVoltMax() - Configuration::Instance().GetVoltMin()));
+//	printf("fThreshold: %f\n", fThreshold);
+
+	bool bSomeSignalFound = false;
+	for (auto& chan: m_vChannels)
+	{
+		float fMaxValue = FLT_MIN;
+		float fMinValue = FLT_MAX;
+		for (auto& sample: chan)
+		{
+			if(sample < fMinValue)
+			{
+				fMinValue = sample;	
+			}
+			if(sample > fMaxValue)
+			{
+				fMaxValue = sample;
+			}
+			if ( (fMaxValue - fMinValue) > fThreshold )
+			{
+				bSomeSignalFound = true;
+				break;
+			}
+			if(bSomeSignalFound)
+			{
+				break;
+			}
+		}
+	}
+	return !bSomeSignalFound;
 }
 
 void EventHandler::PerformIntermediateAnalysis(nanoseconds a_eventTime)
@@ -197,6 +244,7 @@ void EventHandler::MainAnalysisThreadFunc(EventHandler* a_pEventHandler)
 
 void EventHandler::Stop()
 {
+	m_iEventCounter = 0;
 	m_pRootTree->Write();
 	m_pRootFile->Close();
 //	printf("Stoppin\n");

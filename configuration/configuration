@@ -1,7 +1,7 @@
 {
 "panel-ranges":
 	{
-	"A":[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+	"A":[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 	},
 "volt-min" : -0.5,
 "volt-max" : 0.5,
@@ -16,7 +16,7 @@
 "max-edge-jitter-ns": 2,
 "max-amplitude-jitter-volts": 0.1,
 "digitizer-resolution-bits": 4095,
-"number-of-events-to-draw-after": 1000,
+"number-of-events-to-draw-after": 1,
 "trigger-rate-averaging-duration-seconds": 600,
 "normalize-channels": true
 }

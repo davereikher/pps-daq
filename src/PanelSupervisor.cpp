@@ -25,7 +25,9 @@ void PanelSupervisor::InitGraphics()
 	m_pSimultaneousChannelGraph->SetMarkerSize(1);
 	m_pSimultaneousChannelGraph->SetMarkerColor(4);
 	m_pSimultaneousChannelGraph->SetMarkerStyle(21);
-	m_pChannelsHist = new TH1F((m_sPanelName + "ChannelHist").c_str() , "Number of Primary Pulses vs Channel", 100, 0, 0);
+	m_pChannelsHist = new TH1F((m_sPanelName + "ChannelHist").c_str() , "Number of Primary Pulses vs Channel", 90, 0, 0);
+	m_pChannelsHist->SetFillColor(49);
+//	m_pChannelsHist->SetStats(0);
 	m_pCanvas->Divide(1,2);
 
 }
@@ -53,7 +55,7 @@ void PanelSupervisor::AddToChannelsHistogram(std::vector<int>& a_vChannels)
 	Logger::Instance().AddMessage(sLogMessage);
 	m_pChannelsHist->GetXaxis()->SetTitle("Channel no.");
 	m_pChannelsHist->GetXaxis()->CenterTitle();
-	m_pChannelsHist->Draw("bar");
+	m_pChannelsHist->Draw();
 	m_pChannelsHist->SetCanExtend(TH1::kXaxis);
 }
 

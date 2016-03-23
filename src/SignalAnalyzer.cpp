@@ -50,6 +50,7 @@ m_pTriggerTimingSupervisor(new TriggerTimingSupervisor(milliseconds(Configuratio
 
 	for (auto it : Configuration::Instance().GetRanges())
 	{
+		printf("Pushing P.S. for %s\n", it.first.c_str());
 		m_vpPanelSupervisors.push_back(std::unique_ptr<PanelSupervisor>(new PanelSupervisor(it.first)));
 	}
 
@@ -542,6 +543,15 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 	}
 	if (m_iFlags & AnalysisFlags::EPanelSupervisor)
 	{
+		if(a_vChannels.size() == 1)
+		{
+			if(a_vChannels[0].size() == 0)
+			{
+				ProcessEvents();
+				return;
+			}
+		}
+
 		int i = 0;
 		for (auto it: Configuration::Instance().GetRanges())
 		{
@@ -591,6 +601,7 @@ void SignalAnalyzer::SetFlags(int a_iFlags)
 
 void SignalAnalyzer::Analyze(nanoseconds a_eventTimeFromStart, Channels_t& a_vChannels)
 {	
+
 	if(m_iFlags & EAsynchronous)
 	{
 		m_queue.push(std::pair<nanoseconds, std::vector<std::vector<float> > >(a_eventTimeFromStart, a_vChannels));
