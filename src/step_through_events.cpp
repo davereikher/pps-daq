@@ -40,16 +40,16 @@ int main(int argc, char* argv[])
 //	printf("%d digires\n\n", Configuration::GetDigitizerResolution());
 //	SignalAnalyzer sigAnalyzer(2.5, -0.5, 0.5);
 	SignalAnalyzer sigAnalyzer;
-	SignalAnalyzer sigAnalyzerNotNormalized;
+//	SignalAnalyzer sigAnalyzerNotNormalized;
 
 	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
 	TApplication* pApplication = new TApplication("app",&argc,argv);
 //	RangePlotter plt(2.5, -0.5, 0.5);
 	RangePlotter plt(Configuration::Instance().GetSamplingFreqGHz(), Configuration::Instance().GetVoltMin(), Configuration::Instance().GetVoltMax(),
 		Configuration::Instance().GetDigitizerResolution(), "Normalized");
-	RangePlotter pltNotNormalized(Configuration::Instance().GetSamplingFreqGHz(), Configuration::Instance().GetVoltMin(), Configuration::Instance().GetVoltMax(),
+/*	RangePlotter pltNotNormalized(Configuration::Instance().GetSamplingFreqGHz(), Configuration::Instance().GetVoltMin(), Configuration::Instance().GetVoltMax(),
 		Configuration::Instance().GetDigitizerResolution(), "NotNormalized");
-
+*/
 	
 	Range_t ranges = Configuration::Instance().GetRanges();
 
@@ -66,14 +66,18 @@ int main(int argc, char* argv[])
 	for (int i = iStartingIndex; i < iNumOfEntries; i ++)
 	{
 		tree->GetEntry(i);
-		Channels_t vNormalizedChannels = sigAnalyzer.NormalizeChannels(*channels);
-		pltNotNormalized.PlotRanges(*channels, ranges, "");
-		plt.PlotRanges(vNormalizedChannels, ranges, std::string("Event  ") + std::to_string(i)); 
-		sigAnalyzer.FindOriginalPulseInChannelRange(vNormalizedChannels, ranges["A"]);
-		sigAnalyzerNotNormalized.FindOriginalPulseInChannelRange(*channels, ranges["A"]);
-		plt.AddAnalysisMarkers(0, sigAnalyzer.GetAnalysisMarkers());
-		pltNotNormalized.AddAnalysisMarkers(0, sigAnalyzerNotNormalized.GetAnalysisMarkers());
-		plt.Wait();
+		if( (*channels)[0].size() > 1)
+		{
+			Channels_t vNormalizedChannels = sigAnalyzer.NormalizeChannels(*channels);
+		
+	//		pltNotNormalized.PlotRanges(*channels, ranges, "");
+			plt.PlotRanges(vNormalizedChannels, ranges, std::string("Event  ") + std::to_string(i)); 
+			sigAnalyzer.FindOriginalPulseInChannelRange(vNormalizedChannels, ranges["A"]);
+	//		sigAnalyzerNotNormalized.FindOriginalPulseInChannelRange(*channels, ranges["A"]);
+			plt.AddAnalysisMarkers(0, sigAnalyzer.GetAnalysisMarkers());
+	//		pltNotNormalized.AddAnalysisMarkers(0, sigAnalyzerNotNormalized.GetAnalysisMarkers());
+			plt.Wait();
+		}
 /*		timer->TurnOn();			
 		timer->Reset();*/
 //		std::cin.get();

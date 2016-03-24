@@ -545,7 +545,7 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 	{
 		if(a_vChannels.size() == 1)
 		{
-			if(a_vChannels[0].size() == 0)
+			if(a_vChannels[0].size() == 1)
 			{
 				ProcessEvents();
 				return;

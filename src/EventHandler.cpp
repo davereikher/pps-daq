@@ -114,7 +114,9 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventT
 	if (IsEventEmpty())
 	{
 		m_vChannels.clear();
-		m_vChannels.push_back(std::vector<float>());
+		std::vector<float> v;
+		v.push_back(0);
+		m_vChannels.push_back(v);
 	}
 
 
