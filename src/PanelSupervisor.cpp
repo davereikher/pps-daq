@@ -17,6 +17,11 @@ void PanelSupervisor::GotEvent(nanoseconds a_eventTime, std::vector<int> a_vChan
 	m_pCanvas->Update();
 }
 
+void PanelSupervisor::GotTrigger()
+{
+	
+}
+
 void PanelSupervisor::InitGraphics()
 {
 	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_PanelSupervisor").c_str(), "Panel Supervisor", 800, 600));

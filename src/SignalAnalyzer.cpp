@@ -308,7 +308,7 @@ float SignalAnalyzer::FindOffsetVoltage(std::vector<float> a_vSamples, int a_iCh
 	int iEndIndex = 0;
 	
 	int iNumberOfSamplesInSection = (int) (a_vSamples.size() * Configuration::Instance().GetIdleLineDurationFraction());
-	float fMaximumAmplitude = Configuration::Instance().GetIdleFluctuationsAmplitude();
+	float fMaximumAmplitude = Configuration::Instance().GetIdleFluctuationsAmplitude() * Configuration::Instance().GetDigitizerResolution() / (Configuration::Instance().GetVoltMax() - Configuration::Instance().GetVoltMin());
 	bool bDone = false;
 	while (!bDone)
 	{
@@ -336,7 +336,7 @@ float SignalAnalyzer::FindOffsetVoltage(std::vector<float> a_vSamples, int a_iCh
 			{
 				fMinValueInSection = a_vSamples[i];
 			}
-			if( fMaximumAmplitude - fMinValueInSection > fMaximumAmplitude)
+			if( fMaxValueInSection - fMinValueInSection > fMaximumAmplitude)
 			{
 				break;
 			}
@@ -348,9 +348,9 @@ float SignalAnalyzer::FindOffsetVoltage(std::vector<float> a_vSamples, int a_iCh
 			return fAccumulator/(iEndIndex - iStartIndex);
 		}
 
+
 		iStartIndex = iEndIndex + 1;
 	}
-
 	//If no stable section found, return 0 and log.
 	Logger::Instance().AddMessage(std::string("On channel ") + std::to_string(a_iChannelNum) + std::string(", stable section not found. Reference voltage is assumed 0."));
 	Logger::Instance().SetWriteCurrentMessage();
@@ -536,27 +536,37 @@ void SignalAnalyzer::MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer)
 
 void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels)
 {
-	Channels_t vNormalizedChannels = NormalizeChannels(a_vChannels);
 	if (m_iFlags & AnalysisFlags::ETriggerTimingSupervisor)
 	{
 		m_pTriggerTimingSupervisor->GotTrigger(a_timeStamp);
 	}
 	if (m_iFlags & AnalysisFlags::EPanelSupervisor)
 	{
+		bool bEventEmpty = false;
+
 		if(a_vChannels.size() == 1)
 		{
 			if(a_vChannels[0].size() == 1)
 			{
-				ProcessEvents();
-				return;
+				bEventEmpty = true;
 			}
+		}
+		
+		Channels_t vNormalizedChannels;
+		if(!bEventEmpty)
+		{
+			 vNormalizedChannels = NormalizeChannels(a_vChannels);
 		}
 
 		int i = 0;
 		for (auto it: Configuration::Instance().GetRanges())
 		{
-			FindOriginalPulseInChannelRange(vNormalizedChannels, it.second);
-			m_vpPanelSupervisors[i]->GotEvent(a_timeStamp, m_markers.m_vChannelsWithPulse);
+			m_vpPanelSupervisors[i]->GotTrigger();
+			if (!bEventEmpty)
+			{
+				FindOriginalPulseInChannelRange(vNormalizedChannels, it.second);
+				m_vpPanelSupervisors[i]->GotEvent(a_timeStamp, m_markers.m_vChannelsWithPulse);
+			}
 			i++;
 		}
 		

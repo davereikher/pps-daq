@@ -13,6 +13,7 @@ class PanelSupervisor
 public:	
 	PanelSupervisor(std::string a_sPanelName);
 	void GotEvent(nanoseconds a_eventTime, std::vector<int> a_vChannelsWithPulse);
+	void GotTrigger();
 private:
 	void InitGraphics();
 	void AddToChannelsHistogram(std::vector<int>& a_vChannels);
@@ -22,4 +23,6 @@ private:
 	TGraph* m_pSimultaneousChannelGraph;
 	TH1* m_pChannelsHist;
 	std::string m_sPanelName;
+	int m_iTriggerCount;
+	int m_iEventCount;
 };
