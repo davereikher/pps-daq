@@ -10,7 +10,7 @@ public:
 	DigitizerManager(EventHandler& a_handler);
 	~DigitizerManager();
 	void InitAndConfigure();
-	void PrintBoardInfo(CAEN_DGTZ_BoardInfo_t& a_boardInfo);
+	void PrintBoardInfo();
 	void Start();
 	int Acquire();
 private:

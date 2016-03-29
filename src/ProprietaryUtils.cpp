@@ -91,4 +91,16 @@ int Proprietary1742Utils::SetSamplingFrequency(int a_iHandle, unsigned int a_iFr
 	return 0;
 }
 
+int Proprietary1742Utils::GetMezzanineBoardRevision(int a_iHandle)
+{
+	unsigned int data = 0;
+	int ret = CAEN_DGTZ_ReadRegister(a_iHandle, CAEN_DGTZ_CHANNEL_STATUS_BASE_ADDRESS, &data);
+	if (ret != 0)
+	{
+		printf("GetMezzanineBoardRevision (ReadRegister) failed with error %d\n", ret);
+		return -1;
+	}
+	return (data & 0x00000200) >> 9;
+
+}
 

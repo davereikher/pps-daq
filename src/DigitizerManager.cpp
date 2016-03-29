@@ -118,22 +118,24 @@ DigitizerManager::~DigitizerManager()
 #define COMBINE(X,Y) COMBINE1(X,Y)
 #define ASSERT_SUCCESS(action, message) int COMBINE(err,__LINE__); if((COMBINE(err,__LINE__) = (action))!=CAEN_DGTZ_Success) { throw InitException(__LINE__, (message), COMBINE(err,__LINE__)); }
 
-void DigitizerManager::PrintBoardInfo(CAEN_DGTZ_BoardInfo_t& a_boardInfo)
+void DigitizerManager::PrintBoardInfo()
 {
-	printf("\nConnected to CAEN Digitizer Model %s\n", a_boardInfo.ModelName);
-	printf("\tROC FPGA Release is %s\n", a_boardInfo.ROC_FirmwareRel);
-	printf("\tAMC FPGA Release is %s\n", a_boardInfo.AMC_FirmwareRel);
+	CAEN_DGTZ_BoardInfo_t boardInfo;
+	ASSERT_SUCCESS(CAEN_DGTZ_GetInfo(m_iHandle, &boardInfo), "Failed to get digitizer  info");
+	printf("\nConnected to CAEN digitizer model %s\n", boardInfo.ModelName);
+	printf("\tROC FPGA release is %s\n", boardInfo.ROC_FirmwareRel);
+	printf("\tAMC FPGA release is %s\n", boardInfo.AMC_FirmwareRel);
+	int iBoardRev = -1;
+	iBoardRev = Proprietary1742Utils::GetMezzanineBoardRevision(m_iHandle);
+	printf("Mezzanine board revision is %d\n", iBoardRev);
 }
 
 void DigitizerManager::InitAndConfigure()
 {
-	CAEN_DGTZ_BoardInfo_t BoardInfo;
 
 	ASSERT_SUCCESS(CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_USB,0,0,BOARD_ADDRESS,&m_iHandle), "Failed to open digitizer");
-	
-	ASSERT_SUCCESS(CAEN_DGTZ_GetInfo(m_iHandle, &BoardInfo), "Failed to get digitizer  info");
-
-	PrintBoardInfo(BoardInfo);
+		
+	PrintBoardInfo();
 
 	ASSERT_SUCCESS(CAEN_DGTZ_Reset(m_iHandle), "Failed to reset digitizer");
 //	ret = CAEN_DGTZ_SetRecordLength(m_iHandle,4096);                                /* Set the lenght of each waveform (in samples) */

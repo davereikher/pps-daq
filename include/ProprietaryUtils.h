@@ -15,5 +15,6 @@ public:
 //	Setters:
 	static int SetGroupEnableMask(int a_iHandle, bool a_iGroup0, bool a_iGroup1, bool a_iGroup2, bool a_iGroup3);
 	static int SetSamplingFrequency(int a_iHandle, unsigned int a_iFrequency); //Frequency is the CAEN_DGTZ_DRS4_Frequency_t enum
+	static int GetMezzanineBoardRevision(int a_iHandle);
 	
 };
