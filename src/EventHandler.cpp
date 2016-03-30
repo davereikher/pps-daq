@@ -18,8 +18,8 @@
 #define FILE_NAME_FORMAT "pps-events-%d.root"
 #define TOTAL_NUM_OF_CHANNELS MAX_X742_GROUP_SIZE * (MAX_X742_CHANNEL_SIZE - 1)
 
-EventHandler::EventHandler(std::string a_sRootOutFolder):
-m_pRootFile(new TFile(GenerateFileName(a_sRootOutFolder).c_str(), "RECREATE","", 3)),
+EventHandler::EventHandler(std::string a_sRootFileName):
+m_pRootFile(new TFile(a_sRootFileName.c_str(), "RECREATE","", 3)),
 m_pRootTree(new TTree(TREE_NAME, TREE_DESCRIPTION)),
 m_bEventAddrSet(false),
 m_bEventInfoSet(false),
@@ -130,28 +130,6 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventT
 
 
 	m_pRootTree->Fill();	
-}
-
-std::string EventHandler::GenerateFileName(std::string a_sRootOutFolder)
-{
-	char sFileName [NAME_MAX];
-	if (snprintf(sFileName, NAME_MAX, FILE_NAME_FORMAT, (int)time(0)) <= 0)
-	{
-		throw EventHandlerException(__LINE__, "TFile name generation failed");
-	}
-
-	std::string sStr = a_sRootOutFolder;
-
-	if(sStr[sStr.size() - 1] != '/')
-	{
-		sStr += "/";
-	}
-
-	sStr += sFileName;
-
-	std::cout << "Acquired data is stored in " << sStr << std::endl;
-	
-	return sStr;
 }
 
 EventHandler::~EventHandler()

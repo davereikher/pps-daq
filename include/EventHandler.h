@@ -15,19 +15,15 @@ using namespace std;
 class EventHandler
 {
 public:
-	EventHandler(/*int argc, char** argv*/std::string a_sRootOutFolder);
+	EventHandler(std::string a_sRootFileName);
 	~EventHandler();
 	void Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventTime);
-/*	void SetEventAddress();
-	void SetEventInfoAddress();*/
 	void Stop();
 	void ProcessEvents();
 
 private:
 	void PerformIntermediateAnalysis(nanoseconds a_eventTime);
 	void PrintEventInfo(CAEN_DGTZ_EventInfo_t* p_eventInfo);
-//	void AssertReady();
-	std::string GenerateFileName(std::string a_sRootOutFolder);
 	static void MainAnalysisThreadFunc(EventHandler* a_pEventHandler);
 	bool IsEventEmpty();
 
@@ -40,7 +36,6 @@ private:
 	unsigned int m_iNowLSB;
 	bool m_bEventAddrSet;
 	bool m_bEventInfoSet;
-//	bool m_bEventEmpty;
 	std::unique_ptr<SignalAnalyzer> m_pSignalAnalyzer;
 	int m_iEventCounter;
 };

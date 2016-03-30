@@ -7,6 +7,7 @@
 #include "TApplication.h"
 #include "Configuration.h"
 #include "Logger.h"
+#include "CommonUtils.h"
 
 int checkCommand() {
 	int c = 0;
@@ -24,15 +25,42 @@ int checkCommand() {
 
 void Usage(char* a_pProcName)
 {
-	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to folder where output root file will be saved> <path to log file>" << std::endl;
+	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to out folder> <description (surrounded by quotes)>" << std::endl;
 }
 
 
+std::pair<std::string, std::string> GenerateFiles(std::string a_sPath)
+{
+	if(a_sPath[a_sPath.size() - 1] != '/')
+	{
+		a_sPath += '/';
+	}
+
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+	
+	time (&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	strftime(buffer,80,"%Y-%m-%d-%I-%M-%S",timeinfo);
+
+	a_sPath += buffer;
+	
+	if (CommonUtils::MkPath(a_sPath.c_str(), 0755) != 0)
+	{
+		printf("Failed to generate out path\n");
+		exit(1);
+	}
+	
+	std::string sLogFile = a_sPath + "/log";
+	std::string sRootFile = a_sPath + "/data.root";
+
+	return std::make_pair(sLogFile, sRootFile);
+}
+
 int main(int argc, char** argv)
 {
-	//The constructor of TApplication causes a segmentation violation, so we instantiate it on the heap and not delete it at the end. This is bad, but not fatal.
-//	TApplication* pApplication = new TApplication("app",&argc,argv);
-	
 	if (argc < 3)
 	{
 		Usage(argv[0]);
@@ -41,23 +69,20 @@ int main(int argc, char** argv)
 
 	try
 	{
-		printf("size of int64: %d, %d", sizeof(uint64_t), sizeof(int64_t));
+		std::pair<std::string, std::string> fileNames = GenerateFiles(argv[2]);
 		int c = 0;
 		Configuration::Instance().LoadConfiguration(argv[1]);
-		//TODO: generate log file automatically. Fix the bug that root file path doesn't appear in log file by moving the log init into EventHandler and generating the log file name automatically, based on the root file name.
-		Logger::Instance().Init(argv[3], argv[2]);
+		Logger::Instance().Init(fileNames.first);
 		Logger::Instance().AddNecessaryMessage(Configuration::Instance().GetDump());
-		EventHandler eventHandler(argv[2]);
+		Logger::Instance().AddNecessaryMessage((std::string("\n\nSetup Description:\n---------------------\n ") + argv[3] + "\n\n").c_str());
+		EventHandler eventHandler(fileNames.second);
 		DigitizerManager digitizerManager(eventHandler);
 		digitizerManager.InitAndConfigure();
 		digitizerManager.Start();
 		int i = 0;
-		while (/*i < 10*/ true)
+		while ( true)
 		{
-			if(digitizerManager.Acquire() > 0)
-			{
-		//		i++;
-			}
+			digitizerManager.Acquire();
 			c = checkCommand();
 			if (c == 1) break;
 		}

@@ -6,7 +6,7 @@ class Logger
 public:
 	static Logger& Instance();
 	Logger();
-	void Init(std::string a_sFilePath, std::string a_sRootFile);
+	void Init(std::string a_sFilePath);
 	void NewEntry(int a_iEntryNum);
 	void SetWriteCurrentMessage();
 	void AddNecessaryMessage(std::string a_sMessage);

@@ -26,7 +26,7 @@ int checkCommand() {
 
 void Usage(char* a_pProcName)
 {
-	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to root file> <path to log file>" << std::endl;
+	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to root file> <path to new log file>" << std::endl;
 	std::vector<float> vec = CommonUtils::GenerateTimeSequence(5);
 }
 
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 
 	std::string sRootFileName(argv[2]);
 	
-	Logger::Instance().Init(argv[3], sRootFileName);
+	Logger::Instance().Init(argv[3]);
 	Logger::Instance().AddNecessaryMessage(Configuration::Instance().GetDump());
 
 	SignalAnalyzer sigAnalyzer;

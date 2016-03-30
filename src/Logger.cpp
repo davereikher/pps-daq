@@ -16,7 +16,7 @@ m_iCurrentEntry(0)
 {
 }
 
-void Logger::Init(std::string a_sFilePath, std::string a_sRootFile)
+void Logger::Init(std::string a_sFilePath)
 {
 	m_pFile = fopen(a_sFilePath.c_str(), "w");
 	if (NULL == m_pFile)
@@ -25,7 +25,7 @@ void Logger::Init(std::string a_sFilePath, std::string a_sRootFile)
 		//TODO: exception?
 		exit(1);
 	}
-	std::string sInitialMsg = std::string("PPS log. Corresponding root file: ") + a_sRootFile + "\n";
+	std::string sInitialMsg = std::string("PPS log") + "\n\n";
 	fwrite(sInitialMsg.c_str(), sInitialMsg.size(), 1, m_pFile);
 	m_bIsInit = true;
 }
