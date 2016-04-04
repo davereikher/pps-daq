@@ -19,6 +19,8 @@ private:
 	void AddToSimultaneousChannelsPlot(nanoseconds a_eventTime, int a_iNumberOfSimultaneousChannels);*/
 private:
 	std::unique_ptr<TCanvas> m_pCanvas;
+	std::unique_ptr<TCanvas> m_pLineTimingCanvas;
 	TH1* m_pTimingHist;
+	std::map<int, TH1*> m_vpLineHistograms;
 	std::string m_sPanelName;
 };
