@@ -69,23 +69,36 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 				std::vector<float> vTimeSeq = CommonUtils::GenerateTimeSequence(iNumOfSamples, m_fSamplingFreqGHz);
 				for (int counter = 0; counter < iNumOfSamples; counter++)
 				{
-					pGr->SetLineWidth(1);
 					pGr->SetPoint(counter, vTimeSeq[counter], TransformToVoltage(a_channels[chanIt][counter]));
 				}
 
 				m_vpGraph[chanIt] = pGr;
 				pGr->SetLineColor(m_colors[i%(sizeof(m_colors)/sizeof(int))]);
-				std::string sMultiGraphTitle = std::string("Panel ") + rangeIt.first;
-				pGr->SetName((m_sInstanceName + std::string("Panel_") + rangeIt.first).c_str());
+				pGr->SetName((m_sInstanceName + std::string("Pan_") + rangeIt.first + std::string("chan_") + std::to_string(chanIt)).c_str());
 				std::string sGraphTitle = std::string("Channel ") + std::to_string(chanIt);
 				pGr->SetTitle(sGraphTitle.c_str());
 				legend->AddEntry(pGr,std::to_string(chanIt).c_str(), "l");
 		
 				pMg->Add(pGr);
-				pMg->SetTitle(sMultiGraphTitle.c_str());
 				i++;
 			}
 			
+			int iNumOfSamples = a_channels[a_channels.size() - 1].size();
+			m_vpGraphPrecisionTrigger = new TGraph(iNumOfSamples);
+			std::vector<float> vTimeSeq = CommonUtils::GenerateTimeSequence(iNumOfSamples, m_fSamplingFreqGHz);
+			for (int counter = 0; counter < iNumOfSamples; counter++)
+			{
+				m_vpGraphPrecisionTrigger->SetPoint(counter, vTimeSeq[counter], TransformToVoltage(a_channels[a_channels.size() - 1][counter]));
+			}
+			
+			m_vpGraphPrecisionTrigger->SetName((m_sInstanceName + std::string("Pan_") + rangeIt.first + "_Trig").c_str());	
+			m_vpGraphPrecisionTrigger->SetTitle("Trigger");
+			legend->AddEntry(m_vpGraphPrecisionTrigger,"Trigger", "l");
+			pMg->Add(m_vpGraphPrecisionTrigger);
+			
+			std::string sMultiGraphTitle = std::string("Panel ") + rangeIt.first;
+			pMg->SetTitle(sMultiGraphTitle.c_str());
+
 			pMg->Draw("AL");
 			pMg->GetXaxis()->SetTitle("Time [nanoseconds]");
 			pMg->GetXaxis()->CenterTitle();
@@ -109,17 +122,19 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 			for (auto& chanIt: rangeIt.second)
 			{
 				//TODO: num of samples is constant per run at least!
+				m_vpGraph[chanIt]->SetLineWidth(1);
 				int iNumOfSamples = a_channels[chanIt].size();	
 				std::vector<float> vTimeSeq = CommonUtils::GenerateTimeSequence(iNumOfSamples, m_fSamplingFreqGHz);	
 				for (int counter = 0; counter < iNumOfSamples; counter++)
 				{
-					m_vpGraph[chanIt]->SetLineWidth(1);
-					double x = -1, y = -1;
-					int err = 0;
-					err = m_vpGraph[chanIt]->GetPoint(counter, x, y);
 					(m_vpGraph[chanIt]->GetY())[counter] = TransformToVoltage(a_channels[chanIt][counter]);
-					err = m_vpGraph[chanIt]->GetPoint(counter, x, y);
 				}
+
+				for (int counter = 0; counter < iNumOfSamples; counter++)
+				{
+					(m_vpGraphPrecisionTrigger->GetY())[counter] = TransformToVoltage(a_channels[a_channels.size() - 1][counter]);
+				}
+	
 				gPad->Modified();
 			}
 

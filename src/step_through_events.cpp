@@ -72,8 +72,10 @@ int main(int argc, char* argv[])
 		
 	//		pltNotNormalized.PlotRanges(*channels, ranges, "");
 			plt.PlotRanges(vNormalizedChannels, ranges, std::string("Event  ") + std::to_string(i)); 
-			sigAnalyzer.FindOriginalPulseInChannelRange(vNormalizedChannels, ranges["A"]);
+			sigAnalyzer.FindOriginalPulseInChannelRange(vNormalizedChannels, ranges["H"]);
 	//		sigAnalyzerNotNormalized.FindOriginalPulseInChannelRange(*channels, ranges["A"]);
+			plt.AddAnalysisMarkers(1, sigAnalyzer.GetAnalysisMarkers());
+			sigAnalyzer.FindOriginalPulseInChannelRange(vNormalizedChannels, ranges["A"]);
 			plt.AddAnalysisMarkers(0, sigAnalyzer.GetAnalysisMarkers());
 	//		pltNotNormalized.AddAnalysisMarkers(0, sigAnalyzerNotNormalized.GetAnalysisMarkers());
 			plt.Wait();

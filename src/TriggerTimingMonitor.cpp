@@ -1,7 +1,7 @@
-#include "TriggerTimingSupervisor.h"
+#include "TriggerTimingMonitor.h"
 #include "Configuration.h"
 
-TriggerTimingSupervisor::TriggerTimingSupervisor(milliseconds a_periodDuration):
+TriggerTimingMonitor::TriggerTimingMonitor(milliseconds a_periodDuration):
 m_periodDuration(a_periodDuration),
 m_lastTriggerTime(0),
 m_iTriggersAccumulator(0),
@@ -9,7 +9,7 @@ m_iDrawAfterNumOfEvents(Configuration::Instance().GetNumberOfEventsToDrawAfter()
 m_iNumOfEventsAccumulator(0)
 {}
 
-void TriggerTimingSupervisor::GotTrigger(nanoseconds a_eventTime)
+void TriggerTimingMonitor::GotTrigger(nanoseconds a_eventTime)
 {
 	if(m_pCanvas == NULL)
 	{
@@ -40,9 +40,9 @@ void TriggerTimingSupervisor::GotTrigger(nanoseconds a_eventTime)
 	}
 }
 
-void TriggerTimingSupervisor::InitGraphics()
+void TriggerTimingMonitor::InitGraphics()
 {
-	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas("TriggerSupervisor", "Trigger Supervisor", 800, 600));
+	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas("TriggerMonitor", "Trigger Monitor", 800, 600));
 	m_pRateGraph = new TGraph(0);
 	char sNum[10];
 	snprintf(sNum, 10, "%d", (int)(m_periodDuration.count() / (1e3)));
@@ -54,7 +54,7 @@ void TriggerTimingSupervisor::InitGraphics()
 	m_pCanvas->Divide(1,2);
 }
 
-void TriggerTimingSupervisor::AddDurationToHistogram(nanoseconds a_eventTime)
+void TriggerTimingMonitor::AddDurationToHistogram(nanoseconds a_eventTime)
 {
 	m_pCanvas->cd(1);
 	duration<float> fsec = a_eventTime - m_lastTriggerTime;
@@ -66,7 +66,7 @@ void TriggerTimingSupervisor::AddDurationToHistogram(nanoseconds a_eventTime)
 	
 }
 
-void TriggerTimingSupervisor::AddPointToRatePlot(nanoseconds a_eventTime)
+void TriggerTimingMonitor::AddPointToRatePlot(nanoseconds a_eventTime)
 {
 	m_pCanvas->cd(2);
 	float fRate = float(m_iTriggersAccumulator) / duration_cast<seconds>(a_eventTime - m_periodStartTime).count();
@@ -79,7 +79,7 @@ void TriggerTimingSupervisor::AddPointToRatePlot(nanoseconds a_eventTime)
 	m_pRateGraph->Draw("ALP");
 }
 
-void TriggerTimingSupervisor::Flush()
+void TriggerTimingMonitor::Flush()
 {
 	m_pCanvas->Update();
 }

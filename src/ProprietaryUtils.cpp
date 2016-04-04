@@ -104,3 +104,22 @@ int Proprietary1742Utils::GetMezzanineBoardRevision(int a_iHandle)
 
 }
 
+int Proprietary1742Utils::TurnOnFastTriggerDigitizing(int a_iHandle)
+{
+	unsigned int data = 0;
+	unsigned int read_data = 0;
+	int ret = CAEN_DGTZ_ReadRegister(a_iHandle, CAEN_DGTZ_BROAD_CH_CTRL_ADD, &read_data);
+	if (ret != 0)
+	{
+		return ret;
+	}
+
+	data = read_data | 0x00000800;
+	
+	ret = CAEN_DGTZ_WriteRegister(a_iHandle, CAEN_DGTZ_BROAD_CH_CTRL_ADD, data);
+	if (ret != 0)
+	{
+		return ret;
+	}
+	return 0;
+}

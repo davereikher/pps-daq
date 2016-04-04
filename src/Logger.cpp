@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <stdint.h>
 #include "Logger.h"
 
 Logger Logger::m_instance;
@@ -26,7 +27,7 @@ void Logger::Init(std::string a_sFilePath)
 		exit(1);
 	}
 	std::string sInitialMsg = std::string("PPS log") + "\n\n";
-	fwrite(sInitialMsg.c_str(), sInitialMsg.size(), 1, m_pFile);
+	Write(sInitialMsg);
 	m_bIsInit = true;
 }
 
@@ -37,7 +38,7 @@ void Logger::AddNecessaryMessage(std::string a_sMessage)
 		return;
 	}
 
-	fwrite(a_sMessage.c_str(), a_sMessage.size(), 1, m_pFile);
+	Write(a_sMessage);
 }
 
 void Logger::NewEntry(int a_iEntryNum)
@@ -85,4 +86,22 @@ Logger::~Logger()
 	}
 	Flush();	
 	fclose(m_pFile);
+}
+
+void Logger::Write(std::string a_sMessage)
+{
+	
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+	
+	time (&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	strftime(buffer,80,"%I-%M-%S",timeinfo);
+
+	a_sMessage = std::string(buffer) + "\t" + a_sMessage;
+
+	fwrite(a_sMessage.c_str(), a_sMessage.size(), 1, m_pFile);
+	Flush();
 }

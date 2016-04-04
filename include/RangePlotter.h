@@ -26,6 +26,7 @@ private:
 	float m_fMaxVoltage;
 	float m_fVoltageDivision;
 	std::map <int, TGraph*> m_vpGraph;
+	TGraph* m_vpGraphPrecisionTrigger;
 	std::vector <std::unique_ptr<TMultiGraph> > m_vpMultiGraph;
 	std::vector <std::unique_ptr<TLegend> > m_vpLegends;
 	std::string m_sInstanceName;

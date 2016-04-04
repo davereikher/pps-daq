@@ -8,10 +8,10 @@
 
 using namespace std::chrono;
 
-class PanelSupervisor
+class PanelMonitor
 {
 public:	
-	PanelSupervisor(std::string a_sPanelName);
+	PanelMonitor(std::string a_sPanelName);
 	void GotEvent(nanoseconds a_eventTime, std::vector<int> a_vChannelsWithPulse);
 	void GotTrigger();
 private:

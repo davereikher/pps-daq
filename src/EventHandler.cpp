@@ -31,7 +31,7 @@ m_iEventCounter(0)
 	m_pRootTree->Branch("ArrivalTimeMSB", &m_iNowMSB);
 	m_pRootTree->Branch("ArrivalTimeLSB", &m_iNowLSB);
 
-	m_pSignalAnalyzer->SetFlags(SignalAnalyzer::ETriggerTimingSupervisor | SignalAnalyzer::EAsynchronous | SignalAnalyzer::EPanelSupervisor);
+	m_pSignalAnalyzer->SetFlags(SignalAnalyzer::ETriggerTimingMonitor | SignalAnalyzer::EAsynchronous | SignalAnalyzer::EPanelHitMonitor);
 	m_pSignalAnalyzer->Start();
 }
 
@@ -87,10 +87,16 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventT
 	Logger::Instance().NewEntry(m_iEventCounter);
 	m_iEventCounter ++;
 	m_vChannels.clear();
+	int iPresentGroup = -1;
 	for (int iGroupCount = 0; iGroupCount < MAX_X742_GROUP_SIZE; iGroupCount++)
 	{
 		if(a_pEvent->GrPresent[iGroupCount])
 		{
+			if( iPresentGroup == -1)
+			{
+				iPresentGroup = iGroupCount;
+			}
+
 			//We loop until MAX_X742_CHANNEL_SIZE-1 because we're not interested in the group triggers, just the data on the channels.
 			for (int iChannelCount = 0; iChannelCount < MAX_X742_CHANNEL_SIZE - 1; iChannelCount ++)  
 			{
@@ -109,6 +115,20 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventT
 				m_vChannels.push_back(vChannel);
 			}
 		}
+
+	}
+	//Add precision trigger from one of the groups (they're all the same) to the end of the channels buffer (as channel 32)
+	if( iPresentGroup != -1 )
+	{
+		uint32_t iChannelSize = a_pEvent->DataGroup[iPresentGroup].ChSize[MAX_X742_CHANNEL_SIZE - 1];
+		float* pChannelPointer = a_pEvent->DataGroup[iPresentGroup].DataChannel[MAX_X742_CHANNEL_SIZE - 1];
+		std::vector<float> vChannel(pChannelPointer, pChannelPointer + iChannelSize);
+		m_vChannels.push_back(vChannel);
+	}
+	else
+	{
+		std::vector<float> vChannel;
+		m_vChannels.push_back(vChannel);
 	}
 
 	if (IsEventEmpty())
@@ -134,6 +154,7 @@ void EventHandler::Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventT
 
 EventHandler::~EventHandler()
 {
+	Stop();
 }
 
 bool EventHandler::IsEventEmpty()
@@ -142,8 +163,14 @@ bool EventHandler::IsEventEmpty()
 //	printf("fThreshold: %f\n", fThreshold);
 
 	bool bSomeSignalFound = false;
+	int i = 0;
 	for (auto& chan: m_vChannels)
 	{
+		if (i == m_vChannels.size() - 1)
+		{
+			//We've reached the trigger data
+			break;
+		}
 		float fMaxValue = FLT_MIN;
 		float fMinValue = FLT_MAX;
 		for (auto& sample: chan)
@@ -166,6 +193,7 @@ bool EventHandler::IsEventEmpty()
 				break;
 			}
 		}
+		i++;
 	}
 	return !bSomeSignalFound;
 }

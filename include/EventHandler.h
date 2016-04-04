@@ -32,6 +32,7 @@ private:
 	TTree* m_pRootTree;
 	//TODO: typedef this complex nested template
 	std::vector<std::vector<float> > m_vChannels;
+	std::vector<float> m_vPrecisionTrigger;
 	unsigned int m_iNowMSB;
 	unsigned int m_iNowLSB;
 	bool m_bEventAddrSet;

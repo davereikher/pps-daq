@@ -7,10 +7,10 @@
 
 using namespace std::chrono;
 
-class TriggerTimingSupervisor
+class TriggerTimingMonitor
 {
 public:
-	TriggerTimingSupervisor(milliseconds a_periodDuration);
+	TriggerTimingMonitor(milliseconds a_periodDuration);
 	void GotTrigger(nanoseconds a_eventTime);
 	void InitGraphics();
 	void AddDurationToHistogram(nanoseconds a_eventTime);

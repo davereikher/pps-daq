@@ -8,9 +8,10 @@
 #include <mutex>
 #include "Types.h"
 #include "Queue.h"
-#include "PanelSupervisor.h"
-#include "TriggerTimingSupervisor.h"
-#include "PanelSupervisor.h"
+#include "PanelMonitor.h"
+#include "TriggerTimingMonitor.h"
+#include "PanelMonitor.h"
+#include "PanelTimingMonitor.h"
 
 
 #define NO_PULSE_EDGE INT_MAX
@@ -67,6 +68,7 @@ public:
 		void SetMaxEdgeJitter(float a_fMaxEdgeJitterNs);
 		void SetMaxAmplitudeJitter(float a_fMaxAmplitudeJitterVolts);
 		void SetPulseStartThreshold(float a_fPulseStartThresholdVolts);
+		void SetTriggerThreshold(float a_fTriggerThresholdVolts);
 
 		Value GetPulseThreshold();
 		Value GetEdgeThreshold();
@@ -75,6 +77,7 @@ public:
 		Value GetMaxEdgeJitter();
 		Value GetMaxAmplitudeJitter();
 		Value GetPulseStartThreshold();
+		Value GetTriggerThreshold();
 
 	public:
 		float m_fVoltageDivisionVolts;
@@ -101,7 +104,10 @@ public:
 
 		int m_iPulseStartThreshold;
 		float m_fPulseStartThreshold;
-	
+		
+		int m_iTriggerThreshold;
+		float m_fTriggerThreshold;
+		
 		std::vector<std::tuple<Point, Point> > m_vChannelsEdgeAndMinimum;
 		std::vector<int> m_vChannelsWithPulse;
 	};
@@ -109,14 +115,16 @@ public:
 	enum AnalysisFlags
 	{
 		EAsynchronous = 1,
-		ETriggerTimingSupervisor = 2,
-		EPanelSupervisor = 4
+		ETriggerTimingMonitor = 2,
+		EPanelHitMonitor = 4,
+		EPanelTimingMonitor = 8
 	};
 public:
 	SignalAnalyzer();
 	std::tuple<Point, Point> FindLeadingEdgeAndPulseExtremum(std::vector<float>& a_samplesVector);
 	void FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels, std::vector<int>& a_vRange);
 	bool DoesRangeHaveSignal(Channels_t& a_vAllChannels, std::vector<int> a_vRange);
+	Point FindTriggerTime(Channels_t& a_vAllChannels);
 	void Analyze(nanoseconds a_eventTimeFromStart, Channels_t& a_vChannels);
 
 	AnalysisMarkers& GetAnalysisMarkers();
@@ -142,6 +150,7 @@ private:
 	std::thread m_analysisThread;
 	std::mutex m_mutex;
 	Queue<std::pair<nanoseconds, Channels_t> > m_queue;
-	std::unique_ptr<TriggerTimingSupervisor> m_pTriggerTimingSupervisor;
-	std::vector<std::unique_ptr<PanelSupervisor> > m_vpPanelSupervisors;
+	std::unique_ptr<TriggerTimingMonitor> m_pTriggerTimingMonitor;
+	std::vector<std::unique_ptr<PanelMonitor> > m_vpPanelMonitors;
+	std::vector<std::unique_ptr<PanelTimingMonitor> > m_vpPanelTimingMonitors;
 };

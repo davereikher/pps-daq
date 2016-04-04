@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <string.h>
 
 class Logger
 {
@@ -11,6 +12,7 @@ public:
 	void SetWriteCurrentMessage();
 	void AddNecessaryMessage(std::string a_sMessage);
 	void AddMessage(std::string a_sMessage);
+	void Write(std::string a_sMessage);
 	~Logger();
 private:
 	void Flush();

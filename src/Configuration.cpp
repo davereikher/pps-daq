@@ -156,3 +156,9 @@ float Configuration::GetPulseStartThresholdVolts()
 {
 	return m_configuration["pulse-start-threshold-volts"].asFloat();
 }
+
+float Configuration::GetTriggerThresholdVolts()
+{
+	return m_configuration["trigger-threshold-volts"].asFloat();
+}
+

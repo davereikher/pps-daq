@@ -177,7 +177,14 @@ void DigitizerManager::InitAndConfigure()
 	ASSERT_SUCCESS(CAEN_DGTZ_SetSWTriggerMode(m_iHandle,CAEN_DGTZ_TRGMODE_DISABLED), "Failed to set SW trigger mode to disabled")
 	ASSERT_SUCCESS(CAEN_DGTZ_SetMaxNumEventsBLT(m_iHandle,3), "Failed to set max num of events to be transferred");                           
 	ASSERT_SUCCESS(CAEN_DGTZ_SetAcquisitionMode(m_iHandle,CAEN_DGTZ_FIRST_TRG_CONTROLLED), "Failed to set acquisition mode");	
-	
+	int mode = -1;
+	CAEN_DGTZ_GetFastTriggerDigitizing(m_iHandle, (CAEN_DGTZ_EnaDis_t*)&mode);
+	printf("Digitizing before: %d\n", mode);
+//	ASSERT_SUCCESS(CAEN_DGTZ_SetFastTriggerDigitizing(m_iHandle, CAEN_DGTZ_ENABLE), "Failed to enable fast trigger digitizing");
+	ASSERT_SUCCESS(Proprietary1742Utils::TurnOnFastTriggerDigitizing(m_iHandle), "Failed to enable fast trigger digitizing");
+	mode = 2;
+	CAEN_DGTZ_GetFastTriggerDigitizing(m_iHandle, (CAEN_DGTZ_EnaDis_t*)&mode);
+	printf("Digitizing after: %d\n", mode);
 	uint32_t size = 0; //dummy variable. Not used.
 	ASSERT_SUCCESS(CAEN_DGTZ_MallocReadoutBuffer(m_iHandle,&m_pBuffer,&size), "Failed to allocate readout buffer");
 	ASSERT_SUCCESS(CAEN_DGTZ_AllocateEvent(m_iHandle, (void**)&m_pEvent), "Failed to allocate event");

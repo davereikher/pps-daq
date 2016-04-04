@@ -82,11 +82,19 @@ int main(int argc, char** argv)
 		int i = 0;
 		while ( true)
 		{
-			digitizerManager.Acquire();
+			try	
+			{
+				digitizerManager.Acquire();
+			}
+			catch (ExceptionBase& ex)
+			{
+				printf("%s\n", ex.What().c_str());
+				Logger::Instance().AddNecessaryMessage(ex.What() + "\n");
+				sleep(1);
+			}
 			c = checkCommand();
 			if (c == 1) break;
 		}
-		eventHandler.Stop();
 
 		std::cout << "Press 'q' again to quit..."<< std::endl;
 		fflush(stdout);

@@ -1,43 +1,43 @@
-#include "PanelSupervisor.h"
+#include "PanelTimingMonitor.h"
 #include "Logger.h"
 
-PanelSupervisor::PanelSupervisor(std::string a_sPanelName):
+PanelTimingMonitor::PanelTimingMonitor(std::string a_sPanelName):
 m_sPanelName(a_sPanelName)
 {}
 
-void PanelSupervisor::GotEvent(nanoseconds a_eventTime, std::vector<int> a_vChannelsWithPulse)
-{	
+void PanelTimingMonitor::GotEvent(int a_iChannelNum, float a_fTimeOfPulseEdge, float a_fPulseAmplitude, float a_fTriggerEdge)
+{
+	//printf("Got event");
 	if(m_pCanvas == NULL)
 	{
 		InitGraphics();
 	}
 	
-	AddToChannelsHistogram(a_vChannelsWithPulse);
-	AddToSimultaneousChannelsPlot(a_eventTime, a_vChannelsWithPulse.size());
+	//printf("Panel %s, time of pulse: %f, time of trigger: %f\n", m_sPanelName.c_str(), a_fTimeOfPulseEdge, a_fTriggerEdge);
+	m_pCanvas->cd();
+	m_pTimingHist->Fill(a_fTimeOfPulseEdge - a_fTriggerEdge);
+	m_pTimingHist->Draw();
+	m_pTimingHist->SetCanExtend(TH1::kXaxis);
 	m_pCanvas->Update();
 }
 
-void PanelSupervisor::GotTrigger()
+void PanelTimingMonitor::InitGraphics()
 {
-	
-}
-
-void PanelSupervisor::InitGraphics()
-{
-	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_PanelSupervisor").c_str(), "Panel Supervisor", 800, 600));
-	m_pSimultaneousChannelGraph = new TGraph(0);
+	printf("INITGRAPHICS\n");
+	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_PanelTimingMonitor").c_str(), "Panel Timing Monitor", 800, 600));
+	/*m_pSimultaneousChannelGraph = new TGraph(0);
 	m_pSimultaneousChannelGraph->SetTitle("Number of Channels w/ Simultaneously Detected Pulses per Event");
 	m_pSimultaneousChannelGraph->SetMarkerSize(1);
 	m_pSimultaneousChannelGraph->SetMarkerColor(4);
-	m_pSimultaneousChannelGraph->SetMarkerStyle(21);
-	m_pChannelsHist = new TH1F((m_sPanelName + "ChannelHist").c_str() , "Number of Primary Pulses vs Channel", 90, 0, 0);
-	m_pChannelsHist->SetFillColor(49);
+	m_pSimultaneousChannelGraph->SetMarkerStyle(21);*/
+	m_pTimingHist = new TH1F((m_sPanelName + "TimingHist").c_str() , "(Pulse Time) - (Trigger Time)", 100, 0, 0);
+	m_pTimingHist->SetFillColor(49);
 //	m_pChannelsHist->SetStats(0);
-	m_pCanvas->Divide(1,2);
+//	m_pCanvas->Divide(1,2);
 
 }
-
-void PanelSupervisor::AddToChannelsHistogram(std::vector<int>& a_vChannels)
+/*
+void PanelMonitor::AddToChannelsHistogram(std::vector<int>& a_vChannels)
 {
 	if(a_vChannels.size() == 0)
 	{
@@ -64,7 +64,7 @@ void PanelSupervisor::AddToChannelsHistogram(std::vector<int>& a_vChannels)
 	m_pChannelsHist->SetCanExtend(TH1::kXaxis);
 }
 
-void PanelSupervisor::AddToSimultaneousChannelsPlot(nanoseconds a_eventTime, int a_iNumberOfSimultaneousChannels)
+void PanelMonitor::AddToSimultaneousChannelsPlot(nanoseconds a_eventTime, int a_iNumberOfSimultaneousChannels)
 {
 	//Don't plot 0s (when no signals are detected at all). Not interesting.
 	if(a_iNumberOfSimultaneousChannels == 0)
@@ -80,4 +80,4 @@ void PanelSupervisor::AddToSimultaneousChannelsPlot(nanoseconds a_eventTime, int
 
 	m_pSimultaneousChannelGraph->Draw("AP");
 }
-
+*/
