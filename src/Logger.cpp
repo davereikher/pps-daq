@@ -73,8 +73,7 @@ void Logger::Flush()
 	if (m_bWriteCurrentMsg)
 	{
 		m_sCurrentMsg = "Entry No. " + std::to_string(m_iCurrentEntry) + "\n" + m_sCurrentMsg;
-		fwrite(m_sCurrentMsg.c_str(), m_sCurrentMsg.size(), 1, m_pFile);
-		fflush(m_pFile);
+		Write(m_sCurrentMsg);
 	}
 }
 
@@ -98,10 +97,10 @@ void Logger::Write(std::string a_sMessage)
 	time (&rawtime);
 	timeinfo = localtime(&rawtime);
 
-	strftime(buffer,80,"%I-%M-%S",timeinfo);
+	strftime(buffer,80,"%I:%M:%S",timeinfo);
 
 	a_sMessage = std::string(buffer) + "\t" + a_sMessage;
 
 	fwrite(a_sMessage.c_str(), a_sMessage.size(), 1, m_pFile);
-	Flush();
+	fflush(m_pFile);
 }

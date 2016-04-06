@@ -234,31 +234,36 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,
 	//However, if some of the bunched pulse's minimum values are too close to the lowest minimum value, we cannot definitely distinguish the original pulse. Therefore, we return all of them.
 	//Find all pulses the leading edges of which are within a window of size MAX_EDGE_JITTER and find the pulse with the largest amplitude.
 	std::vector<int> vChannelsWithBunchedPulses;
-	for (int i = 0; i < (int)m_markers.m_vChannelsEdgeAndMinimum.size(); i++)
+	for (auto& it: a_vRange)
+	/*for (int i = 0; i < (int)m_markers.m_vChannelsEdgeAndMinimum.size(); i++)*/
 	{
-		if(!(std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[i]).Exists()))
+		if(!(std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[it]).Exists()))
 		{
 			continue;
 		}
 
-		if ((std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[i]).GetXDiscrete() - iEarliestLeadingEdge) < m_markers.GetMaxEdgeJitter().Discrete())
+		if ((std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[it]).GetXDiscrete() - iEarliestLeadingEdge) < m_markers.GetMaxEdgeJitter().Discrete())
 		{
-			if (std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[i]).GetYDiscrete() < minPulseValue)
+			if (std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[it]).GetYDiscrete() < minPulseValue)
 			{
-				minPulseValue = std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[i]).GetYDiscrete();
+				minPulseValue = std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[it]).GetYDiscrete();
 			}
-			vChannelsWithBunchedPulses.push_back(i);
+			vChannelsWithBunchedPulses.push_back(it);
 		}
 	}
 	
 	//look for bunched minima of the pulse within the window MAX_AMPLITUDE_JITTER upwards from the lowest minimum:
-	for (auto& iChannelNum: vChannelsWithBunchedPulses)
+	printf("----\n");
+	for (auto& iChannel: vChannelsWithBunchedPulses)
 	{
-		if ((std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannelNum]).GetYDiscrete() - minPulseValue) <= m_markers.GetMaxAmplitudeJitter().Discrete())
+		if ((std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetYDiscrete() - minPulseValue) <= m_markers.GetMaxAmplitudeJitter().Discrete())
 		{
-			m_markers.m_vChannelsWithPulse.push_back(a_vRange[iChannelNum]);
+			m_markers.m_vChannelsWithPulse.push_back(iChannel);
+			printf("size of a_vRange: %d, iChannel: %d \n", a_vRange.size(), iChannel);
 		}	
 	}
+	printf("----\n");
+		
 }
 
 void SignalAnalyzer::Flush()
