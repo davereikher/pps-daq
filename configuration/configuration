@@ -18,7 +18,7 @@
 "max-amplitude-jitter-volts": 0.1,
 "trigger-threshold-volts" : -0.2,
 "digitizer-resolution-bits": 4095,
-"number-of-events-to-draw-after": 1000,
+"number-of-events-to-draw-after": 5,
 "trigger-rate-averaging-duration-seconds": 600,
 "normalize-channels": true
 }

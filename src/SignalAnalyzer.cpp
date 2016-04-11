@@ -253,16 +253,13 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,
 	}
 	
 	//look for bunched minima of the pulse within the window MAX_AMPLITUDE_JITTER upwards from the lowest minimum:
-	printf("----\n");
 	for (auto& iChannel: vChannelsWithBunchedPulses)
 	{
 		if ((std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetYDiscrete() - minPulseValue) <= m_markers.GetMaxAmplitudeJitter().Discrete())
 		{
 			m_markers.m_vChannelsWithPulse.push_back(iChannel);
-			printf("size of a_vRange: %d, iChannel: %d \n", a_vRange.size(), iChannel);
 		}	
 	}
-	printf("----\n");
 		
 }
 
