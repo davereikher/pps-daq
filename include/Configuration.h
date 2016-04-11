@@ -12,22 +12,22 @@ public:
 	Configuration();
 	void LoadConfiguration(const char* a_pFilename);
 	std::map<std::string, std::vector<int> > GetRanges();
-	float GetPulseThresholdVolts();
-	float GetEdgeThresholdVolts();
+	float GetPulseThresholdVolts(std::string a_sPanelName);
+	float GetEdgeThresholdVolts(std::string a_sPanelName);
 	float GetVoltMin();
 	float GetVoltMax();
 	int GetDigitizerResolution();
-	float GetExpectedPulseWidthNs();
-	float GetMinEdgeSeparationNs();
-	float GetMaxEdgeJitterNs();
-	float GetMaxAmplitudeJitterVolts();
+	float GetExpectedPulseWidthNs(std::string a_sPanelName);
+	float GetMinEdgeSeparationNs(std::string a_sPanelName);
+	float GetMaxEdgeJitterNs(std::string a_sPanelName);
+	float GetMaxAmplitudeJitterVolts(std::string a_sPanelName);
 	float GetSamplingFreqGHz();
 	int GetNumberOfEventsToDrawAfter();
 	seconds GetTriggerRateAveragingDurationSecs();
 	float GetIdleFluctuationsAmplitude();
 	float GetIdleLineDurationFraction();
 	bool ShouldNormalizeChannels();
-	float GetPulseStartThresholdVolts();
+	float GetPulseStartThresholdVolts(std::string a_sPanelName);
 	float GetTriggerThresholdVolts();
 
 

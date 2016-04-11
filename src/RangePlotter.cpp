@@ -156,9 +156,11 @@ void RangePlotter::AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::Analysi
 {
 
 	m_pCanvas->cd(a_iPanelIndex + 1);
+//	printf("pulse threshold: %f\n", a_analysisMarkers.GetPulseThreshold().Continuous());
 	TLine* pulseThresholdLine = new TLine(0, a_analysisMarkers.GetPulseThreshold().Continuous(), m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax(), a_analysisMarkers.GetPulseThreshold().Continuous());
 	pulseThresholdLine->SetLineStyle(2);
 	pulseThresholdLine->SetBit(kCanDelete);
+//	printf("edge threshold: %f\n", a_analysisMarkers.GetEdgeThreshold().Continuous());
 	TLine* edgeThresholdLine = new TLine(0, a_analysisMarkers.GetEdgeThreshold().Continuous(), m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax(), a_analysisMarkers.GetEdgeThreshold().Continuous());
 	edgeThresholdLine->SetLineStyle(2);
 	edgeThresholdLine->SetBit(kCanDelete);

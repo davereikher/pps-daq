@@ -12,6 +12,7 @@
 #include "TriggerTimingMonitor.h"
 #include "PanelMonitor.h"
 #include "PanelTimingMonitor.h"
+#include "TrackMonitor.h"
 
 
 #define NO_PULSE_EDGE INT_MAX
@@ -114,16 +115,17 @@ public:
 
 	enum AnalysisFlags
 	{
-		EAsynchronous = 1,
-		ETriggerTimingMonitor = 2,
-		EPanelHitMonitor = 4,
-		EPanelTimingMonitor = 8
+		EAsynchronous = 0x00000001,
+		ETriggerTimingMonitor = 0x00000002,
+		EPanelHitMonitor = 0x00000004,
+		EPanelTimingMonitor = 0x00000008,
+		ETrackMonitor = 0x00000010
 	};
 public:
 	SignalAnalyzer();
 	std::tuple<Point, Point> FindLeadingEdgeAndPulseExtremum(std::vector<float>& a_samplesVector);
-	void FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels, std::vector<int>& a_vRange);
-	bool DoesRangeHaveSignal(Channels_t& a_vAllChannels, std::vector<int> a_vRange);
+	void FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels, std::string a_sPanelName, std::vector<int>& a_vRange);
+//	bool DoesRangeHaveSignal(Channels_t& a_vAllChannels, std::vector<int> a_vRange);
 	Point FindTriggerTime(Channels_t& a_vAllChannels);
 	void Analyze(nanoseconds a_eventTimeFromStart, Channels_t& a_vChannels);
 
@@ -135,6 +137,7 @@ public:
 	float FindOffsetVoltage(std::vector<float> a_vSamples, int a_iChannelNum);
 	Channels_t NormalizeChannels(Channels_t& a_vChannels);
 	void ProcessEvents();
+	void Configure(std::string a_sPanelName);
 
 private:
 	static void MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer);
@@ -142,6 +145,7 @@ private:
 
 private:
 	AnalysisMarkers m_markers;
+	Range_t m_vRanges;
 	float m_fTimeDivisionNs;
 	float m_fVoltageDivisionVolts;
 	float m_fVoltageStartVolts;
@@ -153,4 +157,5 @@ private:
 	std::unique_ptr<TriggerTimingMonitor> m_pTriggerTimingMonitor;
 	std::vector<std::unique_ptr<PanelMonitor> > m_vpPanelMonitors;
 	std::vector<std::unique_ptr<PanelTimingMonitor> > m_vpPanelTimingMonitors;
+	std::unique_ptr<TrackMonitor> m_pTrackMonitor;
 };

@@ -40,32 +40,39 @@ m_pTriggerTimingMonitor(new TriggerTimingMonitor(milliseconds(Configuration::Ins
 
 	m_markers.ConfigureVoltageConversion(m_fVoltageStartVolts, Configuration::Instance().GetVoltMax(), Configuration::Instance().GetDigitizerResolution());
 	m_markers.ConfigureTimeConversion(Configuration::Instance().GetSamplingFreqGHz());
-	
-	m_markers.SetPulseThreshold(Configuration::Instance().GetPulseThresholdVolts());
-	m_markers.SetEdgeThreshold(Configuration::Instance().GetEdgeThresholdVolts());
-	m_markers.SetExpectedPulseWidth(Configuration::Instance().GetExpectedPulseWidthNs());
-	m_markers.SetMinEdgeSeparation(Configuration::Instance().GetMinEdgeSeparationNs());
-	m_markers.SetMaxEdgeJitter(Configuration::Instance().GetMaxEdgeJitterNs());
-	m_markers.SetMaxAmplitudeJitter(Configuration::Instance().GetMaxAmplitudeJitterVolts());
-	m_markers.SetPulseStartThreshold(Configuration::Instance().GetPulseStartThresholdVolts());
 	m_markers.SetTriggerThreshold(Configuration::Instance().GetTriggerThresholdVolts());
-
-	for (auto it : Configuration::Instance().GetRanges())
+	
+	m_vRanges = Configuration::Instance().GetRanges();
+	
+	for (auto it : m_vRanges)
 	{
 		printf("Pushing P.S. for %s\n", it.first.c_str());
 		m_vpPanelMonitors.push_back(std::unique_ptr<PanelMonitor>(new PanelMonitor(it.first)));
 	}
-	for (auto it : Configuration::Instance().GetRanges())
+	for (auto it : m_vRanges)
 	{
 		m_vpPanelTimingMonitors.push_back(std::unique_ptr<PanelTimingMonitor>(new PanelTimingMonitor(it.first)));
 	}
 
-	printf("PULSE_THRESHOLD: %f, %d\n", m_markers.GetPulseThreshold().Continuous(), m_markers.GetPulseThreshold().Discrete());
+}
+
+void SignalAnalyzer::Configure(std::string a_sPanelName)
+{	
+//	printf("configuring panel %s\n", a_sPanelName.c_str());
+	m_markers.SetPulseThreshold(Configuration::Instance().GetPulseThresholdVolts(a_sPanelName));
+	m_markers.SetEdgeThreshold(Configuration::Instance().GetEdgeThresholdVolts(a_sPanelName));
+	m_markers.SetExpectedPulseWidth(Configuration::Instance().GetExpectedPulseWidthNs(a_sPanelName));
+	m_markers.SetMinEdgeSeparation(Configuration::Instance().GetMinEdgeSeparationNs(a_sPanelName));
+	m_markers.SetMaxEdgeJitter(Configuration::Instance().GetMaxEdgeJitterNs(a_sPanelName));
+	m_markers.SetMaxAmplitudeJitter(Configuration::Instance().GetMaxAmplitudeJitterVolts(a_sPanelName));
+	m_markers.SetPulseStartThreshold(Configuration::Instance().GetPulseStartThresholdVolts(a_sPanelName));
+
+/*	printf("PULSE_THRESHOLD: %f, %d\n", m_markers.GetPulseThreshold().Continuous(), m_markers.GetPulseThreshold().Discrete());
 	printf("EDGE_THRESHOLD: %f, %d\n", m_markers.GetEdgeThreshold().Continuous(), m_markers.GetEdgeThreshold().Discrete());
 	printf("EXPECTED_PULSE_WIDTH: %f, %d\n", m_markers.GetExpectedPulseWidth().Continuous(), m_markers.GetExpectedPulseWidth().Discrete());
 	printf("MIN_EDGE_SEPARATION: %f, %d\n", m_markers.GetMinEdgeSeparation().Continuous(), m_markers.GetMinEdgeSeparation().Discrete());
 	printf("MAX_EDGE_JITTER: %f, %d\n", m_markers.GetMaxEdgeJitter().Continuous(), m_markers.GetMaxEdgeJitter().Discrete());
-	printf("MAX_AMPLITUDE_JITTER: %f, %d\n", m_markers.GetMaxAmplitudeJitter().Continuous(), m_markers.GetMaxAmplitudeJitter().Discrete());
+	printf("MAX_AMPLITUDE_JITTER: %f, %d\n", m_markers.GetMaxAmplitudeJitter().Continuous(), m_markers.GetMaxAmplitudeJitter().Discrete());*/
 }
 
 void SignalAnalyzer::Start()
@@ -174,7 +181,7 @@ The result, a vector of channels containing the original pulse (ideally there wi
 @param a_vAllChannels - a vector of all 32 channels, where each item is a vector of samples from that channel.
 @param a_vRange - a vector of indices of the interesting channels in the first parameter.
 */
-void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,  std::vector<int>& a_vRange)
+void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,  std::string a_sPanelName, std::vector<int>& a_vRange)
 {
 
 	//Get all channels in the provided range, find the leading edge and minimum value of the pulses and store the result in a vector of tuples. Also, find the earliest and next-to-earliest leading edge in the channels in the range.
@@ -183,8 +190,8 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,
 	int iEarliestLeadingEdgeIndex = -1;
 	m_markers.m_vChannelsWithPulse.clear();
 	m_markers.m_vChannelsEdgeAndMinimum.clear();
-	m_markers.m_vChannelsEdgeAndMinimum.resize(TOTAL_NUMBER_OF_CHANNELS);
-	
+	m_markers.m_vChannelsEdgeAndMinimum.resize(TOTAL_NUMBER_OF_CHANNELS);	
+	Configure(a_sPanelName);
 	for (int i = 0; i < (int)a_vRange.size(); i++)
 	{
 
@@ -374,12 +381,12 @@ Returns whether a range has a pulse in one of the channels or not. This is good 
 @param a_vRange - the range of channels defining a panel
 @return Whether a pulse was detected on one of the panels
 */
-bool SignalAnalyzer::DoesRangeHaveSignal(Channels_t& a_vAllChannels, std::vector<int> a_vRange)
+/*bool SignalAnalyzer::DoesRangeHaveSignal(Channels_t& a_vAllChannels, std::vector<int> a_vRange)
 {
 	FindOriginalPulseInChannelRange(a_vAllChannels, a_vRange);
 	return !(m_markers.m_vChannelsWithPulse.empty());
 }
-
+*/
 SignalAnalyzer::AnalysisMarkers& SignalAnalyzer::GetAnalysisMarkers()
 {
 	return m_markers;
@@ -557,7 +564,8 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 	{
 		m_pTriggerTimingMonitor->GotTrigger(a_timeStamp);
 	}
-	if ((m_iFlags & AnalysisFlags::EPanelHitMonitor) || (m_iFlags & AnalysisFlags::EPanelTimingMonitor))
+	//All these require DC offset zeroing (normalization)
+	if ((m_iFlags & AnalysisFlags::EPanelHitMonitor) || (m_iFlags & AnalysisFlags::EPanelTimingMonitor) || (m_iFlags& AnalysisFlags::ETrackMonitor))
 	{
 		bool bEventEmpty = false;
 
@@ -574,15 +582,26 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 		{
 			 vNormalizedChannels = NormalizeChannels(a_vChannels);
 		}
-
+		HitMap_t mPanelAndLine;
 		int i = 0;
-		for (auto it: Configuration::Instance().GetRanges())
+		for (auto it: m_vRanges)
 		{
 			m_vpPanelMonitors[i]->GotTrigger();
 			if (!bEventEmpty)
 			{
-				FindOriginalPulseInChannelRange(vNormalizedChannels, it.second);
+				FindOriginalPulseInChannelRange(vNormalizedChannels, it.first, it.second);
 				m_vpPanelMonitors[i]->GotEvent(a_timeStamp, m_markers.m_vChannelsWithPulse);
+				if(m_iFlags & AnalysisFlags::ETrackMonitor)
+				{
+					if(m_markers.m_vChannelsWithPulse.size() == 1)
+					{
+						mPanelAndLine[it.first] = m_markers.m_vChannelsWithPulse[0];
+					}
+					else
+					{
+						mPanelAndLine[it.first] = NO_SIGNAL_ON_PANEL;
+					}
+				}
 
 				if(m_iFlags & AnalysisFlags::EPanelTimingMonitor)
 				{
@@ -606,7 +625,10 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 			}
 			i++;
 		}
-		
+		if (m_iFlags & AnalysisFlags::ETrackMonitor)
+		{
+			m_pTrackMonitor->GotEvent(mPanelAndLine);
+		}
 	}
 
 	ProcessEvents();

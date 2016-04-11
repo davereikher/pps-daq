@@ -54,14 +54,16 @@ std::map<std::string, std::vector<int> > Configuration::GetRanges()
 {
 	std::map<std::string, std::vector<int> > vRanges;
 
-	Json::Value ranges = m_configuration["panel-ranges"];
+	Json::Value ranges = m_configuration["panels"];
 	Json::Value::Members panelKeys = ranges.getMemberNames();
 
 	for (auto& panelKey: panelKeys) 
 	{
 		std::vector<int> singlePanelRange;
-		for (auto& channelIt: ranges[panelKey])
+		//printf("\npanel key = %s\n", panelKey.c_str());
+		for (auto& channelIt: ranges[panelKey]["range"])
 		{
+			//printf("%d ", channelIt.asInt());
 			singlePanelRange.push_back(channelIt.asInt());
 		}
 		vRanges[panelKey]= singlePanelRange;
@@ -70,14 +72,15 @@ std::map<std::string, std::vector<int> > Configuration::GetRanges()
 	return vRanges;
 }
 
-float Configuration::GetPulseThresholdVolts()
+float Configuration::GetPulseThresholdVolts(std::string a_sPanelName)
 {
-	return m_configuration["pulse-threshold-volts"].asFloat();
+	return m_configuration["panels"][a_sPanelName]["pulse-threshold-volts"].asFloat();
 }
 
-float Configuration::GetEdgeThresholdVolts()
+float Configuration::GetEdgeThresholdVolts(std::string a_sPanelName)
 {
-	return m_configuration["edge-threshold-volts"].asFloat();
+	//printf("\nEDGE THRESHOLD VOLTS FOR %s is %f\n", a_sPanelName.c_str(), m_configuration["panels"][a_sPanelName]["edge-threshold-volts"].asFloat());
+	return m_configuration["panels"][a_sPanelName]["edge-threshold-volts"].asFloat();
 }
 
 float Configuration::GetVoltMin()
@@ -95,24 +98,24 @@ int Configuration::GetDigitizerResolution()
 	return m_configuration["digitizer-resolution-bits"].asInt();
 }
 
-float Configuration::GetExpectedPulseWidthNs()
+float Configuration::GetExpectedPulseWidthNs(std::string a_sPanelName)
 {
-	return m_configuration["expected-pulse-width-ns"].asFloat();
+	return m_configuration["panels"][a_sPanelName]["expected-pulse-width-ns"].asFloat();
 }
 
-float Configuration::GetMinEdgeSeparationNs()
+float Configuration::GetMinEdgeSeparationNs(std::string a_sPanelName)
 {
-	return m_configuration["min-edge-separation-ns"].asFloat();
+	return m_configuration["panels"][a_sPanelName]["min-edge-separation-ns"].asFloat();
 }
 
-float Configuration::GetMaxEdgeJitterNs()
+float Configuration::GetMaxEdgeJitterNs(std::string a_sPanelName)
 {
-	return m_configuration["max-edge-jitter-ns"].asFloat();
+	return m_configuration["panels"][a_sPanelName]["max-edge-jitter-ns"].asFloat();
 }
 
-float Configuration::GetMaxAmplitudeJitterVolts()
+float Configuration::GetMaxAmplitudeJitterVolts(std::string a_sPanelName)
 {
-	return m_configuration["max-amplitude-jitter-volts"].asFloat();
+	return m_configuration["panels"][a_sPanelName]["max-amplitude-jitter-volts"].asFloat();
 }
 
 float Configuration::GetSamplingFreqGHz()
@@ -152,9 +155,9 @@ bool Configuration::ShouldNormalizeChannels()
 	return m_configuration["normalize-channels"].asBool();
 }
  
-float Configuration::GetPulseStartThresholdVolts()
+float Configuration::GetPulseStartThresholdVolts(std::string a_sPanelName)
 {
-	return m_configuration["pulse-start-threshold-volts"].asFloat();
+	return m_configuration["panels"][a_sPanelName]["pulse-start-threshold-volts"].asFloat();
 }
 
 float Configuration::GetTriggerThresholdVolts()
