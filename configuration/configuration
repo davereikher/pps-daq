@@ -2,20 +2,20 @@
 	"panels": {
 		"H": {
 
-			"range": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-			"pulse-threshold-volts": -0.17,
-			"edge-threshold-volts": -0.15,
-			"pulse-start-threshold-volts": -0.02,
+			"range": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+			"pulse-threshold-volts": -0.13,
+			"edge-threshold-volts": -0.11,
+			"pulse-start-amplitude-volts": 0.02,
 			"expected-pulse-width-ns": 3,
 			"min-edge-separation-ns": 3,
 			"max-edge-jitter-ns": 2,
 			"max-amplitude-jitter-volts": 0.1
 		},
 		"A": {
-			"range": [17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
-			"pulse-threshold-volts": -0.17,
-			"edge-threshold-volts": -0.15,
-			"pulse-start-threshold-volts": -0.02,
+			"range": [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+			"pulse-threshold-volts": -0.13,
+			"edge-threshold-volts": -0.11,
+			"pulse-start-amplitude-volts": 0.02,
 			"expected-pulse-width-ns": 3,
 			"min-edge-separation-ns": 3,
 			"max-edge-jitter-ns": 2,

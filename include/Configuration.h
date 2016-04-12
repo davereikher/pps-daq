@@ -27,7 +27,7 @@ public:
 	float GetIdleFluctuationsAmplitude();
 	float GetIdleLineDurationFraction();
 	bool ShouldNormalizeChannels();
-	float GetPulseStartThresholdVolts(std::string a_sPanelName);
+	float GetPulseStartAmplitudeVolts(std::string a_sPanelName);
 	float GetTriggerThresholdVolts();
 
 

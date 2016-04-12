@@ -155,9 +155,9 @@ bool Configuration::ShouldNormalizeChannels()
 	return m_configuration["normalize-channels"].asBool();
 }
  
-float Configuration::GetPulseStartThresholdVolts(std::string a_sPanelName)
+float Configuration::GetPulseStartAmplitudeVolts(std::string a_sPanelName)
 {
-	return m_configuration["panels"][a_sPanelName]["pulse-start-threshold-volts"].asFloat();
+	return m_configuration["panels"][a_sPanelName]["pulse-start-amplitude-volts"].asFloat();
 }
 
 float Configuration::GetTriggerThresholdVolts()

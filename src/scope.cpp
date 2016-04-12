@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdint.h>
 #include "DigitizerManager.h"
-#include "EventHandlerAcquisition.h"
+#include "EventHandler.h"
 #include "Exception.h"
 #include "keyb.h"
 #include "TApplication.h"
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 		Logger::Instance().Init(fileNames.first);
 		Logger::Instance().AddNecessaryMessage(Configuration::Instance().GetDump());
 		Logger::Instance().AddNecessaryMessage((std::string("\n\nSetup Description:\n---------------------\n ") + argv[3] + "\n\n").c_str());
-		EventHandlerAcquisition eventHandler(fileNames.second);
+		EventHandler eventHandler(fileNames.second);
 		DigitizerManager digitizerManager(eventHandler);
 		digitizerManager.InitAndConfigure();
 		digitizerManager.Start();

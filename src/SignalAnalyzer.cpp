@@ -34,13 +34,18 @@ m_iFlags(0),
 m_bStopAnalysisThread(false),
 m_pTriggerTimingMonitor(new TriggerTimingMonitor(milliseconds(Configuration::Instance().GetTriggerRateAveragingDurationSecs())))
 {
-	m_fVoltageStartVolts = Configuration::Instance().GetVoltMin();
-	m_fVoltageDivisionVolts = (Configuration::Instance().GetVoltMax() - m_fVoltageStartVolts)/(float)Configuration::Instance().GetDigitizerResolution();
+	float fVoltMin = Configuration::Instance().GetVoltMin();
+	float fVoltMax = Configuration::Instance().GetVoltMax();
+	int iDigitizerRes = Configuration::Instance().GetDigitizerResolution();
+
+	m_fVoltageStartVolts = fVoltMin;
+	m_fVoltageDivisionVolts = (fVoltMax - m_fVoltageStartVolts)/(float)iDigitizerRes;
 	m_fTimeDivisionNs = 1.0/Configuration::Instance().GetSamplingFreqGHz();
 
-	m_markers.ConfigureVoltageConversion(m_fVoltageStartVolts, Configuration::Instance().GetVoltMax(), Configuration::Instance().GetDigitizerResolution());
+	m_markers.ConfigureVoltageConversion(fVoltMin,fVoltMax, iDigitizerRes);
 	m_markers.ConfigureTimeConversion(Configuration::Instance().GetSamplingFreqGHz());
 	m_markers.SetTriggerThreshold(Configuration::Instance().GetTriggerThresholdVolts());
+	m_markers.SetZero(fVoltMin, fVoltMax, iDigitizerRes);
 	
 	m_vRanges = Configuration::Instance().GetRanges();
 	
@@ -65,7 +70,7 @@ void SignalAnalyzer::Configure(std::string a_sPanelName)
 	m_markers.SetMinEdgeSeparation(Configuration::Instance().GetMinEdgeSeparationNs(a_sPanelName));
 	m_markers.SetMaxEdgeJitter(Configuration::Instance().GetMaxEdgeJitterNs(a_sPanelName));
 	m_markers.SetMaxAmplitudeJitter(Configuration::Instance().GetMaxAmplitudeJitterVolts(a_sPanelName));
-	m_markers.SetPulseStartThreshold(Configuration::Instance().GetPulseStartThresholdVolts(a_sPanelName));
+	m_markers.SetPulseStartAmplitude(Configuration::Instance().GetPulseStartAmplitudeVolts(a_sPanelName));
 
 /*	printf("PULSE_THRESHOLD: %f, %d\n", m_markers.GetPulseThreshold().Continuous(), m_markers.GetPulseThreshold().Discrete());
 	printf("EDGE_THRESHOLD: %f, %d\n", m_markers.GetEdgeThreshold().Continuous(), m_markers.GetEdgeThreshold().Discrete());
@@ -104,12 +109,19 @@ std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> SignalAnalyzer::FindLea
 
 	for (auto& it: a_samplesVector)
 	{
+		//Find first fluctuation in the line. 		
 		i++;
-		if (it < m_markers.GetPulseStartThreshold().Discrete())
+		if (abs((int)it - m_markers.GetZero().Discrete()) > m_markers.GetPulseStartAmplitude().Discrete())
 		{
+//			printf("it is %d, zero is %d, pulsestartamplitude is %d\n", (int)it, m_markers.GetZero().Discrete(), m_markers.GetPulseStartAmplitude().Discrete());
+			if( it > m_markers.GetZero().Discrete())
+			{
+				//This fluctuation must be negative.
+				break;
+			}
 			iFluctuationStart = i;
 		}
-
+		//Find the pulse within a defined window after the first fluctuation
 		if (iFluctuationStart != -1)
 		{
 			if (it < m_markers.GetPulseThreshold().Discrete())
@@ -197,6 +209,7 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,
 
 	//Each tuple represents a pulse. The first value is the location of the leading edge time, the second is the location of the lowest value of the pulse
 		std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> p;
+//		printf("CHANNEL %d\n", a_vRange[i]);
 		p = FindLeadingEdgeAndPulseExtremum(a_vAllChannels[a_vRange[i]]);
 //		printf("Channel %d, edge at %f, %d\n", a_vRange[i], std::get<EDGE_THRES_INDEX>(p).GetX(), std::get<EDGE_THRES_INDEX>(p).GetXDiscrete());
 		//printf("On channel %d\n", a_vRange[i]);
@@ -458,10 +471,10 @@ void SignalAnalyzer::AnalysisMarkers::SetTriggerThreshold(float a_fTriggerThresh
 	m_fTriggerThreshold = a_fTriggerThresholdVolts;
 }
 
-void SignalAnalyzer::AnalysisMarkers::SetPulseStartThreshold(float a_fPulseStartThresholdVolts)
+void SignalAnalyzer::AnalysisMarkers::SetPulseStartAmplitude(float a_fPulseStartAmplitudeVolts)
 {
-	m_iPulseStartThreshold = (a_fPulseStartThresholdVolts - m_fVoltageStartVolts) / m_fVoltageDivisionVolts;
-	m_fPulseStartThreshold = a_fPulseStartThresholdVolts;
+	m_iPulseStartAmplitude = a_fPulseStartAmplitudeVolts / m_fVoltageDivisionVolts;
+	m_fPulseStartAmplitude = a_fPulseStartAmplitudeVolts;
 }
 
 void SignalAnalyzer::AnalysisMarkers::SetEdgeThreshold(float a_fEdgeThresholdVolts)
@@ -480,6 +493,11 @@ void SignalAnalyzer::AnalysisMarkers::SetMinEdgeSeparation(float a_fMinEdgeSepar
 {
 	m_iMinEdgeSeparation = a_fMinEdgeSeparationNs / m_fTimeDivisionNs;
 	m_fMinEdgeSeparation = a_fMinEdgeSeparationNs;
+}
+
+void SignalAnalyzer::AnalysisMarkers::SetZero(float a_fVoltMin, float a_fVoltMax, int a_iDigitizerResolution)
+{
+	m_iZero = a_iDigitizerResolution * (-1)*a_fVoltMin/(a_fVoltMax - a_fVoltMin);
 }
 
 
@@ -521,6 +539,11 @@ SignalAnalyzer::AnalysisMarkers::Value SignalAnalyzer::AnalysisMarkers::GetMinEd
 	return Value(m_iMinEdgeSeparation, m_fMinEdgeSeparation);
 }
 
+SignalAnalyzer::AnalysisMarkers::Value SignalAnalyzer::AnalysisMarkers::GetZero()
+{
+	return Value(m_iZero, 0);
+}
+
 SignalAnalyzer::AnalysisMarkers::Value SignalAnalyzer::AnalysisMarkers::GetMaxEdgeJitter()
 {
 	return Value(m_iMaxEdgeJitter, m_fMaxEdgeJitter);
@@ -531,9 +554,9 @@ SignalAnalyzer::AnalysisMarkers::Value SignalAnalyzer::AnalysisMarkers::GetMaxAm
 	return Value(m_iMaxAmplitudeJitter, m_fMaxAmplitudeJitter);
 }
 
-SignalAnalyzer::AnalysisMarkers::Value SignalAnalyzer::AnalysisMarkers::GetPulseStartThreshold()
+SignalAnalyzer::AnalysisMarkers::Value SignalAnalyzer::AnalysisMarkers::GetPulseStartAmplitude()
 {
-	return Value(m_iPulseStartThreshold, m_fPulseStartThreshold);
+	return Value(m_iPulseStartAmplitude, m_fPulseStartAmplitude);
 }
 
 void SignalAnalyzer::MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer)
@@ -614,12 +637,12 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 						for (auto& it: m_markers.m_vChannelsEdgeAndMinimum)
 						{
 							printf("channel %d, edge at %f\n", cnt, std::get<EDGE_THRES_INDEX>(it).GetX());
-							cnt++;
+	 						cnt++;
 						}*/
 //						printf("iChannel: %d, pulse x = %f\n", iChannel,  std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX());
 
-						m_vpPanelTimingMonitors[i]->GotEvent(iChannel, std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX(), 
-							std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetY(), p.GetX());
+						/*m_vpPanelTimingMonitors[i]->GotEvent(iChannel, std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX(), 
+							std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetY(), p.GetX());*/
 					}
 				}
 			}

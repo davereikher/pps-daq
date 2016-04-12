@@ -18,7 +18,7 @@ public:
 private:
 	void InitGraphics();
 private:
-	std::unique_ptr<TCanvas> m_pCanvas;
+//	std::unique_ptr<TCanvas> m_pCanvas;
 	/*std::unique_ptr<TCanvas> m_pLineTimingCanvas;
 	TH1* m_pTimingHist;
 	std::map<int, TH1*> m_vpLineHistograms;*/

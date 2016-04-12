@@ -68,8 +68,9 @@ public:
 		void SetMinEdgeSeparation(float a_fMinEdgeSeparationNs);
 		void SetMaxEdgeJitter(float a_fMaxEdgeJitterNs);
 		void SetMaxAmplitudeJitter(float a_fMaxAmplitudeJitterVolts);
-		void SetPulseStartThreshold(float a_fPulseStartThresholdVolts);
+		void SetPulseStartAmplitude(float a_fPulseStartThresholdVolts);
 		void SetTriggerThreshold(float a_fTriggerThresholdVolts);
+		void SetZero(float a_fVoltMin, float a_fVoltMax, int a_iDigitizerResolution);
 
 		Value GetPulseThreshold();
 		Value GetEdgeThreshold();
@@ -77,8 +78,9 @@ public:
 		Value GetMinEdgeSeparation();
 		Value GetMaxEdgeJitter();
 		Value GetMaxAmplitudeJitter();
-		Value GetPulseStartThreshold();
+		Value GetPulseStartAmplitude();
 		Value GetTriggerThreshold();
+		Value GetZero();
 
 	public:
 		float m_fVoltageDivisionVolts;
@@ -103,11 +105,13 @@ public:
 		int m_iMaxAmplitudeJitter;
 		float m_fMaxAmplitudeJitter;
 
-		int m_iPulseStartThreshold;
-		float m_fPulseStartThreshold;
+		int m_iPulseStartAmplitude;
+		float m_fPulseStartAmplitude;
 		
 		int m_iTriggerThreshold;
 		float m_fTriggerThreshold;
+
+		int m_iZero;
 		
 		std::vector<std::tuple<Point, Point> > m_vChannelsEdgeAndMinimum;
 		std::vector<int> m_vChannelsWithPulse;
@@ -125,7 +129,6 @@ public:
 	SignalAnalyzer();
 	std::tuple<Point, Point> FindLeadingEdgeAndPulseExtremum(std::vector<float>& a_samplesVector);
 	void FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels, std::string a_sPanelName, std::vector<int>& a_vRange);
-//	bool DoesRangeHaveSignal(Channels_t& a_vAllChannels, std::vector<int> a_vRange);
 	Point FindTriggerTime(Channels_t& a_vAllChannels);
 	void Analyze(nanoseconds a_eventTimeFromStart, Channels_t& a_vChannels);
 

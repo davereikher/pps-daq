@@ -8,17 +8,17 @@ TrackMonitor::TrackMonitor()
 void TrackMonitor::GotEvent(HitMap_t& a_hitMap)
 {
 	//printf("Got event");
-	if(m_pCanvas == NULL)
+/*	if(m_pCanvas == NULL)
 	{
 		InitGraphics();
 	}
-	
+*/	
 	//printf("Panel %s, time of pulse: %f, time of trigger: %f\n", m_sPanelName.c_str(), a_fTimeOfPulseEdge, a_fTriggerEdge);
 /*	m_pCanvas->cd();
 	m_pTimingHist->Fill(a_fTimeOfPulseEdge - a_fTriggerEdge);
 	m_pTimingHist->Draw(); 
 	m_pTimingHist->SetCanExtend(TH1::kXaxis);*/
-	m_pCanvas->Update();
+	//m_pCanvas->Update();
 	
 /*	m_vpLineHistograms[a_iChannelNum]->Fill(a_fTimeOfPulseEdge - a_fTriggerEdge);
 	m_vpLineHistograms[a_iChannelNum]->Draw();
@@ -30,7 +30,8 @@ void TrackMonitor::InitGraphics()
 {
 	printf("INITGRAPHICS\n");
 
-/*	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_TrackMonitor").c_str(), (std::string("Panel ") + m_sPanelName  + " Timing Monitor").c_str(), 800, 600));
+//	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas("TrackMonitor", "Track Monitor", 800, 600));
+/*
 	m_pTimingHist = new TH1F((m_sPanelName + "TimingHist").c_str() , (std::string("Pan. ") + m_sPanelName + " Timing (Pulse-Trigger)").c_str(), 100, 0, 0);
 	m_pTimingHist->SetFillColor(49);
 	m_pLineTimingCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_LineTimingMonitor").c_str(), (std::string("Panel ") + m_sPanelName  + " Line Timing Monitor").c_str(), 800, 600));
