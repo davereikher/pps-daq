@@ -19,15 +19,15 @@ DICTDIR = root_dictionary
 ROOTOUTDIR = root
 LIBDIR = lib
 
-EXECS = $(BINDIR)/v1742-readout
-_OBJECTS = keyb.o ProprietaryUtils.o EventHandler.o EventHandlerAcquisition.o Exception.o dict.o DigitizerManager.o main.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o SignalAnalyzer.o TimeManager.o Logger.o CommonUtils.o
+EXECS = $(BINDIR)/acquisition
+_OBJECTS = keyb.o ProprietaryUtils.o EventHandler.o EventHandlerAcquisition.o Exception.o dict.o DigitizerManager.o main_acquisition.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o SignalAnalyzer.o TimeManager.o Logger.o CommonUtils.o
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS)) 
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx
 
 all : $(EXECS)
 
-$(BINDIR)/v1742-readout: $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR) $(OBJECTS) 
+$(BINDIR)/acquisition: $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR) $(OBJECTS) 
 	@echo "=> linking $@"	
 	@echo $(LDFLAGS) 
 	$(LD) $(LDFLAGS) $(OBJECTS) $(LDLIBS) -o $@

@@ -126,6 +126,11 @@ bool EventHandler::IsEventEmpty()
 	return !bSomeSignalFound;
 }
 
+void EventHandler::ProcessEvents()
+{
+	gSystem->ProcessEvents();
+}
+
 /*
 void EventHandler::MainAnalysisThreadFunc(EventHandler* a_pEventHandler)
 {

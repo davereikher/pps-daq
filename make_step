@@ -10,25 +10,23 @@ LD = $(CXX)
 OBJDIR = obj
 SOURCEDIR = src
 BINDIR = bin
-LIBDIR = lib
-INCDIR = include
+
 
 CXXFLAGS = -D ROOT_FILE_OUT_DIR=\"$(ROOTFILEOUTDIR)\" $(MYFLAG) -fpermissive $(ROOTINCS) -Wall -Wno-return-type -Wunused -Wno-deprecated
-MYFLAG = -I$(INCDIR) -I./additional-packages/include -L./additional-packages/lib -fmax-errors=5
+MYFLAG = -I./include -I./additional-packages/include -L./additional-packages/lib -fmax-errors=5
 
 LDFLAGS = $(MYFLAG)
-LDLIBS = -lpthread -ljson  $(ROOTLIBS)
+LDLIBS = -lpthread -ljson $(ROOTLIBS) 
 
-EXECS = $(BINDIR)/analysis
-_OBJECTS = main_analysis.o keyb.o CommonUtils.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o SignalAnalyzer.o Logger.o
-INC_DEPS = $(INCDIR)/Queue.h
+EXECS = $(BINDIR)/step_through_events
+_OBJECTS = main_step.o CommonUtils.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o RangePlotter.o SignalAnalyzer.o Logger.o
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx
 
-all : $(EXECS)
+all : $(EXECS) $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR)
 
-$(EXECS): $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR) $(OBJECTS) $(INC_DEPS)
+$(EXECS):  $(OBJECTS) 
 	@echo "=> linking $@"	
 	@echo $(LDFLAGS) 
 	$(LD) $(LDFLAGS) $(OBJECTS) $(OBJDIR)/dict.o $(LDLIBS) -o $@
@@ -65,7 +63,7 @@ $(OBJDIR)/%.o: $(SOURCEDIR)/%.c
 .PHONY : clean clobber
 clean :
 	@echo "=> removing object files"
-	-rm $(OBJDIR)/*.o 
+	-rm -f $(OBJDIR)/*.o 
 
 clobber : clean
 	@echo "=> removing executables"

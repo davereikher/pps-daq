@@ -16,6 +16,7 @@ public:
 	virtual ~EventHandler();
 	void Handle(CAEN_DGTZ_X742_EVENT_t* a_pEvent, nanoseconds a_eventTime);
 	virtual void DoHandle(nanoseconds a_eventTime) = 0;
+	virtual void ProcessEvents();
 
 private:
 

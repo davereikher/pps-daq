@@ -78,3 +78,4 @@ void EventHandlerAcquisition::ProcessEvents()
 {
 	m_pSignalAnalyzer->ProcessEvents();
 }
+
