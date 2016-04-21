@@ -28,9 +28,7 @@ EventHandlerScope::~EventHandlerScope()
 
 void EventHandlerScope::DoHandle(nanoseconds a_eventTime)
 {
-	Range_t ranges = Configuration::Instance().GetRanges();
 	m_pRangePlotter->PlotRanges(m_vChannels, m_ranges, "Scope");
-	gSystem->ProcessEvents();
 }
 
 

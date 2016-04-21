@@ -29,7 +29,7 @@ void Usage(char* a_pProcName)
 
 int main(int argc, char** argv)
 {
-	if (argc < 3)
+	if (argc < 2)
 	{
 		Usage(argv[0]);
 		exit(-1);
@@ -52,6 +52,7 @@ int main(int argc, char** argv)
 			try	
 			{
 				digitizerManager.Acquire();
+				eventHandler.ProcessEvents();
 			}
 			catch (ExceptionBase& ex)
 			{

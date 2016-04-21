@@ -32,7 +32,8 @@ Constructor.
 SignalAnalyzer::SignalAnalyzer():
 m_iFlags(0),
 m_bStopAnalysisThread(false),
-m_pTriggerTimingMonitor(new TriggerTimingMonitor(milliseconds(Configuration::Instance().GetTriggerRateAveragingDurationSecs())))
+m_pTriggerTimingMonitor(new TriggerTimingMonitor(milliseconds(Configuration::Instance().GetTriggerRateAveragingDurationSecs()))),
+m_pTrackMonitor(new TrackMonitor())
 {
 	float fVoltMin = Configuration::Instance().GetVoltMin();
 	float fVoltMax = Configuration::Instance().GetVoltMax();
@@ -58,6 +59,7 @@ m_pTriggerTimingMonitor(new TriggerTimingMonitor(milliseconds(Configuration::Ins
 	{
 		m_vpPanelTimingMonitors.push_back(std::unique_ptr<PanelTimingMonitor>(new PanelTimingMonitor(it.first)));
 	}
+
 
 }
 
@@ -641,8 +643,8 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 						}*/
 //						printf("iChannel: %d, pulse x = %f\n", iChannel,  std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX());
 
-						/*m_vpPanelTimingMonitors[i]->GotEvent(iChannel, std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX(), 
-							std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetY(), p.GetX());*/
+						m_vpPanelTimingMonitors[i]->GotEvent(iChannel, std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX(), 
+							std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetY(), p.GetX());
 					}
 				}
 			}

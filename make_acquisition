@@ -1,6 +1,6 @@
 ROOTLIBS = $(shell root-config --libs) -lRooFitCore -lMinuit -lEG 
 ROOTINCS = $(shell root-config --cflags) 
-ROOTLIBS = -L$(ROOTSYS)/lib  -lHtml -lCore -lTreePlayer -lRIO -lNet -lssl -lcrypto -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lm -ldl -rdynamic -lGenVector -lTMVA
+ROOTLIBS = -L$(ROOTSYS)/lib  -lHtml -lCore -lTreePlayer -lRIO -lNet -lssl -lcrypto -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lm -ldl -rdynamic -lGenVector -lTMVA -lMinuit
 MYFLAG = -I./include -I./additional-packages/include 
 #CXX = g++
 DEBUG =
@@ -20,7 +20,7 @@ ROOTOUTDIR = root
 LIBDIR = lib
 
 EXECS = $(BINDIR)/acquisition
-_OBJECTS = keyb.o ProprietaryUtils.o EventHandler.o EventHandlerAcquisition.o Exception.o dict.o DigitizerManager.o main_acquisition.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o SignalAnalyzer.o TimeManager.o Logger.o CommonUtils.o
+_OBJECTS = keyb.o ProprietaryUtils.o EventHandler.o EventHandlerAcquisition.o Exception.o dict.o DigitizerManager.o main_acquisition.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o Track.o SignalAnalyzer.o TimeManager.o Logger.o CommonUtils.o
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS)) 
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx

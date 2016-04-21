@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 
 	SignalAnalyzer sigAnalyzer;
 
-	sigAnalyzer.SetFlags(SignalAnalyzer::ETriggerTimingMonitor | SignalAnalyzer::EPanelHitMonitor | SignalAnalyzer::EPanelTimingMonitor);
+	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelTimingMonitor |  SignalAnalyzer::ETrackMonitor);
 
 	sigAnalyzer.Start();
 	

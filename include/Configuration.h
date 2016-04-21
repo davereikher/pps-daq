@@ -29,7 +29,17 @@ public:
 	bool ShouldNormalizeChannels();
 	float GetPulseStartAmplitudeVolts(std::string a_sPanelName);
 	float GetTriggerThresholdVolts();
-
+	int GetLineCorrespondingTo(std::string a_sPanel, int a_iChannel);
+	int GetPanelIndex(std::string a_sPanelName);
+	float GetDistanceBetweenPanelsMm();
+	float GetReadoutLinePitchMm();
+	int GetNumberOfEventsToFitAfter();
+	bool ShouldFitTimingHistograms();
+	float GetCrystalBallAlphaParam();
+	float GetCrystalBallnParam();
+	float GetCrystalBallMuParam();
+	float GetCrystalBallSigmaParam();
+	float GetCrystalBallNParam();
 
 	std::string GetDump();
 

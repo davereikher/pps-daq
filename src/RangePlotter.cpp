@@ -27,31 +27,33 @@ The purpose of this function is to conveniently plot an event. Each event is plo
 @param sEventTitle - a string containing the title of the event (for example, the time stamp)
 */
 void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsAssociation, std::string sEventTitle)
-{		
-	m_pCanvas->Clear();
+{	
+//	printf("Plotting\n");
+	//m_pCanvas->Clear();
 	m_pCanvas->SetTitle(sEventTitle.c_str());
 	
-	double fPads1, fPads2;
-	if (a_channelsToPadsAssociation.size() > 1)
-	{
-// determine the division of the canvas into pads according to the size of a_channelsToPadsAssociation
-		double fPads1 = ceil(sqrt(a_channelsToPadsAssociation.size()));
-		double fPads2 = ceil(a_channelsToPadsAssociation.size()/fPads1);
-
-// since the screen is wider usually, we want more pads in the horizontal direction:
-		if ( fPads1 > fPads2)
-		{
-			m_pCanvas->Divide((int)fPads1, (int)fPads2);	
-		}
-		else
-		{
-			m_pCanvas->Divide((int)fPads2, (int)fPads1);
-		}
-	}
 	
 	int iPadCounter = 0;
 	if(0 == m_vpMultiGraph.size())
 	{
+		double fPads1, fPads2;
+		if (a_channelsToPadsAssociation.size() > 1)
+		{
+	// determine the division of the canvas into pads according to the size of a_channelsToPadsAssociation
+			double fPads1 = ceil(sqrt(a_channelsToPadsAssociation.size()));
+			double fPads2 = ceil(a_channelsToPadsAssociation.size()/fPads1);
+	
+	// since the screen is wider usually, we want more pads in the horizontal direction:
+			if ( fPads1 > fPads2)
+			{
+			m_pCanvas->Divide((int)fPads1, (int)fPads2);	
+			}
+			else
+			{
+				m_pCanvas->Divide((int)fPads2, (int)fPads1);
+			}
+		}
+	
 		for (auto& rangeIt: a_channelsToPadsAssociation)
 		{	
 			TMultiGraph* pMg = new TMultiGraph();	
@@ -60,7 +62,7 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 			m_pCanvas->cd(iPadCounter + 1);
 			int i = 0;
 
-			auto legend = new TLegend(0.8,0.8,1,1, "Channels");	
+			auto legend = new TLegend(0.8,0.8,1,1, "Channels");
 			m_vpLegends.push_back(std::unique_ptr<TLegend>(legend));
 			for (auto& chanIt: rangeIt.second)
 			{
@@ -116,11 +118,14 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 	}
 	else
 	{
+//		printf("Plottin again\n");
 		for (auto& rangeIt: a_channelsToPadsAssociation)
 		{
+			printf("Panel %s\n", rangeIt.first.c_str());
 			m_pCanvas->cd(iPadCounter + 1);
 			for (auto& chanIt: rangeIt.second)
 			{
+//				printf("Chanenl %d\n", chanIt);
 				//TODO: num of samples is constant per run at least!
 				m_vpGraph[chanIt]->SetLineWidth(1);
 				int iNumOfSamples = a_channels[chanIt].size();	
@@ -142,8 +147,11 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 			m_vpLegends[iPadCounter]->Draw();
 			iPadCounter++;
 		}
+		printf("Updating\n");
 		m_pCanvas->Update();
+		printf("After updating\n");
 	}
+	printf("done\n");
 }
 
 float RangePlotter::TransformToVoltage(float a_fSample)

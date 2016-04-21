@@ -1,41 +1,89 @@
 #include "TrackMonitor.h"
 #include "Configuration.h"
 #include "Logger.h"
+#include "Track.h"
 
 TrackMonitor::TrackMonitor()
 {}
 
 void TrackMonitor::GotEvent(HitMap_t& a_hitMap)
 {
-	//printf("Got event");
-/*	if(m_pCanvas == NULL)
+	if(m_pCanvas == NULL)
 	{
 		InitGraphics();
 	}
-*/	
+
+	std::map<std::string, int> mHitsInThisEvent;
+	for (auto& it: a_hitMap)
+	{
+		if(it.second != NO_SIGNAL_ON_PANEL)
+		{
+			mHitsInThisEvent[it.first] = it.second;
+		}
+	}
+//	printf("size of hitmap: %d", mHitsInThisEvent.size());
+	std::string sLogMessage;
+	if(mHitsInThisEvent.size() > 1)
+	{
+		sLogMessage = std::to_string(mHitsInThisEvent.size()) + "-panel track detected. Points (panel, channel): ";
+//		printf("%d-panel track detected! ", mHitsInThisEvent.size());
+		
+//		Track track;
+		for (auto& it: mHitsInThisEvent)	
+		{
+			sLogMessage += "(" + it.first + ", " + std::to_string(Configuration::Instance().GetLineCorrespondingTo(it.first, it.second))+ ") ";
+//			track.AddPoint(PanelToZ(it.first), ChannelToX(it.first, it.second));
+		}
+
+//		FillAngleHist(track.GetAngle());
+		printf("%s\n", sLogMessage.c_str());
+		Logger::Instance().SetWriteCurrentMessage();
+		Logger::Instance().AddMessage(sLogMessage);
+	}
+
 	//printf("Panel %s, time of pulse: %f, time of trigger: %f\n", m_sPanelName.c_str(), a_fTimeOfPulseEdge, a_fTriggerEdge);
 /*	m_pCanvas->cd();
 	m_pTimingHist->Fill(a_fTimeOfPulseEdge - a_fTriggerEdge);
 	m_pTimingHist->Draw(); 
 	m_pTimingHist->SetCanExtend(TH1::kXaxis);*/
-	//m_pCanvas->Update();
+	m_pCanvas->Update();
 	
 /*	m_vpLineHistograms[a_iChannelNum]->Fill(a_fTimeOfPulseEdge - a_fTriggerEdge);
 	m_vpLineHistograms[a_iChannelNum]->Draw();
 	m_vpLineHistograms[a_iChannelNum]->SetCanExtend(TH1::kXaxis);
 	m_pLineTimingCanvas->Update();*/
+
+
+}
+
+void TrackMonitor::FillAngleHist(float m_fAngle)
+{
+	m_pAngleHist->Fill(m_fAngle);
+	m_pAngleHist->Draw();
+	m_pAngleHist->SetCanExtend(TH1::kXaxis);
+}
+
+float TrackMonitor::PanelToZ(std::string a_sPanel)
+{
+	return Configuration::Instance().GetPanelIndex(a_sPanel) * Configuration::Instance().GetDistanceBetweenPanelsMm();
+}
+
+float TrackMonitor::ChannelToX(std::string a_sPanel, int a_iChannel)
+{
+	int line = Configuration::Instance().GetLineCorrespondingTo(a_sPanel, a_iChannel);
+	return line * Configuration::Instance().GetReadoutLinePitchMm();
 }
 
 void TrackMonitor::InitGraphics()
 {
 	printf("INITGRAPHICS\n");
 
-//	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas("TrackMonitor", "Track Monitor", 800, 600));
-/*
-	m_pTimingHist = new TH1F((m_sPanelName + "TimingHist").c_str() , (std::string("Pan. ") + m_sPanelName + " Timing (Pulse-Trigger)").c_str(), 100, 0, 0);
-	m_pTimingHist->SetFillColor(49);
-	m_pLineTimingCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_LineTimingMonitor").c_str(), (std::string("Panel ") + m_sPanelName  + " Line Timing Monitor").c_str(), 800, 600));
-	std::vector<int> vChannelRange = Configuration::Instance().GetRanges()[m_sPanelName];
+	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas("TrackMonitor", "Track Monitor", 800, 600));
+
+	m_pAngleHist = new TH1F("AngleHist" , "Polar Angle", 100, 0, 0);
+	m_pAngleHist->SetFillColor(49);
+//	m_pLineTimingCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_LineTimingMonitor").c_str(), (std::string("Panel ") + m_sPanelName  + " Line Timing Monitor").c_str(), 800, 600));
+/*	std::vector<int> vChannelRange = Configuration::Instance().GetRanges()[m_sPanelName];
 	int iNumberOfLines = vChannelRange.size();
 	if (iNumberOfLines > 1)
 	{

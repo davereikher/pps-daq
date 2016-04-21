@@ -61,7 +61,7 @@ std::map<std::string, std::vector<int> > Configuration::GetRanges()
 	{
 		std::vector<int> singlePanelRange;
 		//printf("\npanel key = %s\n", panelKey.c_str());
-		for (auto& channelIt: ranges[panelKey]["range"])
+		for (auto& channelIt: ranges[panelKey]["channels"])
 		{
 			//printf("%d ", channelIt.asInt());
 			singlePanelRange.push_back(channelIt.asInt());
@@ -165,3 +165,70 @@ float Configuration::GetTriggerThresholdVolts()
 	return m_configuration["trigger-threshold-volts"].asFloat();
 }
 
+int Configuration::GetLineCorrespondingTo(std::string a_sPanel, int a_iChannel)
+{	
+	Json::Value ranges = m_configuration["panels"];
+	int i = 0;
+
+	for (auto& channelIt: ranges[a_sPanel]["channels"])
+	{
+		//printf("%d ", channelIt.asInt());
+		if(channelIt.asInt() == a_iChannel)
+		{
+			return ranges[a_sPanel]["lines"][i].asInt();
+		}	
+		i ++;
+	}
+}
+
+int Configuration::GetPanelIndex(std::string a_sPanelName)
+{
+	return m_configuration["panels"][a_sPanelName]["index"].asInt();
+}
+
+float Configuration::GetDistanceBetweenPanelsMm()
+{
+	return m_configuration["distance-between-panels-mm"].asFloat();
+}
+
+float Configuration::GetReadoutLinePitchMm()
+{
+	return m_configuration["readout-line-pitch-mm"].asFloat();
+}
+
+int Configuration::GetNumberOfEventsToFitAfter()
+{
+	return m_configuration["number-of-events-to-fit-after"].asInt();
+}
+
+bool Configuration::ShouldFitTimingHistograms()
+{
+	return m_configuration["should-fit-timing-histograms"].asBool();
+}
+
+float Configuration::GetCrystalBallAlphaParam()
+{
+	return m_configuration["crystal-ball-alpha"].asFloat();
+}
+
+
+float Configuration::GetCrystalBallnParam()
+{	
+	return m_configuration["crystal-ball-n"].asFloat();
+}
+
+float Configuration::GetCrystalBallMuParam()
+{	
+	return m_configuration["crystal-ball-mu"].asFloat();
+}
+
+float Configuration::GetCrystalBallSigmaParam()
+{	
+	return m_configuration["crystal-ball-sigma"].asFloat();
+}
+ 
+float Configuration::GetCrystalBallNParam()
+{	
+	return m_configuration["crystal-ball-N"].asFloat();
+}
+ 

@@ -15,12 +15,16 @@ class TrackMonitor
 public:	
 	TrackMonitor();
 	void GotEvent(HitMap_t& a_hitMap);
+	float PanelToZ(std::string a_sPanel);
+	float ChannelToX(std::string a_sPanel, int a_iChannel);
+	void FillAngleHist(float m_fAngle);
+
 private:
 	void InitGraphics();
 private:
-//	std::unique_ptr<TCanvas> m_pCanvas;
-	/*std::unique_ptr<TCanvas> m_pLineTimingCanvas;
-	TH1* m_pTimingHist;
-	std::map<int, TH1*> m_vpLineHistograms;*/
+	std::unique_ptr<TCanvas> m_pCanvas;
+//	std::unique_ptr<TCanvas> m_pLineTimingCanvas;
+	TH1* m_pAngleHist;
+//	std::map<int, TH1*> m_vpLineHistograms;
 //	std::string m_sPanelName;
 };
