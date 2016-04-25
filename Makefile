@@ -11,6 +11,7 @@ all:	$(BINDIR) $(OBJDIR) $(DICTOBJ)
 	@make -f make_analysis
 	@make -f make_step
 	@make -f make_scope
+	@make -f make_compress
 
 $(DICTSRC): $(DICTDIR)/LinkDef.h
 	@rootcint -f $@ -p $^
@@ -30,6 +31,7 @@ clean:
 	-make -f make_analysis clean
 	-make -f make_step clean
 	-make -f make_scope clean
+	-make -f make_compress clean
 	-rm $(DICTDIR)/dict.cxx
 	-rm $(BINDIR)/dict_rdict.pcm
 
@@ -40,5 +42,6 @@ clobber:
 	-make -f ./make_analysis clobber
 	-make -f ./make_step clobber
 	-make -f ./make_scope clobber
+	-make -f make_compress clobber
 
 

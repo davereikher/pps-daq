@@ -583,14 +583,24 @@ void SignalAnalyzer::MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer)
 	}
 }
 
+/**
+Returns the number of panels with primary pulses in an acquisition event if the flag AnalysisFlags::ECountPanelsWithPrimaryPulse is set. This is for the 'compression' utility, which goes over the raw root tree and creates a "compressed" root tree, containing only interesting events. This function and flag should be set when running in synchronous mode only (not together with the flag AnalysisFlags::EAsynchronous)!
+@return Number of panels containing pulses
+*/
+int SignalAnalyzer::GetLastNumberOfPanelsWithPrimaryPulse()
+{
+	return m_iNumberOfPanelsWithPrimaryPulse;
+}
+
 void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels)
 {
+	m_iNumberOfPanelsWithPrimaryPulse= 0;
 	if (m_iFlags & AnalysisFlags::ETriggerTimingMonitor)
 	{
 		m_pTriggerTimingMonitor->GotTrigger(a_timeStamp);
 	}
 	//All these require DC offset zeroing (normalization)
-	if ((m_iFlags & AnalysisFlags::EPanelHitMonitor) || (m_iFlags & AnalysisFlags::EPanelTimingMonitor) || (m_iFlags& AnalysisFlags::ETrackMonitor))
+	if ((m_iFlags & AnalysisFlags::EPanelHitMonitor) || (m_iFlags & AnalysisFlags::EPanelTimingMonitor) || (m_iFlags & AnalysisFlags::ETrackMonitor) || (m_iFlags & AnalysisFlags::ECountPanelsWithPrimaryPulse))
 	{
 		bool bEventEmpty = false;
 
@@ -611,16 +621,23 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 		int i = 0;
 		for (auto it: m_vRanges)
 		{
-			m_vpPanelMonitors[i]->GotTrigger();
+			if (m_iFlags & AnalysisFlags::EPanelHitMonitor)
+			{
+				m_vpPanelMonitors[i]->GotTrigger();
+			}
 			if (!bEventEmpty)
 			{
 				FindOriginalPulseInChannelRange(vNormalizedChannels, it.first, it.second);
-				m_vpPanelMonitors[i]->GotEvent(a_timeStamp, m_markers.m_vChannelsWithPulse);
-				if(m_iFlags & AnalysisFlags::ETrackMonitor)
+				if (m_iFlags & AnalysisFlags::EPanelHitMonitor)
+				{
+					m_vpPanelMonitors[i]->GotEvent(a_timeStamp, m_markers.m_vChannelsWithPulse);
+				}
+				if((m_iFlags & AnalysisFlags::ETrackMonitor) || (m_iFlags & AnalysisFlags::ECountPanelsWithPrimaryPulse))
 				{
 					if(m_markers.m_vChannelsWithPulse.size() == 1)
 					{
 						mPanelAndLine[it.first] = m_markers.m_vChannelsWithPulse[0];
+						m_iNumberOfPanelsWithPrimaryPulse ++;
 					}
 					else
 					{

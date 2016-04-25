@@ -123,7 +123,8 @@ public:
 		ETriggerTimingMonitor = 0x00000002,
 		EPanelHitMonitor = 0x00000004,
 		EPanelTimingMonitor = 0x00000008,
-		ETrackMonitor = 0x00000010
+		ETrackMonitor = 0x00000010,
+		ECountPanelsWithPrimaryPulse = 0x00000020
 	};
 public:
 	SignalAnalyzer();
@@ -141,6 +142,7 @@ public:
 	Channels_t NormalizeChannels(Channels_t& a_vChannels);
 	void ProcessEvents();
 	void Configure(std::string a_sPanelName);
+	int GetLastNumberOfPanelsWithPrimaryPulse();
 
 private:
 	static void MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer);
@@ -161,4 +163,5 @@ private:
 	std::vector<std::unique_ptr<PanelMonitor> > m_vpPanelMonitors;
 	std::vector<std::unique_ptr<PanelTimingMonitor> > m_vpPanelTimingMonitors;
 	std::unique_ptr<TrackMonitor> m_pTrackMonitor;
+	int m_iNumberOfPanelsWithPrimaryPulse;
 };
