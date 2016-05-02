@@ -73,8 +73,8 @@ void PanelMonitor::AddToSimultaneousChannelsPlot(nanoseconds a_eventTime, int a_
 	}
 	m_pCanvas->cd(2);
 	m_pSimultaneousChannelGraph->SetPoint(m_pSimultaneousChannelGraph->GetN(), duration_cast<seconds>(a_eventTime).count(), a_iNumberOfSimultaneousChannels);
-	m_pSimultaneousChannelGraph->GetXaxis()->SetTitle("Number of Channels w/ Pulses");
-	m_pSimultaneousChannelGraph->GetYaxis()->SetTitle("Time [seconds]");
+	m_pSimultaneousChannelGraph->GetYaxis()->SetTitle("Number of Channels w/ Pulses");
+	m_pSimultaneousChannelGraph->GetXaxis()->SetTitle("Time [seconds]");
 	m_pSimultaneousChannelGraph->GetXaxis()->CenterTitle();
 	m_pSimultaneousChannelGraph->GetYaxis()->CenterTitle();
 

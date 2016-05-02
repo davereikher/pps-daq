@@ -28,14 +28,21 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap)
 		sLogMessage = std::to_string(mHitsInThisEvent.size()) + "-panel track detected. Points (panel, channel): ";
 //		printf("%d-panel track detected! ", mHitsInThisEvent.size());
 		
-//		Track track;
+		Track track;
 		for (auto& it: mHitsInThisEvent)	
 		{
 			sLogMessage += "(" + it.first + ", " + std::to_string(Configuration::Instance().GetLineCorrespondingTo(it.first, it.second))+ ") ";
-//			track.AddPoint(PanelToZ(it.first), ChannelToX(it.first, it.second));
+			track.AddPoint(ChannelToX(it.first, it.second), PanelToZ(it.first));
 		}
 
-//		FillAngleHist(track.GetAngle());
+		if (track.GetNumberOfPoints() > 2)
+		{
+			FillAngleHist(track.GetAngle());
+		}		
+		if(track.GetNumberOfPoints() > 2)
+		{	
+			//FillChiSquaredPerNDFHist(track.GetChiSquaredPerNDF());
+		}
 		printf("%s\n", sLogMessage.c_str());
 		Logger::Instance().SetWriteCurrentMessage();
 		Logger::Instance().AddMessage(sLogMessage);
@@ -58,9 +65,18 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap)
 
 void TrackMonitor::FillAngleHist(float m_fAngle)
 {
+//	m_pCanvas->cd(1);
 	m_pAngleHist->Fill(m_fAngle);
-	m_pAngleHist->Draw();
+	m_pAngleHist->Draw("E1");
 	m_pAngleHist->SetCanExtend(TH1::kXaxis);
+}
+
+void TrackMonitor::FillChiSquaredPerNDFHist(float m_fChiSquaredPerNDF)
+{
+	m_pCanvas->cd(2);
+	m_pChiSquaredPerNDFHist->Fill(m_fChiSquaredPerNDF);
+	m_pChiSquaredPerNDFHist->Draw();
+	m_pChiSquaredPerNDFHist->SetCanExtend(TH1::kXaxis);
 }
 
 float TrackMonitor::PanelToZ(std::string a_sPanel)
@@ -79,9 +95,12 @@ void TrackMonitor::InitGraphics()
 	printf("INITGRAPHICS\n");
 
 	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas("TrackMonitor", "Track Monitor", 800, 600));
+//	m_pCanvas->Divide(2);
 
-	m_pAngleHist = new TH1F("AngleHist" , "Polar Angle", 100, 0, 0);
+	m_pAngleHist = new TH1F("AngleHist" , "Polar Angle", 1000, 0, 0);
 	m_pAngleHist->SetFillColor(49);
+	m_pChiSquaredPerNDFHist = new TH1F("ChiSquaredPerNDF", "Chi Squared per NDF", 100, 0, 0);
+	m_pChiSquaredPerNDFHist->SetFillColor(49);
 //	m_pLineTimingCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_LineTimingMonitor").c_str(), (std::string("Panel ") + m_sPanelName  + " Line Timing Monitor").c_str(), 800, 600));
 /*	std::vector<int> vChannelRange = Configuration::Instance().GetRanges()[m_sPanelName];
 	int iNumberOfLines = vChannelRange.size();
