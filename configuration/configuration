@@ -57,7 +57,7 @@
 	"idle-line-duration-fraction": 0.05,
 	"trigger-threshold-volts": -0.2,
 	"digitizer-resolution-bits": 4095,
-	"number-of-events-to-draw-after": 1000,
+	"number-of-events-to-draw-after": 5,
 	"should-fit-timing-histograms": false,
 	"number-of-events-to-fit-after": 100,
 	"crystal-ball-alpha" : 0.46,

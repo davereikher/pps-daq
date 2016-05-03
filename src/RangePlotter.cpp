@@ -64,6 +64,7 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 
 			auto legend = new TLegend(0.8,0.8,1,1, "Channels");
 			m_vpLegends.push_back(std::unique_ptr<TLegend>(legend));
+			printf("printing panel %s\n", rangeIt.first.c_str());
 			for (auto& chanIt: rangeIt.second)
 			{
 				int iNumOfSamples = a_channels[chanIt].size();

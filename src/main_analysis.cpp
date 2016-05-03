@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "keyb.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -7,6 +8,7 @@
 #include "SignalAnalyzer.h"
 #include "CommonUtils.h"
 #include "Configuration.h"
+#include "TChain.h"
 #include "Types.h"
 #include "Logger.h"
 
@@ -66,6 +68,25 @@ void ShowProgress(int a_iCurrentEntry, int a_iTotalEntries)
 //	std::cout << std::endl;
 }
 
+std::vector<std::string> GetVectorOfDataFileNames(std::string sListFile)
+{	
+	std::ifstream file;
+	std::string line;
+	std::vector<std::string> vResult;
+
+	file.open(sListFile.c_str());
+	if(file.is_open())
+	{
+		while(getline(file, line))
+		{
+	        	vResult.push_back(line);
+		}
+	}
+
+	file.close();
+	return vResult;
+}
+
 int main(int argc, char* argv[])
 {
 	if (argc < 3)
@@ -93,21 +114,29 @@ int main(int argc, char* argv[])
 	unsigned int iArrivalTimeMSB = 0;
 	unsigned int iArrivalTimeLSB = 0;
 
-	TFile f(sRootFileName.c_str());
-	TTree* tree = (TTree*)f.Get("DigitizerEvents");
-	tree->SetBranchAddress("Event", &vChannels);
-	tree->SetBranchAddress("ArrivalTimeMSB", &iArrivalTimeMSB);
-	tree->SetBranchAddress("ArrivalTimeLSB", &iArrivalTimeLSB);
+	std::vector<std::string> vDataFileNames = GetVectorOfDataFileNames(argv[2]);
+
+//	TFile f(sRootFileName.c_str());
+	TChain chain("DigitizerEvents");
+	for (auto & it : vDataFileNames)
+	{
+		printf("file name : %s\n", it.c_str());
+		chain.Add(it.c_str());
+	}
+//	TTree* tree = (TTree*)f.Get("DigitizerEvents");
+	chain.SetBranchAddress("Event", &vChannels);
+	chain.SetBranchAddress("ArrivalTimeMSB", &iArrivalTimeMSB);
+	chain.SetBranchAddress("ArrivalTimeLSB", &iArrivalTimeLSB);
 
 
-	int iNumOfEntries = tree->GetEntries();
+	int iNumOfEntries = chain.GetEntries();
 	int c = 0;
 	for (int i = 0; i < iNumOfEntries; i ++)
 	{
 		Logger::Instance().NewEntry(i);
 		ShowProgress(i, iNumOfEntries);
 		
-		tree->GetEntry(i);
+		chain.GetEntry(i);
 
 		int64_t iTimeStampNano = (((uint64_t)iArrivalTimeMSB) << 32) | iArrivalTimeLSB;
 		//printf("MSB: %u, LSB: %u, time stamp: %llu\n", iArrivalTimeMSB, iArrivalTimeLSB, iTimeStampNano);

@@ -35,13 +35,10 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap)
 			track.AddPoint(ChannelToX(it.first, it.second), PanelToZ(it.first));
 		}
 
-		if (track.GetNumberOfPoints() > 2)
-		{
-			FillAngleHist(track.GetAngle());
-		}		
+		FillAngleHist(track.GetAngle());
 		if(track.GetNumberOfPoints() > 2)
 		{	
-			//FillChiSquaredPerNDFHist(track.GetChiSquaredPerNDF());
+			FillChiSquaredPerNDFHist(track.GetChiSquaredPerNDF());
 		}
 		printf("%s\n", sLogMessage.c_str());
 		Logger::Instance().SetWriteCurrentMessage();
@@ -65,7 +62,7 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap)
 
 void TrackMonitor::FillAngleHist(float m_fAngle)
 {
-//	m_pCanvas->cd(1);
+	m_pCanvas->cd(1);
 	m_pAngleHist->Fill(m_fAngle);
 	m_pAngleHist->Draw("E1");
 	m_pAngleHist->SetCanExtend(TH1::kXaxis);
@@ -74,6 +71,9 @@ void TrackMonitor::FillAngleHist(float m_fAngle)
 void TrackMonitor::FillChiSquaredPerNDFHist(float m_fChiSquaredPerNDF)
 {
 	m_pCanvas->cd(2);
+	Logger::Instance().SetWriteCurrentMessage();
+	Logger::Instance().AddMessage(std::string("Chi squared per NDF is ") + std::to_string(m_fChiSquaredPerNDF));
+
 	m_pChiSquaredPerNDFHist->Fill(m_fChiSquaredPerNDF);
 	m_pChiSquaredPerNDFHist->Draw();
 	m_pChiSquaredPerNDFHist->SetCanExtend(TH1::kXaxis);
@@ -95,7 +95,7 @@ void TrackMonitor::InitGraphics()
 	printf("INITGRAPHICS\n");
 
 	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas("TrackMonitor", "Track Monitor", 800, 600));
-//	m_pCanvas->Divide(2);
+	m_pCanvas->Divide(2);
 
 	m_pAngleHist = new TH1F("AngleHist" , "Polar Angle", 1000, 0, 0);
 	m_pAngleHist->SetFillColor(49);

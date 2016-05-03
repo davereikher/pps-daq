@@ -50,7 +50,8 @@ float Track::GetChiSquaredPerNDF()
 {
 	DoLinearRegression();
 	Double_t fChiSquare = m_linearFitter.GetChisquare();
-	return fChiSquare/m_linearFitter.GetNumberFreeParameters();
+	float fResult = fChiSquare/m_linearFitter.GetNumberFreeParameters();
+	return fResult;
 }
 
 float Track::GetSlopeValue()
