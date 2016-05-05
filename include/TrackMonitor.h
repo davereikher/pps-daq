@@ -7,7 +7,6 @@
 #include "Types.h"
 
 #define NO_SIGNAL_ON_PANEL -1
-typedef std::map<std::string, int> HitMap_t;
 //using namespace std::chrono;
 
 class TrackMonitor

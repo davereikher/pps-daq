@@ -2,13 +2,14 @@
 
 class Geometry
 {
+public:
 	class Point3D
 	{
 	public:
-		Point3D(float a_fX, float a_fY, float a_fZ);
-		float GetX();
-		float GetY();
-		float GetZ();
+		Point3D(float a_fX, float a_fY, float a_fZ):m_fX(a_fX),m_fY(a_fY),m_fZ(a_fZ){}
+		float GetX() {return m_fX;}
+		float GetY() {return m_fY;}
+		float GetZ() {return m_fZ;}
 	private:
 		float m_fX;
 		float m_fY;
@@ -18,10 +19,10 @@ class Geometry
 	class Line3D
 	{
 	public:
-		Line(float a_fTheta, float a_fPhi, Point& a_point);
-		Point3D GetPoint();
-		float GetPhi();
-		float GetTheta();
+		Line3D(float a_fTheta, float a_fPhi, Point3D& a_point);
+		Point3D GetPoint() {return m_point;}
+		float GetPhi()	{return  m_fPhi;}
+		float GetTheta() {return m_fTheta;}
 	private:
 		float m_fPhi;
 		float m_fTheta;
@@ -30,12 +31,13 @@ class Geometry
 
 	class HorizontalRectangle3D
 	{
-		HorizontalRectangle(float a_fLength, floart a_fWidth, float a_fXOffsetOfCenter, float a_fYOffsetOfCenter, float a_fZOffset);
-		float GetZOffset();
-		float GetMaxX();
-		float GetMinX();
-		float GetMaxY();
-		float GetMinY();
+	public:
+		HorizontalRectangle3D(float a_fLength, float a_fWidth, float a_fXOffsetOfCenter, float a_fYOffsetOfCenter, float a_fZOffset);
+		float GetZOffset() {return m_fZOffset;}
+		float GetMaxX() {return 0;}
+		float GetMinX() {return 0;}
+		float GetMaxY() {return 0;}
+		float GetMinY() {return 0;}
 	private:
 		float m_fZOffset;
 	};
@@ -47,6 +49,6 @@ class Geometry
 		float a_fZ;
 	};
 
-	Point LineWithHorizontalRectangleIntersection(HorizontalRectangle3D& a_rectangle, Line3D& a_line, Point3D& a_intersection);
-	Point LineWithHorizontalPlaneIntersection(float a_fPlaneZValue, Line3D& a_line);
+	bool LineWithHorizontalRectangleIntersection(HorizontalRectangle3D& a_rectangle, Line3D& a_line, Point3D& a_intersection);
+	Point3D LineWithHorizontalPlaneIntersection(float a_fPlaneZValue, Line3D& a_line);
 };

@@ -12,6 +12,10 @@
 #include "Types.h"
 #include "Logger.h"
 
+#include "RandomTrackGenerator.h"
+#include "TH1.h"
+#include "TCanvas.h"
+
 int checkCommand() {
 	int c = 0;
 	if(!kbhit())
@@ -89,7 +93,29 @@ std::vector<std::string> GetVectorOfDataFileNames(std::string sListFile)
 
 int main(int argc, char* argv[])
 {
-	if (argc < 3)
+	TApplication* pApplication = new TApplication("app",&argc,argv);
+	RandomTrackGenerator rg;
+	TCanvas pCanvas("test_distributions", "Test distributions", 800, 600);	
+	pCanvas.Divide(1,2);
+	TH1F pPhiHist("Phi" , "Phi", 100, 0, 0);
+	pPhiHist.SetFillColor(49);
+	TH1F pThetaHist("Phi" , "Phi", 100, 0, 0);
+	pThetaHist.SetFillColor(49);
+
+	for (int i = 0; i < 1000000; i++)
+	{
+		pPhiHist.Fill(rg.GeneratePhiValue());
+		pThetaHist.Fill(rg.GenerateThetaValue());
+	}
+
+	pCanvas.cd(1);
+	pPhiHist.Draw();
+	pCanvas.cd(2);
+	pThetaHist.Draw();
+	pCanvas.WaitPrimitive();
+
+	
+/*	if (argc < 3)
 	{
 		Usage(argv[0]);
 		exit(-1);
@@ -158,6 +184,6 @@ int main(int argc, char* argv[])
 		sigAnalyzer.ProcessEvents();
 	} while(c != 1);
 
-	sigAnalyzer.Stop();
+	sigAnalyzer.Stop();*/
 	return 0;
 }
