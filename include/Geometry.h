@@ -41,7 +41,7 @@ public:
 	private:
 		float m_fZOffset;
 	};
-
+	
 	class Vector3D
 	{
 		float a_fX;
@@ -49,6 +49,6 @@ public:
 		float a_fZ;
 	};
 
-	bool LineWithHorizontalRectangleIntersection(HorizontalRectangle3D& a_rectangle, Line3D& a_line, Point3D& a_intersection);
-	Point3D LineWithHorizontalPlaneIntersection(float a_fPlaneZValue, Line3D& a_line);
+	static bool LineWithHorizontalRectangleIntersection(HorizontalRectangle3D& a_rectangle, Line3D& a_line, Point3D& a_intersection);
+	static Point3D LineWithHorizontalPlaneIntersection(float a_fPlaneZValue, Line3D& a_line);
 };

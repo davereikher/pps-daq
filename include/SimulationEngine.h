@@ -2,9 +2,10 @@
 
 class SimulationEngine
 {
-	void Run();
+	void SingleRun();
 private:
-	std::vector<Elements::Scintillator> m_vScintillators;
-	std::vector<Elements::Panel> m_vPanels;
+	std::vector<Scintillator> m_vScintillators;
+	std::map<std::string, Panel> m_mPanels;
 	RandomTrackGenerator m_randomTrackGenerator;
+	HitMap_t m_mResult;
 };

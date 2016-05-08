@@ -29,36 +29,16 @@ void Configuration::LoadConfiguration(const char* a_pFilename) {
 		std::cout << "Could not read json. Error: " << reader.getFormattedErrorMessages() << std::endl;
 	}
 
-	/*	Json::Reader reader;
-		bool parsedSuccess = reader.parse(json_example,
-		root,
-		false);*/
-
-	/*	if(not parsedSuccess)
-		{
-	// Report failures and their locations
-	// in the document.
-	cout<<"Failed to parse JSON"<<endl
-	<<reader.getFormatedErrorMessages()
-	<<endl;
-	return 1;
-
-	}*/
 	std::cout << "OK" <<std::endl;
 	in.close();
 	m_bInitialized = true;
-}
-
-
-std::map<std::string, std::vector<int> > Configuration::GetRanges()
-{
-	std::map<std::string, std::vector<int> > vRanges;
 
 	Json::Value ranges = m_configuration["panels"];
 	Json::Value::Members panelKeys = ranges.getMemberNames();
 
 	for (auto& panelKey: panelKeys) 
 	{
+		m_mIndexToPanel[ranges[panelKey]["index"].AsInt()] = panelKey;
 		std::vector<int> singlePanelRange;
 		//printf("\npanel key = %s\n", panelKey.c_str());
 		for (auto& channelIt: ranges[panelKey]["channels"])
@@ -66,10 +46,14 @@ std::map<std::string, std::vector<int> > Configuration::GetRanges()
 			//printf("%d ", channelIt.asInt());
 			singlePanelRange.push_back(channelIt.asInt());
 		}
-		vRanges[panelKey]= singlePanelRange;
+		m_vRanges[panelKey]= singlePanelRange;
 	}
-	
-	return vRanges;
+}
+
+
+std::map<std::string, std::vector<int> > Configuration::GetRanges()
+{
+		return m_vRanges;
 }
 
 float Configuration::GetPulseThresholdVolts(std::string a_sPanelName)
@@ -231,4 +215,8 @@ float Configuration::GetCrystalBallNParam()
 {	
 	return m_configuration["crystal-ball-N"].asFloat();
 }
- 
+
+std::string GetPanelNameWithIndex(int a_iIndex)
+{
+	return m_mIndexToPanel[a_iIndex];
+}

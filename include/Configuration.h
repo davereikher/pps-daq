@@ -40,6 +40,7 @@ public:
 	float GetCrystalBallMuParam();
 	float GetCrystalBallSigmaParam();
 	float GetCrystalBallNParam();
+	float GetPanelNameWithIndex(int a_iIndex);
 
 	std::string GetDump();
 
@@ -47,4 +48,6 @@ private:
 	bool m_bInitialized;
 	Json::Value m_configuration;
 	static Configuration m_instance;
+	std::map<int, std::string> m_mIndexToPanel;
+	std::map<std::string, std::vector<int> > m_vRanges;
 };
