@@ -243,7 +243,6 @@ float Configuration::GetMonteCarloPointDomainRectangleCenterYMm()
 
 float Configuration::GetMonteCarloPointDomainRectangleCenterZMm()
 {	
-	printf("Z of random point from configuration: %f\n",  m_configuration["monte-carlo"]["track-intersection-point-domain-rectangle"]["center-z-mm"].asFloat());
 	return m_configuration["monte-carlo"]["track-intersection-point-domain-rectangle"]["center-z-mm"].asFloat();
 }
 

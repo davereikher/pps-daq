@@ -95,11 +95,11 @@
 	{
 		"track-intersection-point-domain-rectangle": 
 		{
-			"length-x-mm": 30,
-			"length-y-mm": 30,
+			"length-x-mm": 300,
+			"length-y-mm": 300,
 			"center-x-mm": 0,
 			"center-y-mm": 0,
-			"center-z-mm": 30
+			"center-z-mm": 400
 		}
 	}
 }

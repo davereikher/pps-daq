@@ -23,7 +23,7 @@ Geometry::Point3D Geometry::LineWithHorizontalPlaneIntersection(float a_fPlaneZV
 	printf("a_line.GetPoint: %f\n", a_line.GetPoint().GetX());
 	float fT = (a_fPlaneZValue - a_line.GetPoint().GetZ())/cos(a_line.GetTheta());
 	float fX = a_line.GetPoint().GetX() + sin(a_line.GetTheta()) * cos(a_line.GetPhi()) * fT;
-	float fY = a_line.GetPoint().GetX() + sin(a_line.GetTheta()) * sin(a_line.GetPhi()) * fT;
+	float fY = a_line.GetPoint().GetY() + sin(a_line.GetTheta()) * sin(a_line.GetPhi()) * fT;
 	return Point3D(fX, fY, a_fPlaneZValue);
 }
 
