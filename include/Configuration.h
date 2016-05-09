@@ -40,7 +40,12 @@ public:
 	float GetCrystalBallMuParam();
 	float GetCrystalBallSigmaParam();
 	float GetCrystalBallNParam();
-	float GetPanelNameWithIndex(int a_iIndex);
+	std::string GetPanelNameWithIndex(int a_iIndex);
+	float GetMonteCarloPointDomainRectangleLengthXMm();
+	float GetMonteCarloPointDomainRectangleLengthYMm();
+	float GetMonteCarloPointDomainRectangleCenterXMm();
+	float GetMonteCarloPointDomainRectangleCenterYMm();
+	float GetMonteCarloPointDomainRectangleCenterZMm();
 
 	std::string GetDump();
 

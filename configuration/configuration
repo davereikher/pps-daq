@@ -68,5 +68,16 @@
 	"trigger-rate-averaging-duration-seconds": 600,
 	"normalize-channels": true,
 	"distance-between-panels-mm": 37,
-	"readout-line-pitch-mm": 2.54
+	"readout-line-pitch-mm": 2.54,
+	"monte-carlo":
+	{
+		"track-intersection-point-domain-rectangle": 
+		{
+			"length-x-mm": 30,
+			"length-y-mm": 30,
+			"center-x-mm": 0,
+			"center-y-mm": 0,
+			"center-z-mm": 30
+		}
+	}
 }

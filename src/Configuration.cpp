@@ -38,7 +38,7 @@ void Configuration::LoadConfiguration(const char* a_pFilename) {
 
 	for (auto& panelKey: panelKeys) 
 	{
-		m_mIndexToPanel[ranges[panelKey]["index"].AsInt()] = panelKey;
+		m_mIndexToPanel[ranges[panelKey]["index"].asInt()] = panelKey;
 		std::vector<int> singlePanelRange;
 		//printf("\npanel key = %s\n", panelKey.c_str());
 		for (auto& channelIt: ranges[panelKey]["channels"])
@@ -216,7 +216,32 @@ float Configuration::GetCrystalBallNParam()
 	return m_configuration["crystal-ball-N"].asFloat();
 }
 
-std::string GetPanelNameWithIndex(int a_iIndex)
+std::string Configuration::GetPanelNameWithIndex(int a_iIndex)
 {
 	return m_mIndexToPanel[a_iIndex];
+}
+
+float Configuration::GetMonteCarloPointDomainRectangleLengthXMm()
+{
+	return m_configuration["monte-carlo"]["track-intersection-point-domain-rectangle"]["length-x-mm"].asFloat();
+}
+
+float Configuration::GetMonteCarloPointDomainRectangleLengthYMm()
+{
+	return m_configuration["monte-carlo"]["track-intersection-point-domain-rectangle"]["length-y-mm"].asFloat();
+}
+
+float Configuration::GetMonteCarloPointDomainRectangleCenterXMm()
+{
+	return m_configuration["monte-carlo"]["track-intersection-point-domain-rectangle"]["center-x-mm"].asFloat();
+}
+
+float Configuration::GetMonteCarloPointDomainRectangleCenterYMm()
+{
+	return m_configuration["monte-carlo"]["track-intersection-point-domain-rectangle"]["center-y-mm"].asFloat();
+}
+
+float Configuration::GetMonteCarloPointDomainRectangleCenterZMm()
+{
+	return m_configuration["monte-carlo"]["track-intersection-point-domain-rectangle"]["center-z-mm"].asFloat();
 }

@@ -5,13 +5,12 @@
 class RandomTrackGenerator
 {
 public:
-	RandomTrackGenerator(Geometry::HorizontalRectangle3D& a_pointDomainRectangle);
-	void GenerateTracks(int a_iNumberOfTracks);
+	RandomTrackGenerator(Geometry::HorizontalRectangle3D a_pointDomainRectangle);
+	Geometry::Line3D GenerateTrack();
 
-private:
 	float GeneratePhiValue();
 	float GenerateThetaValue();
-	Geometry::Point3D GeneratePoint(Geometry::HorizontalRectangle3D& a_pointDomainRectangle);
+	Geometry::Point3D GeneratePoint();
 
 private:
 	std::default_random_engine m_generator;
@@ -20,5 +19,5 @@ private:
 	std::uniform_real_distribution<float> m_distribution0To1;
 	std::uniform_real_distribution<float> m_distributionPointX;
 	std::uniform_real_distribution<float> m_distributionPointY;
-	
+	Geometry::HorizontalRectangle3D m_pointDomainRectangle;	
 };

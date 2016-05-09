@@ -7,6 +7,7 @@ public:
 	{
 	public:
 		Point3D(float a_fX, float a_fY, float a_fZ):m_fX(a_fX),m_fY(a_fY),m_fZ(a_fZ){}
+		Point3D(){}
 		float GetX() {return m_fX;}
 		float GetY() {return m_fY;}
 		float GetZ() {return m_fZ;}
@@ -19,7 +20,9 @@ public:
 	class Line3D
 	{
 	public:
-		Line3D(float a_fTheta, float a_fPhi, Point3D& a_point);
+		Line3D(float a_fTheta, float a_fPhi, Geometry::Point3D a_point){}
+		Line3D(){}
+		
 		Point3D GetPoint() {return m_point;}
 		float GetPhi()	{return  m_fPhi;}
 		float GetTheta() {return m_fTheta;}
@@ -32,7 +35,8 @@ public:
 	class HorizontalRectangle3D
 	{
 	public:
-		HorizontalRectangle3D(float a_fLength, float a_fWidth, float a_fXOffsetOfCenter, float a_fYOffsetOfCenter, float a_fZOffset);
+		HorizontalRectangle3D(float a_fLengthX, float a_fLengthY, float a_fXOffsetOfCenter, float a_fYOffsetOfCenter, float a_fZOffset) {}
+		HorizontalRectangle3D(){}
 		float GetZOffset() {return m_fZOffset;}
 		float GetMaxX() {return 0;}
 		float GetMinX() {return 0;}

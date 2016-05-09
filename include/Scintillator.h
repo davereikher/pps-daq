@@ -1,11 +1,12 @@
 #pragma once 
+#include <random>
 #include "Geometry.h"
 
-class Scintillator: public HorizontalRectangle3D
+class Scintillator: public Geometry::HorizontalRectangle3D
 {
 public:
 	Scintillator(float a_fEfficiency, HorizontalRectangle3D& a_polygon);
-	bool Captured(Line3D& a_track);
+	bool Captured(Geometry::Line3D& a_track);
 
 private:
 	float m_fEfficiency;

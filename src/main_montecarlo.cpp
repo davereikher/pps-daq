@@ -94,8 +94,13 @@ std::vector<std::string> GetVectorOfDataFileNames(std::string sListFile)
 int main(int argc, char* argv[])
 {
 	TApplication* pApplication = new TApplication("app",&argc,argv);
-	RandomTrackGenerator rg;
-	TCanvas pCanvas("test_distributions", "Test distributions", 800, 600);	
+	RandomTrackGenerator rg(Geometry::HorizontalRectangle3D(Configuration::Instance().GetMonteCarloPointDomainRectangleLengthXMm(),
+			Configuration::Instance().GetMonteCarloPointDomainRectangleLengthYMm(), 
+			Configuration::Instance().GetMonteCarloPointDomainRectangleCenterXMm(), 
+			Configuration::Instance().GetMonteCarloPointDomainRectangleCenterYMm(),
+			Configuration::Instance().GetMonteCarloPointDomainRectangleCenterZMm()));
+
+	TCanvas pCanvas("test_distributions", "Test distributions", 800, 600);
 	pCanvas.Divide(1,2);
 	TH1F pPhiHist("Phi" , "Phi", 100, 0, 0);
 	pPhiHist.SetFillColor(49);
