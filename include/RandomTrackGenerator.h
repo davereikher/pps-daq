@@ -19,5 +19,5 @@ private:
 	std::uniform_real_distribution<float> m_distribution0To1;
 	std::uniform_real_distribution<float> m_distributionPointX;
 	std::uniform_real_distribution<float> m_distributionPointY;
-	Geometry::HorizontalRectangle3D m_pointDomainRectangle;	
+	float m_fPointZOffset;
 };

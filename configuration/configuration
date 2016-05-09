@@ -50,6 +50,28 @@
 			"index": 0
 		}
 	},
+	"scintillators":
+	{
+		"top":
+		{
+			"length-x-mm": 270,
+			"length-y-mm": 125,
+			"center-x-mm": 0,
+			"center-y-mm": 0,
+			"center-z-mm": 400,
+			"efficiency": 0.95
+		},
+
+		"bottom":
+		{
+			"length-x-mm": 270,
+			"length-y-mm": 125,
+			"center-x-mm": 0,
+			"center-y-mm": 0,
+			"center-z-mm": -400,
+			"efficiency": 0.95
+		}
+	},
 	"volt-min": -0.5,
 	"volt-max": 0.5,
 	"sampling-freq-ghz": 2.5,

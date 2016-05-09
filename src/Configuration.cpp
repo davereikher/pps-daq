@@ -242,6 +242,67 @@ float Configuration::GetMonteCarloPointDomainRectangleCenterYMm()
 }
 
 float Configuration::GetMonteCarloPointDomainRectangleCenterZMm()
-{
+{	
+	printf("Z of random point from configuration: %f\n",  m_configuration["monte-carlo"]["track-intersection-point-domain-rectangle"]["center-z-mm"].asFloat());
 	return m_configuration["monte-carlo"]["track-intersection-point-domain-rectangle"]["center-z-mm"].asFloat();
+}
+
+float Configuration::GetTopScintillatorLengthXMm()
+{
+	return m_configuration["scintillators"]["top"]["length-x-mm"].asFloat();	
+}
+
+float Configuration::GetTopScintillatorLengthYMm()
+{
+	return m_configuration["scintillators"]["top"]["length-y-mm"].asFloat();	
+}
+
+float Configuration::GetTopScintillatorCenterXMm()
+{
+	return m_configuration["scintillators"]["top"]["center-x-mm"].asFloat();	
+}
+
+float Configuration::GetTopScintillatorCenterYMm()
+{
+	return m_configuration["scintillators"]["top"]["center-y-mm"].asFloat();	
+}
+
+float Configuration::GetTopScintillatorCenterZMm()
+{
+	return m_configuration["scintillators"]["top"]["center-z-mm"].asFloat();	
+}
+
+float Configuration::GetTopScintillatorEfficiency()
+{
+	return m_configuration["scintillators"]["top"]["efficiency"].asFloat();	
+}
+
+float Configuration::GetBottomScintillatorLengthXMm()
+{
+	return m_configuration["scintillators"]["bottom"]["length-x-mm"].asFloat();	
+}
+
+float Configuration::GetBottomScintillatorLengthYMm()
+{
+	return m_configuration["scintillators"]["bottom"]["length-y-mm"].asFloat();	
+}
+
+float Configuration::GetBottomScintillatorCenterXMm()
+{
+	return m_configuration["scintillators"]["bottom"]["center-x-mm"].asFloat();	
+}
+
+float Configuration::GetBottomScintillatorCenterYMm()
+{
+	return m_configuration["scintillators"]["bottom"]["center-y-mm"].asFloat();	
+}
+
+float Configuration::GetBottomScintillatorCenterZMm()
+{
+	return m_configuration["scintillators"]["bottom"]["center-z-mm"].asFloat();	
+}
+
+float Configuration::GetBottomScintillatorEfficiency()
+{
+	return m_configuration["scintillators"]["bottom"]["efficiency"].asFloat();	
 }

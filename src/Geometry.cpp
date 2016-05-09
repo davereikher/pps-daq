@@ -1,7 +1,8 @@
 #include <cmath>
+#include "stdio.h"
 #include "Geometry.h"
 
-bool Geometry::LineWithHorizontalRectangleIntersection(Geometry::HorizontalRectangle3D& a_rectangle, Line3D& a_line, Geometry::Point3D& a_intersection)
+bool Geometry::LineWithHorizontalRectangleIntersection(Geometry::HorizontalRectangle3D a_rectangle, Line3D a_line, Geometry::Point3D& a_intersection)
 {
 	Point3D pt(LineWithHorizontalPlaneIntersection(a_rectangle.GetZOffset(), a_line));
 	if (
@@ -19,6 +20,7 @@ bool Geometry::LineWithHorizontalRectangleIntersection(Geometry::HorizontalRecta
 
 Geometry::Point3D Geometry::LineWithHorizontalPlaneIntersection(float a_fPlaneZValue, Geometry::Line3D& a_line)
 {
+	printf("a_line.GetPoint: %f\n", a_line.GetPoint().GetX());
 	float fT = (a_fPlaneZValue - a_line.GetPoint().GetZ())/cos(a_line.GetTheta());
 	float fX = a_line.GetPoint().GetX() + sin(a_line.GetTheta()) * cos(a_line.GetPhi()) * fT;
 	float fY = a_line.GetPoint().GetX() + sin(a_line.GetTheta()) * sin(a_line.GetPhi()) * fT;

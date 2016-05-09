@@ -46,7 +46,19 @@ public:
 	float GetMonteCarloPointDomainRectangleCenterXMm();
 	float GetMonteCarloPointDomainRectangleCenterYMm();
 	float GetMonteCarloPointDomainRectangleCenterZMm();
-
+	float GetTopScintillatorLengthXMm();
+	float GetTopScintillatorLengthYMm();
+	float GetTopScintillatorCenterXMm();
+	float GetTopScintillatorCenterYMm();
+	float GetTopScintillatorCenterZMm();
+	float GetTopScintillatorEfficiency();
+	float GetBottomScintillatorLengthXMm();
+	float GetBottomScintillatorLengthYMm();
+	float GetBottomScintillatorCenterXMm();
+	float GetBottomScintillatorCenterYMm();
+	float GetBottomScintillatorCenterZMm();
+	float GetBottomScintillatorEfficiency();
+		
 	std::string GetDump();
 
 private:

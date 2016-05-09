@@ -14,7 +14,7 @@
 
 #include "RandomTrackGenerator.h"
 #include "TH1.h"
-#include "TCanvas.h"
+#include "SimulationEngine.h"
 
 int checkCommand() {
 	int c = 0;
@@ -32,7 +32,7 @@ int checkCommand() {
 
 void Usage(char* a_pProcName)
 {
-	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to root file> <path to new log file>" << std::endl;
+	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file>" << std::endl;
 	std::vector<float> vec = CommonUtils::GenerateTimeSequence(5);
 }
 
@@ -93,32 +93,43 @@ std::vector<std::string> GetVectorOfDataFileNames(std::string sListFile)
 
 int main(int argc, char* argv[])
 {
-	TApplication* pApplication = new TApplication("app",&argc,argv);
+	TApplication* pApplication = new TApplication("app",0, 0);
+
+	if (argc < 2)
+	{
+		Usage(argv[0]);
+		exit(-1);
+	}
+
+	Configuration::Instance().LoadConfiguration(argv[1]);
+
 	RandomTrackGenerator rg(Geometry::HorizontalRectangle3D(Configuration::Instance().GetMonteCarloPointDomainRectangleLengthXMm(),
 			Configuration::Instance().GetMonteCarloPointDomainRectangleLengthYMm(), 
 			Configuration::Instance().GetMonteCarloPointDomainRectangleCenterXMm(), 
 			Configuration::Instance().GetMonteCarloPointDomainRectangleCenterYMm(),
 			Configuration::Instance().GetMonteCarloPointDomainRectangleCenterZMm()));
 
-	TCanvas pCanvas("test_distributions", "Test distributions", 800, 600);
+/*	TCanvas pCanvas("test_distributions", "Test distributions", 800, 600);
 	pCanvas.Divide(1,2);
 	TH1F pPhiHist("Phi" , "Phi", 100, 0, 0);
 	pPhiHist.SetFillColor(49);
 	TH1F pThetaHist("Phi" , "Phi", 100, 0, 0);
 	pThetaHist.SetFillColor(49);
+*/	
+	SimulationEngine simEngine(rg);
+	simEngine.Draw();
 
-	for (int i = 0; i < 1000000; i++)
+	for (int i = 0; i < 500; i++)
 	{
-		pPhiHist.Fill(rg.GeneratePhiValue());
-		pThetaHist.Fill(rg.GenerateThetaValue());
+		simEngine.SingleRun();
 	}
 
-	pCanvas.cd(1);
+/*	pCanvas.cd(1);
 	pPhiHist.Draw();
 	pCanvas.cd(2);
 	pThetaHist.Draw();
 	pCanvas.WaitPrimitive();
-
+*/
 	
 /*	if (argc < 3)
 	{
@@ -190,5 +201,6 @@ int main(int argc, char* argv[])
 	} while(c != 1);
 
 	sigAnalyzer.Stop();*/
+	simEngine.Wait();
 	return 0;
 }

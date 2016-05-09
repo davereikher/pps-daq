@@ -6,8 +6,11 @@ m_distributionPhi(0, 2*M_PI),
 m_distributionTheta(0, M_PI/2),
 m_distribution0To1(0,1),
 m_distributionPointX(a_pointDomainRectangle.GetMinX(), a_pointDomainRectangle.GetMaxX()),
-m_distributionPointY(a_pointDomainRectangle.GetMinY(), a_pointDomainRectangle.GetMaxY())
-{}
+m_distributionPointY(a_pointDomainRectangle.GetMinY(), a_pointDomainRectangle.GetMaxY()),
+m_fPointZOffset(a_pointDomainRectangle.GetZOffset())
+{
+//	printf("MaxX: %f, MinX: %f, MaxY: %f, MinY: %f\n", a_pointDomainRectangle.GetMaxX(), a_pointDomainRectangle.GetMinX(), a_pointDomainRectangle.GetMaxY(), a_pointDomainRectangle.GetMinY());
+}
 
 Geometry::Line3D RandomTrackGenerator::GenerateTrack()
 {
@@ -42,11 +45,15 @@ float RandomTrackGenerator::GenerateThetaValue()
 		fCosSquared = cos(x);
 		
 	} while (y > fCosSquared * fCosSquared);
+	
+	printf("Theta: %f\n", x);
 
 	return x;
 }
 
 Geometry::Point3D RandomTrackGenerator::GeneratePoint()
 {
-	Geometry::Point3D pt(m_distributionPointX(m_generator), m_distributionPointY(m_generator), 0);
+	Geometry::Point3D pt(m_distributionPointX(m_generator), m_distributionPointY(m_generator), m_fPointZOffset);
+	printf("Random Point is at (%f, %f, %f)\n", pt.GetX(), pt.GetY(), pt.GetZ());
+	return pt;
 }

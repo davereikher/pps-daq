@@ -1,12 +1,14 @@
 #pragma once 
 #include <random>
+#include "TPolyLine3D.h"
 #include "Geometry.h"
 
 class Scintillator: public Geometry::HorizontalRectangle3D
 {
 public:
-	Scintillator(float a_fEfficiency, HorizontalRectangle3D& a_polygon);
+	Scintillator(float a_fEfficiency, HorizontalRectangle3D a_polygon);
 	bool Captured(Geometry::Line3D& a_track);
+	TPolyLine3D* GeneratePolyLine3D();
 
 private:
 	float m_fEfficiency;
