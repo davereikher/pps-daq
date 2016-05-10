@@ -101,13 +101,13 @@ int main(int argc, char* argv[])
 		exit(-1);
 	}
 
-	Configuration::Instance().LoadConfiguration(argv[1]);
+	Configuration& config = Configuration::Instance();
 
-	RandomTrackGenerator rg(Geometry::HorizontalRectangle3D(Configuration::Instance().GetMonteCarloPointDomainRectangleLengthXMm(),
-			Configuration::Instance().GetMonteCarloPointDomainRectangleLengthYMm(), 
-			Configuration::Instance().GetMonteCarloPointDomainRectangleCenterXMm(), 
-			Configuration::Instance().GetMonteCarloPointDomainRectangleCenterYMm(),
-			Configuration::Instance().GetMonteCarloPointDomainRectangleCenterZMm()));
+	config.LoadConfiguration(argv[1]);
+
+	RandomTrackGenerator rg(Geometry::HorizontalRectangle3D(config.GetMonteCarloPointDomainRectangleLengthXMm(),
+			config.GetMonteCarloPointDomainRectangleLengthYMm(), 
+			Geometry::Point3D(config.GetMonteCarloPointDomainRectangleCenterXMm(), config.GetMonteCarloPointDomainRectangleCenterYMm(), config.GetMonteCarloPointDomainRectangleCenterZMm())));
 
 /*	TCanvas pCanvas("test_distributions", "Test distributions", 800, 600);
 	pCanvas.Divide(1,2);
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 	SimulationEngine simEngine(rg);
 	simEngine.Draw();
 
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 1000; i++)
 	{
 		simEngine.SingleRun();
 	}
@@ -137,12 +137,12 @@ int main(int argc, char* argv[])
 		exit(-1);
 	}
 
-	Configuration::Instance().LoadConfiguration(argv[1]);
+	config.LoadConfiguration(argv[1]);
 
 	std::string sRootFileName(argv[2]);
 	
 	Logger::Instance().Init(argv[3]);
-	Logger::Instance().AddNecessaryMessage(Configuration::Instance().GetDump());
+	Logger::Instance().AddNecessaryMessage(config.GetDump());
 
 	SignalAnalyzer sigAnalyzer;
 
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 
 	sigAnalyzer.Start();
 	
-	Range_t mRanges = Configuration::Instance().GetRanges();
+	Range_t mRanges = config.GetRanges();
 
 	Channels_t* vChannels = 0;
 	unsigned int iArrivalTimeMSB = 0;

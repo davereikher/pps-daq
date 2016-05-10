@@ -27,15 +27,25 @@ void SimulationEngine::InitGraphics()
 void SimulationEngine::InitObjects()
 {
 	Configuration& config = Configuration::Instance();
+
+	//init scintillators
 	Scintillator topScint(config.GetTopScintillatorEfficiency(),
 			Geometry::HorizontalRectangle3D(config.GetTopScintillatorLengthXMm(),	config.GetTopScintillatorLengthYMm(),
-			config.GetTopScintillatorCenterXMm(), config.GetTopScintillatorCenterYMm(), config.GetTopScintillatorCenterZMm()));
+			Geometry::Point3D(config.GetTopScintillatorCenterXMm(), config.GetTopScintillatorCenterYMm(), config.GetTopScintillatorCenterZMm())));
 	Scintillator bottomScint(config.GetBottomScintillatorEfficiency(),
 			Geometry::HorizontalRectangle3D(config.GetBottomScintillatorLengthXMm(),	config.GetBottomScintillatorLengthYMm(),
-			config.GetBottomScintillatorCenterXMm(), config.GetBottomScintillatorCenterYMm(), config.GetBottomScintillatorCenterZMm()));
+			Geometry::Point3D(config.GetBottomScintillatorCenterXMm(), config.GetBottomScintillatorCenterYMm(), config.GetBottomScintillatorCenterZMm())));
 	
 	m_vScintillators.push_back(topScint);
 	m_vScintillators.push_back(bottomScint);
+
+	//init panels.
+	int iNumberOfPanels = config.GetNumberOfMonteCarloPanels();
+	for (int i = 0; i < iNumberOfPanels; i++)
+	{
+		Panel panel(i);
+		m_mPanels[config.GetPanelMonteCarloName(i)] = panel;
+	}	
 }
 
 void SimulationEngine::SingleRun()
@@ -86,7 +96,7 @@ void SimulationEngine::DrawTrack(Geometry::Line3D& a_track)
 	m_pCanvas->cd();
 
 	TPolyLine3D* pPolyLine = new TPolyLine3D(2);
-	printf("Bottom point: %f, %f, %f\nTop point: %f, %f, %f\n--\n", bottom.GetX(), bottom.GetY(), bottom.GetZ(), top.GetX(), top.GetY(), top.GetZ());
+//	printf("Bottom point: %f, %f, %f\nTop point: %f, %f, %f\n--\n", bottom.GetX(), bottom.GetY(), bottom.GetZ(), top.GetX(), top.GetY(), top.GetZ());
 
 	pPolyLine->SetPoint(0, top.GetX(), top.GetY(), top.GetZ());
 //	pPolyLine->SetPoint(0, -11.362981, -2.280738, -10.000000);
@@ -126,6 +136,10 @@ void SimulationEngine::Draw()
 		scint->SetLineColor(4);
 		scint->Draw();
 
+	}
+	for (auto& it: m_mPanels)
+	{
+		it.second.Draw();
 	}
 /*	TPolyLine3D*  = new TPolyLine3D(5);
 	pPolyLine->SetPoint(0, -10, -10, 0);

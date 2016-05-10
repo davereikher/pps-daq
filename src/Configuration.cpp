@@ -248,60 +248,120 @@ float Configuration::GetMonteCarloPointDomainRectangleCenterZMm()
 
 float Configuration::GetTopScintillatorLengthXMm()
 {
-	return m_configuration["scintillators"]["top"]["length-x-mm"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["top"]["length-x-mm"].asFloat();	
 }
 
 float Configuration::GetTopScintillatorLengthYMm()
 {
-	return m_configuration["scintillators"]["top"]["length-y-mm"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["top"]["length-y-mm"].asFloat();	
 }
 
 float Configuration::GetTopScintillatorCenterXMm()
 {
-	return m_configuration["scintillators"]["top"]["center-x-mm"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["top"]["center-x-mm"].asFloat();	
 }
 
 float Configuration::GetTopScintillatorCenterYMm()
 {
-	return m_configuration["scintillators"]["top"]["center-y-mm"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["top"]["center-y-mm"].asFloat();	
 }
 
 float Configuration::GetTopScintillatorCenterZMm()
 {
-	return m_configuration["scintillators"]["top"]["center-z-mm"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["top"]["center-z-mm"].asFloat();	
 }
 
 float Configuration::GetTopScintillatorEfficiency()
 {
-	return m_configuration["scintillators"]["top"]["efficiency"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["top"]["efficiency"].asFloat();	
 }
 
 float Configuration::GetBottomScintillatorLengthXMm()
 {
-	return m_configuration["scintillators"]["bottom"]["length-x-mm"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["bottom"]["length-x-mm"].asFloat();	
 }
 
 float Configuration::GetBottomScintillatorLengthYMm()
 {
-	return m_configuration["scintillators"]["bottom"]["length-y-mm"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["bottom"]["length-y-mm"].asFloat();	
 }
 
 float Configuration::GetBottomScintillatorCenterXMm()
 {
-	return m_configuration["scintillators"]["bottom"]["center-x-mm"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["bottom"]["center-x-mm"].asFloat();	
 }
 
 float Configuration::GetBottomScintillatorCenterYMm()
 {
-	return m_configuration["scintillators"]["bottom"]["center-y-mm"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["bottom"]["center-y-mm"].asFloat();	
 }
 
 float Configuration::GetBottomScintillatorCenterZMm()
 {
-	return m_configuration["scintillators"]["bottom"]["center-z-mm"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["bottom"]["center-z-mm"].asFloat();	
 }
 
 float Configuration::GetBottomScintillatorEfficiency()
 {
-	return m_configuration["scintillators"]["bottom"]["efficiency"].asFloat();	
+	return m_configuration["monte-carlo"]["scintillators"]["bottom"]["efficiency"].asFloat();	
+}
+
+float Configuration::GetCenterXOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["center-x-mm"].asFloat(); 
+}
+
+float Configuration::GetCenterYOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["center-y-mm"].asFloat(); 
+}
+
+float Configuration::GetCenterZOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["center-z-mm"].asFloat(); 
+}
+
+float Configuration::GetCellEfficiencyOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["efficiency"].asFloat();
+}
+
+float Configuration::GetXPitchOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["x-pitch-mm"].asFloat(); 
+}
+
+float Configuration::GetYPitchOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["y-pitch-mm"].asFloat(); 
+}
+
+float Configuration::GetCellXLengthOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["cell-length-x-mm"].asFloat(); 
+}
+
+float Configuration::GetCellYLengthOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["cell-length-y-mm"].asFloat(); 
+}
+
+int Configuration::GetNumberOfROLinesOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["number-of-RO-y-lines"].asInt(); 
+}
+
+int Configuration::GetNumberOfHVLinesOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["number-of-HV-x-lines"].asInt(); 
+}
+
+int Configuration::GetNumberOfMonteCarloPanels()
+{
+	return m_configuration["monte-carlo"]["panels"].size();
+}
+
+std::string Configuration::GetPanelMonteCarloName(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["name"].asString();
 }

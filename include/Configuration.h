@@ -58,7 +58,19 @@ public:
 	float GetBottomScintillatorCenterYMm();
 	float GetBottomScintillatorCenterZMm();
 	float GetBottomScintillatorEfficiency();
-		
+	float GetCenterXOfPanel(int a_iPanelIndex);
+	float GetCenterYOfPanel(int a_iPanelIndex);
+	float GetCenterZOfPanel(int a_iPanelIndex);	
+	float GetCellEfficiencyOfPanel(int a_iPanelIndex);
+	float GetXPitchOfPanel(int a_iPanelIndex);
+	float GetYPitchOfPanel(int a_iPanelIndex);
+	float GetCellXLengthOfPanel(int a_iPanelIndex);
+	float GetCellYLengthOfPanel(int a_iPanelIndex);
+	int GetNumberOfROLinesOfPanel(int a_iPanelIndex);
+	int GetNumberOfHVLinesOfPanel(int a_iPanelIndex);
+	int GetNumberOfMonteCarloPanels();
+	std::string GetPanelMonteCarloName(int a_iPanelIndex);
+
 	std::string GetDump();
 
 private:

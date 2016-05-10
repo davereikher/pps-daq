@@ -46,7 +46,7 @@ float RandomTrackGenerator::GenerateThetaValue()
 		
 	} while (y > fCosSquared * fCosSquared);
 	
-	printf("Theta: %f\n", x);
+//	printf("Theta: %f\n", x);
 
 	return x;
 }
@@ -54,6 +54,6 @@ float RandomTrackGenerator::GenerateThetaValue()
 Geometry::Point3D RandomTrackGenerator::GeneratePoint()
 {
 	Geometry::Point3D pt(m_distributionPointX(m_generator), m_distributionPointY(m_generator), m_fPointZOffset);
-	printf("Random Point is at (%f, %f, %f)\n", pt.GetX(), pt.GetY(), pt.GetZ());
+//	printf("Random Point is at (%f, %f, %f)\n", pt.GetX(), pt.GetY(), pt.GetZ());
 	return pt;
 }

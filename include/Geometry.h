@@ -36,20 +36,18 @@ public:
 	class HorizontalRectangle3D
 	{
 	public:
-		HorizontalRectangle3D(float a_fLengthX, float a_fLengthY, float a_fXOffsetOfCenter, float a_fYOffsetOfCenter, float a_fZOffset):
-		m_fLengthX(a_fLengthX), m_fLengthY(a_fLengthY), m_fXOffsetOfCenter(a_fXOffsetOfCenter), m_fYOffsetOfCenter(a_fYOffsetOfCenter), m_fZOffset(a_fZOffset) {}
+		HorizontalRectangle3D(float a_fLengthX, float a_fLengthY, Point3D a_centeriPoint):
+		m_fLengthX(a_fLengthX), m_fLengthY(a_fLengthY), m_centerPoint(a_centeriPoint) {}
 		HorizontalRectangle3D(){}
-		float GetZOffset() {return m_fZOffset;}
-		float GetMaxX() {return m_fXOffsetOfCenter + m_fLengthX/2;}
-		float GetMinX() {return m_fXOffsetOfCenter - m_fLengthX/2;}
-		float GetMaxY() {return m_fYOffsetOfCenter + m_fLengthY/2;}
-		float GetMinY() {return m_fYOffsetOfCenter - m_fLengthY/2;}
+		float GetZOffset() {return m_centerPoint.GetZ();}
+		float GetMaxX() {return m_centerPoint.GetX() + m_fLengthX/2;}
+		float GetMinX() {return m_centerPoint.GetX() - m_fLengthX/2;}
+		float GetMaxY() {return m_centerPoint.GetY() + m_fLengthY/2;}
+		float GetMinY() {return m_centerPoint.GetY() - m_fLengthY/2;}
 	private:
 		float m_fLengthX;
 		float m_fLengthY;
-		float m_fXOffsetOfCenter;
-		float m_fYOffsetOfCenter;
-		float m_fZOffset;
+		Point3D m_centerPoint;
 	};
 	
 	class Vector3D
