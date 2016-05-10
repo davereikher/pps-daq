@@ -15,7 +15,7 @@ public:
 	void SingleRun();
 	HitMap_t GetResults();
 	void Draw();
-	void DrawTrack(Geometry::Line3D& a_line);
+	void DrawTrack(Geometry::Line3D& a_line, int a_iColor);
 	float GetMinZ();
 	float GetMaxZ();
 	void Wait();

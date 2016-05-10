@@ -51,7 +51,6 @@ void SimulationEngine::InitObjects()
 void SimulationEngine::SingleRun()
 {
 	Geometry::Line3D track = m_randomTrackGenerator.GenerateTrack();
-	DrawTrack(track);
 	bool bCapturedInAllScintillators = true;
 	for (auto& scintillator: m_vScintillators)
 	{
@@ -63,8 +62,12 @@ void SimulationEngine::SingleRun()
 	}
 	if (!bCapturedInAllScintillators)
 	{
+		DrawTrack(track, 3);
 		return;
 	}
+	DrawTrack(track, 2);
+
+	
 	
 	//If we got here, the track intersects all scintillators and generates a signal in all of them, so the track 'triggers the DAQ'. Now we see if the track intersects and triggers signals in the panels.
 	std::map<int, int> mHitMapIntegerPanelIndices;
@@ -88,7 +91,7 @@ float  SimulationEngine::GetMinZ()
 	return -500;
 }
 
-void SimulationEngine::DrawTrack(Geometry::Line3D& a_track)
+void SimulationEngine::DrawTrack(Geometry::Line3D& a_track, int a_iColor)
 {
 	Geometry::Point3D top = Geometry::LineWithHorizontalPlaneIntersection(GetMaxZ(), a_track);
 	Geometry::Point3D bottom = Geometry::LineWithHorizontalPlaneIntersection(GetMinZ(), a_track);
@@ -103,7 +106,7 @@ void SimulationEngine::DrawTrack(Geometry::Line3D& a_track)
 	pPolyLine->SetPoint(1, bottom.GetX(), bottom.GetY(), bottom.GetZ());
 //	pPolyLine->SetPoint(1, -10.744752, -19.826996, 10.000000);
 	pPolyLine->SetLineWidth(1);
-	pPolyLine->SetLineColor(2);
+	pPolyLine->SetLineColor(a_iColor);
 	pPolyLine->Draw();
 	m_pCanvas->Update();
 }

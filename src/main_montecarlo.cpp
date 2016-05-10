@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 	SimulationEngine simEngine(rg);
 	simEngine.Draw();
 
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		simEngine.SingleRun();
 	}

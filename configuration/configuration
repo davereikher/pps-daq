@@ -73,8 +73,8 @@
 	{
 		"track-intersection-point-domain-rectangle": 
 		{
-			"length-x-mm": 3000,
-			"length-y-mm": 3000,
+			"length-x-mm": 300,
+			"length-y-mm": 300,
 			"center-x-mm": 0,
 			"center-y-mm": 0,
 			"center-z-mm": 500
@@ -88,7 +88,7 @@
 				"center-x-mm": 0,
 				"center-y-mm": 0,
 				"center-z-mm": 400,
-				"efficiency": 0.95
+				"efficiency": 1
 			},
 	
 			"bottom":
@@ -98,7 +98,7 @@
 				"center-x-mm": 0,
 				"center-y-mm": 0,
 				"center-z-mm": -400,
-				"efficiency": 0.95
+				"efficiency": 1
 			}
 		},
 		"panels":
