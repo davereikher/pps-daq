@@ -117,12 +117,28 @@ int main(int argc, char* argv[])
 	pThetaHist.SetFillColor(49);
 */	
 	SimulationEngine simEngine(rg);
-	simEngine.Draw();
-
-	for (int i = 0; i < 100; i++)
+	simEngine.Draw();	
+	SignalAnalyzer sigAnalyzer;
+	for (int i = 0; i < 500; i++)
 	{
 		simEngine.SingleRun();
+		HitMap_t& results = simEngine.GetResults();
+		bool bWritten = false;
+	/*	for (auto& it: results)
+		{
+			bWritten = true;
+			printf("(%s, %d) ", it.first.c_str(), it.second);
+		}
+		if(bWritten)
+		{
+			printf("\n");
+		}*/
+		if(results.size() >= 2)
+		{
+			sigAnalyzer.AnalyzeTrack(results);		
+		}
 	}
+
 
 /*	pCanvas.cd(1);
 	pPhiHist.Draw();

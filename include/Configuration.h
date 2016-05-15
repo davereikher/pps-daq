@@ -70,6 +70,8 @@ public:
 	int GetNumberOfHVLinesOfPanel(int a_iPanelIndex);
 	int GetNumberOfMonteCarloPanels();
 	std::string GetPanelMonteCarloName(int a_iPanelIndex);
+	float GetNumberIonPairsPerMmOfPanel(int a_iPanelIndex);
+	float GetGasGapThicknessMmOfPanel(int a_iPanelIndex);
 
 	std::string GetDump();
 

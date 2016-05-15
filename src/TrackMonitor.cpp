@@ -6,7 +6,7 @@
 TrackMonitor::TrackMonitor()
 {}
 
-void TrackMonitor::GotEvent(HitMap_t& a_hitMap)
+void TrackMonitor::GotEvent(HitMap_t& a_hitMap, bool a_bConvertChannelToLine)
 {
 	if(m_pCanvas == NULL)
 	{
@@ -21,6 +21,11 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap)
 			mHitsInThisEvent[it.first] = it.second;
 		}
 	}
+	for(auto& it: mHitsInThisEvent)
+	{
+		printf("#############%s, %d ", it.first.c_str(), it.second);
+	}
+	printf("\n");
 //	printf("size of hitmap: %d", mHitsInThisEvent.size());
 	std::string sLogMessage;
 	if(mHitsInThisEvent.size() > 1)
@@ -31,14 +36,27 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap)
 		Track track;
 		for (auto& it: mHitsInThisEvent)	
 		{
-			sLogMessage += "(" + it.first + ", " + std::to_string(Configuration::Instance().GetLineCorrespondingTo(it.first, it.second))+ ") ";
-			track.AddPoint(ChannelToX(it.first, it.second), PanelToZ(it.first));
+			int iLine = 0;
+			float fX = 0;
+			if(a_bConvertChannelToLine)
+			{
+				iLine = Configuration::Instance().GetLineCorrespondingTo(it.first, it.second);
+				fX = ChannelToX(it.first, it.second);
+			}
+			else
+			{
+				iLine = it.second;
+				fX = ChannelToX(it.first, it.second, false);
+			}
+			sLogMessage += "(" + it.first + ", " + std::to_string(iLine)+ ") ";
+			track.AddPoint(fX, PanelToZ(it.first));
 		}
 
 		FillAngleHist(track.GetAngle());
 		if(track.GetNumberOfPoints() > 2)
 		{	
 			FillChiSquaredPerNDFHist(track.GetChiSquaredPerNDF());
+			printf("Chi square: %f\n", track.GetChiSquaredPerNDF());
 		}
 		printf("%s\n", sLogMessage.c_str());
 		Logger::Instance().SetWriteCurrentMessage();
@@ -84,10 +102,15 @@ float TrackMonitor::PanelToZ(std::string a_sPanel)
 	return Configuration::Instance().GetPanelIndex(a_sPanel) * Configuration::Instance().GetDistanceBetweenPanelsMm();
 }
 
-float TrackMonitor::ChannelToX(std::string a_sPanel, int a_iChannel)
+float TrackMonitor::ChannelToX(std::string a_sPanel, int a_iChannel, bool a_bConvertChannelToLine)
 {
-	int line = Configuration::Instance().GetLineCorrespondingTo(a_sPanel, a_iChannel);
-	return line * Configuration::Instance().GetReadoutLinePitchMm();
+	int iLine = a_iChannel;
+	if(a_bConvertChannelToLine)
+	{
+		iLine = Configuration::Instance().GetLineCorrespondingTo(a_sPanel, a_iChannel);
+	}
+	
+	return iLine * Configuration::Instance().GetReadoutLinePitchMm();
 }
 
 void TrackMonitor::InitGraphics()

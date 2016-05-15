@@ -9,6 +9,9 @@ m_distributionPointX(a_pointDomainRectangle.GetMinX(), a_pointDomainRectangle.Ge
 m_distributionPointY(a_pointDomainRectangle.GetMinY(), a_pointDomainRectangle.GetMaxY()),
 m_fPointZOffset(a_pointDomainRectangle.GetZOffset())
 {
+	std::random_device r;
+	std::seed_seq seed{r(), r(), r(), r(), r(), r(), r()};
+	m_generator.seed(seed);
 //	printf("MaxX: %f, MinX: %f, MaxY: %f, MinY: %f\n", a_pointDomainRectangle.GetMaxX(), a_pointDomainRectangle.GetMinX(), a_pointDomainRectangle.GetMaxY(), a_pointDomainRectangle.GetMinY());
 }
 

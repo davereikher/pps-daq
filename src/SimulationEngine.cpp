@@ -50,7 +50,9 @@ void SimulationEngine::InitObjects()
 
 void SimulationEngine::SingleRun()
 {
+	m_mResult.clear();
 	Geometry::Line3D track = m_randomTrackGenerator.GenerateTrack();
+	TPolyLine3D* pTrack = MakePolyLine(track);
 	bool bCapturedInAllScintillators = true;
 	for (auto& scintillator: m_vScintillators)
 	{
@@ -62,23 +64,34 @@ void SimulationEngine::SingleRun()
 	}
 	if (!bCapturedInAllScintillators)
 	{
-		DrawTrack(track, 3);
+		DrawPolyLine(pTrack);
 		return;
 	}
-	DrawTrack(track, 2);
-
-	
 	
 	//If we got here, the track intersects all scintillators and generates a signal in all of them, so the track 'triggers the DAQ'. Now we see if the track intersects and triggers signals in the panels.
 	std::map<int, int> mHitMapIntegerPanelIndices;
+	bool bDrawn = false;
 	for (auto& panel: m_mPanels)
 	{
 		int iLine = panel.second.Captured(track);
 		if (iLine != -1)
 		{
+//			printf("iLine: %d\n", iLine);
+			if(!bDrawn)
+			{
+				pTrack->SetLineColor(3);
+				DrawPolyLine(pTrack);
+				bDrawn = true;
+			}
 			m_mResult[panel.first] = iLine;
 		}
 	}
+/*	if(!bDrawn)
+	{
+		pTrack->SetLineColor(4);
+		DrawPolyLine(pTrack);
+	}*/
+
 }
 
 float SimulationEngine::GetMaxZ()
@@ -91,7 +104,13 @@ float  SimulationEngine::GetMinZ()
 	return -500;
 }
 
-void SimulationEngine::DrawTrack(Geometry::Line3D& a_track, int a_iColor)
+void SimulationEngine::DrawPolyLine(TPolyLine3D* a_pPolyLine)
+{
+	a_pPolyLine->Draw();
+	m_pCanvas->Update();
+}
+
+TPolyLine3D* SimulationEngine::MakePolyLine(Geometry::Line3D& a_track)
 {
 	Geometry::Point3D top = Geometry::LineWithHorizontalPlaneIntersection(GetMaxZ(), a_track);
 	Geometry::Point3D bottom = Geometry::LineWithHorizontalPlaneIntersection(GetMinZ(), a_track);
@@ -106,12 +125,11 @@ void SimulationEngine::DrawTrack(Geometry::Line3D& a_track, int a_iColor)
 	pPolyLine->SetPoint(1, bottom.GetX(), bottom.GetY(), bottom.GetZ());
 //	pPolyLine->SetPoint(1, -10.744752, -19.826996, 10.000000);
 	pPolyLine->SetLineWidth(1);
-	pPolyLine->SetLineColor(a_iColor);
-	pPolyLine->Draw();
-	m_pCanvas->Update();
+	pPolyLine->SetLineColor(2);
+	return pPolyLine;
 }
 
-HitMap_t SimulationEngine::GetResults()
+HitMap_t& SimulationEngine::GetResults()
 {
 	return m_mResult;
 }

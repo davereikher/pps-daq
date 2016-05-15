@@ -27,3 +27,18 @@ Geometry::Point3D Geometry::LineWithHorizontalPlaneIntersection(float a_fPlaneZV
 	return Point3D(fX, fY, a_fPlaneZValue);
 }
 
+float Geometry::GetPathLengthInHorizontalMedium(Geometry::Line3D& a_line, float a_fThickness)
+{
+	return a_fThickness/cos(a_line.GetTheta());
+}
+
+static bool Geometry::PointExceedsBoundaries(Geometry::HorizontalRectangle3D& a_rectange, Geometry::Point3D& a_point)
+{
+	if ( (a_point.GetX() <= a_rectangle.GetMaxX()) && (a_point.GetX() >= a_rectangle.GetMinX()) && (a_point.GetY() <= a_rectangle.GetMaxY()) && (a_point.GetY() >= a_rectangle.GetMinY()))
+	{
+		return false;
+	}
+
+	return true;
+}
+

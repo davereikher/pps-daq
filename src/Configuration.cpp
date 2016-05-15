@@ -151,6 +151,7 @@ float Configuration::GetTriggerThresholdVolts()
 
 int Configuration::GetLineCorrespondingTo(std::string a_sPanel, int a_iChannel)
 {	
+	printf("Getting line corresponding to %s, %d... ", a_sPanel.c_str(), a_iChannel);
 	Json::Value ranges = m_configuration["panels"];
 	int i = 0;
 
@@ -163,6 +164,7 @@ int Configuration::GetLineCorrespondingTo(std::string a_sPanel, int a_iChannel)
 		}	
 		i ++;
 	}
+	return 0;
 }
 
 int Configuration::GetPanelIndex(std::string a_sPanelName)
@@ -354,6 +356,16 @@ int Configuration::GetNumberOfROLinesOfPanel(int a_iPanelIndex)
 int Configuration::GetNumberOfHVLinesOfPanel(int a_iPanelIndex)
 {
 	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["number-of-HV-x-lines"].asInt(); 
+}
+
+float Configuration::GetNumberIonPairsPerMmOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["ion-pairs-per-mm"].asFloat(); 
+}
+
+float Configuration::GetGasGapThicknessMmOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["gas-gap-thickness-mm"].asFloat(); 
 }
 
 int Configuration::GetNumberOfMonteCarloPanels()

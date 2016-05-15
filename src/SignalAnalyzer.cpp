@@ -669,11 +669,16 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 		}
 		if (m_iFlags & AnalysisFlags::ETrackMonitor)
 		{
-			m_pTrackMonitor->GotEvent(mPanelAndLine);
+			AnalyzeTrack(mPanelAndLine);
 		}
 	}
 
 	ProcessEvents();
+}
+
+void SignalAnalyzer::AnalyzeTrack(HitMap_t& a_panelAndLine)
+{
+	m_pTrackMonitor->GotEvent(a_panelAndLine, false);
 }
 
 SignalAnalyzer::Point SignalAnalyzer::FindTriggerTime(Channels_t& a_vAllChannels)

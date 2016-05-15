@@ -143,6 +143,7 @@ public:
 	void ProcessEvents();
 	void Configure(std::string a_sPanelName);
 	int GetLastNumberOfPanelsWithPrimaryPulse();
+	void AnalyzeTrack(HitMap_t& a_panelAndLine);
 
 private:
 	static void MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer);

@@ -13,9 +13,10 @@ class SimulationEngine
 public:
 	SimulationEngine(RandomTrackGenerator& a_rd);
 	void SingleRun();
-	HitMap_t GetResults();
+	HitMap_t& GetResults();
 	void Draw();
-	void DrawTrack(Geometry::Line3D& a_line, int a_iColor);
+	TPolyLine3D* MakePolyLine(Geometry::Line3D& a_track);
+	void DrawPolyLine(TPolyLine3D* a_pPolyLine);
 	float GetMinZ();
 	float GetMaxZ();
 	void Wait();

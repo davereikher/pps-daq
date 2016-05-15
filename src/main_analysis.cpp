@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 
 	SignalAnalyzer sigAnalyzer;
 
-	sigAnalyzer.SetFlags(SignalAnalyzer::ETrackMonitor);
+	sigAnalyzer.SetFlags(SignalAnalyzer::ETrackMonitor | SignalAnalyzer::EPanelHitMonitor);
 
 	sigAnalyzer.Start();
 	
@@ -115,6 +115,7 @@ int main(int argc, char* argv[])
 	unsigned int iArrivalTimeLSB = 0;
 
 	std::vector<std::string> vDataFileNames = GetVectorOfDataFileNames(argv[2]);
+	printf("blah\n");
 
 //	TFile f(sRootFileName.c_str());
 	TChain chain("DigitizerEvents");
@@ -137,6 +138,7 @@ int main(int argc, char* argv[])
 		ShowProgress(i, iNumOfEntries);
 		
 		chain.GetEntry(i);
+		printf("Getting entry %d\n", i);
 
 		int64_t iTimeStampNano = (((uint64_t)iArrivalTimeMSB) << 32) | iArrivalTimeLSB;
 		//printf("MSB: %u, LSB: %u, time stamp: %llu\n", iArrivalTimeMSB, iArrivalTimeLSB, iTimeStampNano);

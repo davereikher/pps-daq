@@ -13,9 +13,9 @@ class TrackMonitor
 {
 public:	
 	TrackMonitor();
-	void GotEvent(HitMap_t& a_hitMap);
+	void GotEvent(HitMap_t& a_hitMap, bool a_bConvertChannelToLine = true);
 	float PanelToZ(std::string a_sPanel);
-	float ChannelToX(std::string a_sPanel, int a_iChannel);
+	float ChannelToX(std::string a_sPanel, int a_iChannel, bool a_bConvertChannelToLine = true);
 	void FillAngleHist(float m_fAngle);
 	void FillChiSquaredPerNDFHist(float m_fChiSquaredPerNDF);
 

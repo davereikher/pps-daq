@@ -44,19 +44,22 @@ public:
 		float GetMinX() {return m_centerPoint.GetX() - m_fLengthX/2;}
 		float GetMaxY() {return m_centerPoint.GetY() + m_fLengthY/2;}
 		float GetMinY() {return m_centerPoint.GetY() - m_fLengthY/2;}
+		Point3D GetCenterPoint() {return m_centerPoint;}
 	private:
 		float m_fLengthX;
 		float m_fLengthY;
 		Point3D m_centerPoint;
 	};
-	
+/*	
 	class Vector3D
 	{
 		float a_fX;
 		float a_fY;
 		float a_fZ;
 	};
-
+*/
 	static bool LineWithHorizontalRectangleIntersection(HorizontalRectangle3D a_rectangle, Line3D a_line, Point3D& a_intersection);
 	static Point3D LineWithHorizontalPlaneIntersection(float a_fPlaneZValue, Line3D& a_line);
+	static float GetPathLengthInHorizontalMedium(Geometry::Line3D& a_line, float a_fThickness);
+	static bool PointExceedsBoundaries(Geometry::HorizontalRectangle3D& a_rectange, Geometry::Point3D& a_point);
 };

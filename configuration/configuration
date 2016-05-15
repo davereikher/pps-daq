@@ -57,7 +57,7 @@
 	"idle-line-duration-fraction": 0.05,
 	"trigger-threshold-volts": -0.2,
 	"digitizer-resolution-bits": 4095,
-	"number-of-events-to-draw-after": 5,
+	"number-of-events-to-draw-after": 1000,
 	"should-fit-timing-histograms": false,
 	"number-of-events-to-fit-after": 100,
 	"crystal-ball-alpha" : 0.46,
@@ -87,7 +87,7 @@
 				"length-y-mm": 125,
 				"center-x-mm": 0,
 				"center-y-mm": 0,
-				"center-z-mm": 400,
+				"center-z-mm": 170,
 				"efficiency": 1
 			},
 	
@@ -97,38 +97,73 @@
 				"length-y-mm": 125,
 				"center-x-mm": 0,
 				"center-y-mm": 0,
-				"center-z-mm": -400,
+				"center-z-mm": 0,
 				"efficiency": 1
 			}
 		},
 		"panels":
 		[
 			{	
-				"name": "A",
+				"name": "B",
 				"center-x-mm": 0,
 				"center-y-mm": 0,
-				"center-z-mm": 20,
+				"center-z-mm": 43,
 				"cell-length-x-mm": 1.397,
 				"cell-length-y-mm": 1.27,
 				"x-pitch-mm": 2.54,
 				"y-pitch-mm": 2.54,
-				"efficiency": 0.5,
+				"efficiency": 0.6,
 				"number-of-RO-y-lines": 8,
-				"number-of-HV-x-lines": 30
+				"number-of-HV-x-lines": 30,
+				"ion-pairs-per-mm": 2.5,
+				"gas-gap-thickness-mm": 0.5
 			},
 			{
-				"name": "B",
+				"name": "H",
 				"center-x-mm": 0,
 				"center-y-mm": 0,
-				"center-z-mm": 40,
-				"cell-length-x-mm": 2,
-				"cell-length-y-mm": 2,
+				"center-z-mm": 80,
+				"cell-length-x-mm": 1.397,
+				"cell-length-y-mm": 1.27,
 				"x-pitch-mm": 2.54,
 				"y-pitch-mm": 2.54,
-				"efficiency": 0.5,
+				"efficiency": 0.6,
 				"number-of-RO-y-lines": 8,
-				"number-of-HV-x-lines": 30
+				"number-of-HV-x-lines": 30,
+				"ion-pairs-per-mm": 2.5,
+				"gas-gap-thickness-mm": 0.5
+			},
+			{
+				"name": "C",
+				"center-x-mm": 0,
+				"center-y-mm": 0,
+				"center-z-mm": 117,
+				"cell-length-x-mm": 1.397,
+				"cell-length-y-mm": 1.27,
+				"x-pitch-mm": 2.54,
+				"y-pitch-mm": 2.54,
+				"efficiency": 0.6,
+				"number-of-RO-y-lines": 8,
+				"number-of-HV-x-lines": 30,
+				"ion-pairs-per-mm": 2.5,
+				"gas-gap-thickness-mm": 0.5
+			},
+			{
+				"name": "E",
+				"center-x-mm": 0,
+				"center-y-mm": 0,
+				"center-z-mm": 155,
+				"cell-length-x-mm": 1.397,
+				"cell-length-y-mm":1.27,
+				"x-pitch-mm": 2.54,
+				"y-pitch-mm": 2.54,
+				"efficiency": 0.6,
+				"number-of-RO-y-lines": 8,
+				"number-of-HV-x-lines": 30,
+				"ion-pairs-per-mm": 2.5,
+				"gas-gap-thickness-mm": 0.5
 			}
+
 		]			
 	}
 }
