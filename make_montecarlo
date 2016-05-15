@@ -1,0 +1,72 @@
+ROOTLIBS = $(shell root-config --libs) -lRooFitCore -lMinuit -lEG 
+ROOTINCS = $(shell root-config --cflags) 
+ROOTLIBS = -L$(ROOTSYS)/lib  -lHtml -lCore -lTreePlayer -lRIO -lNet -lssl -lcrypto -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lm -ldl -rdynamic -lGenVector -lTMVA -lMinuit -lGeom
+#CXX = g++
+DEBUG =
+#CXXFLAGS        =-I$(ROOTSYS)/include -O -Wall -fPIC
+LD = $(CXX)
+###LDLIBS = $(ROOTLIBS) -lz -lpthread
+
+OBJDIR = obj
+SOURCEDIR = src
+BINDIR = bin
+LIBDIR = lib
+INCDIR = include
+
+CXXFLAGS = -D ROOT_FILE_OUT_DIR=\"$(ROOTFILEOUTDIR)\" $(MYFLAG) -fpermissive $(ROOTINCS) -Wall -Wno-return-type -Wunused -Wno-deprecated
+MYFLAG = -I$(INCDIR) -I./additional-packages/include -L./additional-packages/lib -fmax-errors=5
+
+LDFLAGS = $(MYFLAG)
+LDLIBS = -lpthread -ljson  $(ROOTLIBS)
+
+EXECS = $(BINDIR)/montecarlo
+_OBJECTS = main_montecarlo.o keyb.o CommonUtils.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o Track.o SignalAnalyzer.o Logger.o RandomTrackGenerator.o Geometry.o SimulationEngine.o Panel.o Scintillator.o BasicHorizontalRectangularDetectorElement.o Cell.o
+INC_DEPS = $(INCDIR)/Queue.h
+OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
+
+#.SUFFIXES: .o .C .c .cpp .so .cxx
+
+all : $(EXECS)
+
+$(EXECS): $(OBJDIR) $(BINDIR) $(DICTDIR) $(ROOTOUTDIR) $(OBJECTS) $(INC_DEPS)
+	@echo "=> linking $@"	
+	@echo $(LDFLAGS) 
+	$(LD) $(LDFLAGS) $(OBJECTS) $(OBJDIR)/dict.o $(LDLIBS) -o $@
+
+$(OBJDIR):
+	@mkdir $@
+
+$(BINDIR):
+	@mkdir $@
+
+$(ROOTOUTDIR):
+	@mkdir $@
+
+$(OBJDIR)/%.o: $(SOURCEDIR)/%.C 
+	@echo "=> compiling $<"
+	@echo  $(CXXFLAGS) 
+	$(CXX) $(DEBUG) -c $< -o $@ $(CXXFLAGS) 
+
+$(OBJDIR)/%.o: $(SOURCEDIR)/%.cpp
+	@echo "=> compiling $<"
+	@echo  $(CXXFLAGS) 
+	$(CXX) $(DEBUG) -c $< -o $@ $(CXXFLAGS) 
+
+$(OBJDIR)/%.o: $(SOURCEDIR)/%.cxx
+	@echo "=> compiling $<"
+	@echo  $(CXXFLAGS) 
+	$(CXX) $(DEBUG) -c $< -o $@ $(CXXFLAGS) 
+
+$(OBJDIR)/%.o: $(SOURCEDIR)/%.c
+	@echo "=> compiling $<"
+	@echo  $(CXXFLAGS) 
+	$(CXX) $(DEBUG) -c $< -o $@ $(CXXFLAGS) 
+
+.PHONY : clean clobber
+clean :
+	@echo "=> removing object files"
+	-rm $(OBJDIR)/*.o 
+
+clobber : clean
+	@echo "=> removing executables"
+	-rm -f $(EXECS)
