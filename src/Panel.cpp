@@ -1,3 +1,5 @@
+#include <math.h>
+#include <cfloat>
 #include "Panel.h"
 #include "Cell.h"
 #include "TPolyLine3D.h"
@@ -6,9 +8,11 @@
 Panel::Panel(int a_iIndex):
 m_iIndex(a_iIndex),
 m_fCellEfficiency(Configuration::Instance().GetCellEfficiencyOfPanel(a_iIndex)),
-m_fGasGapsizeMm(Configuration::Instance().GetGasGapThicknessMm()),
+m_fGasGapsizeMm(Configuration::Instance().GetGasGapThicknessMmOfPanel(a_iIndex)),
 m_fPanelZValueMm(Configuration::Instance().GetCenterZOfPanel(a_iIndex)),
-m_exponentialDistribution(Configuration::Instance().GetNumberIonPairsPerMmOfPanel())
+m_fSigmaOfBreakdownGaussian(Configuration::Instance().GetBreakdownGenerationGaussianSigmaMmOfPanel(a_iIndex)),
+m_exponentialDistribution(Configuration::Instance().GetNumberIonPairsPerMmOfPanel(a_iIndex)),
+m_uniformAngleDistribution(0, 2*M_PI)
 {
 	std::random_device r;
 	std::seed_seq seed{r(), r(), r(), r(), r(), r(), r()};
@@ -18,10 +22,10 @@ m_exponentialDistribution(Configuration::Instance().GetNumberIonPairsPerMmOfPane
 }
 
 
-bool Panel::WasIonized(Geometry::Line3D a_track, Geometry::Point& a_point)
+bool Panel::WasIonized(Geometry::Line3D a_track, Geometry::Point3D a_point)
 {
-	float fPathLengthUntilIonization = exponential_distribution(m_generator);
-	if (fPathLengthUntilIonization < Geometry::GetPathLengthInHorizontalMedium(a_line, m_fGasGapsizeMm))
+	float fPathLengthUntilIonization = m_exponentialDistribution(m_generator);
+	if (fPathLengthUntilIonization < Geometry::GetPathLengthInHorizontalMedium(a_track, m_fGasGapsizeMm))
 	{	
 		a_point = Geometry::LineWithHorizontalPlaneIntersection(m_fPanelZValueMm + m_fGasGapsizeMm, a_track);
 		if( !Geometry::PointExceedsBoundaries(m_panelBoundaries, a_point))
@@ -64,26 +68,7 @@ int Panel::Captured(Geometry::Line3D a_track)
 		return NO_HIT;
 	}
 	
-	
-
-	for (auto& row: m_cellMatrix)
-	{
-		for (auto& cell: row)
-		{
-			Geometry::Point3D intersectionPoint;
-			if (Geometry::LineWithHorizontalRectangleIntersection(cell, a_track, intersectionPoint))
-			{
-				if (m_distribution0To1(m_generator) <= m_fCellEfficiency)
-				{
-					return i;
-				}
-				return NO_HIT;
-			}
-		}
-		i ++;
-	}
-
-	return NO_HIT;
+	return GetClosestCellLine(GenerateBreakdownPoint(pt));
 }
 
 int Panel::GetClosestCellLine(Geometry::Point3D a_point)
@@ -92,7 +77,7 @@ int Panel::GetClosestCellLine(Geometry::Point3D a_point)
 	int iLine = 0;
 	for (auto& line: m_cellMatrix)
 	{
-		iLine = line[0].GetLine();
+		iLine = line[0].GetROLine();
 		float fYDistance = abs(a_point.GetY() - iLine);
 		if(fYDistance < fPreviousDistance)
 		{
@@ -105,6 +90,12 @@ int Panel::GetClosestCellLine(Geometry::Point3D a_point)
 	}
 
 	return iLine;
+}
+
+Geometry::Point3D Panel::GenerateBreakdownPoint(Geometry::Point3D a_ionizationPoint)
+{
+	return Geometry::GetPointAtHorizontalPolarAngleAndDistanceFrom(a_ionizationPoint, m_uniformAngleDistribution(m_generator), 
+		m_fSigmaOfBreakdownGaussian * m_gaussianDistribution(m_generator));
 }
 
 void Panel::GenerateMatrix()

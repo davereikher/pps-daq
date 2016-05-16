@@ -116,7 +116,8 @@
 				"number-of-RO-y-lines": 8,
 				"number-of-HV-x-lines": 30,
 				"ion-pairs-per-mm": 2.5,
-				"gas-gap-thickness-mm": 0.5
+				"gas-gap-thickness-mm": 0.5,
+				"breakdown-generation-gaussian-sigma-mm": 2.54
 			},
 			{
 				"name": "H",
@@ -131,7 +132,8 @@
 				"number-of-RO-y-lines": 8,
 				"number-of-HV-x-lines": 30,
 				"ion-pairs-per-mm": 2.5,
-				"gas-gap-thickness-mm": 0.5
+				"gas-gap-thickness-mm": 0.5,
+				"breakdown-generation-gaussian-sigma-mm": 2.54
 			},
 			{
 				"name": "C",
@@ -146,7 +148,8 @@
 				"number-of-RO-y-lines": 8,
 				"number-of-HV-x-lines": 30,
 				"ion-pairs-per-mm": 2.5,
-				"gas-gap-thickness-mm": 0.5
+				"gas-gap-thickness-mm": 0.5,
+				"breakdown-generation-gaussian-sigma-mm": 2.54
 			},
 			{
 				"name": "E",
@@ -161,7 +164,8 @@
 				"number-of-RO-y-lines": 8,
 				"number-of-HV-x-lines": 30,
 				"ion-pairs-per-mm": 2.5,
-				"gas-gap-thickness-mm": 0.5
+				"gas-gap-thickness-mm": 0.5,
+				"breakdown-generation-gaussian-sigma-mm": 2.54
 			}
 
 		]			

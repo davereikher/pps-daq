@@ -32,7 +32,7 @@ float Geometry::GetPathLengthInHorizontalMedium(Geometry::Line3D& a_line, float 
 	return a_fThickness/cos(a_line.GetTheta());
 }
 
-static bool Geometry::PointExceedsBoundaries(Geometry::HorizontalRectangle3D& a_rectange, Geometry::Point3D& a_point)
+bool Geometry::PointExceedsBoundaries(Geometry::HorizontalRectangle3D& a_rectangle, Geometry::Point3D& a_point)
 {
 	if ( (a_point.GetX() <= a_rectangle.GetMaxX()) && (a_point.GetX() >= a_rectangle.GetMinX()) && (a_point.GetY() <= a_rectangle.GetMaxY()) && (a_point.GetY() >= a_rectangle.GetMinY()))
 	{
@@ -42,3 +42,7 @@ static bool Geometry::PointExceedsBoundaries(Geometry::HorizontalRectangle3D& a_
 	return true;
 }
 
+Geometry::Point3D Geometry::GetPointAtHorizontalPolarAngleAndDistanceFrom(Geometry::Point3D a_point, float a_fAngle, float a_fDistance)
+{
+	return Geometry::Point3D(a_point.GetX() + a_fDistance * sin(a_fAngle), a_point.GetY() + a_fDistance * cos(a_fAngle), a_point.GetZ());
+}

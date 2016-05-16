@@ -72,6 +72,7 @@ public:
 	std::string GetPanelMonteCarloName(int a_iPanelIndex);
 	float GetNumberIonPairsPerMmOfPanel(int a_iPanelIndex);
 	float GetGasGapThicknessMmOfPanel(int a_iPanelIndex);
+	float GetBreakdownGenerationGaussianSigmaMmOfPanel(int a_iPanelIndex);
 
 	std::string GetDump();
 

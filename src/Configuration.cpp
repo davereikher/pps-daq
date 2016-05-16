@@ -368,6 +368,11 @@ float Configuration::GetGasGapThicknessMmOfPanel(int a_iPanelIndex)
 	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["gas-gap-thickness-mm"].asFloat(); 
 }
 
+float Configuration::GetBreakdownGenerationGaussianSigmaMmOfPanel(int a_iPanelIndex)
+{
+	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["breakdown-generation-gaussian-sigma-mm"].asFloat(); 
+}
+
 int Configuration::GetNumberOfMonteCarloPanels()
 {
 	return m_configuration["monte-carlo"]["panels"].size();
@@ -377,3 +382,4 @@ std::string Configuration::GetPanelMonteCarloName(int a_iPanelIndex)
 {
 	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["name"].asString();
 }
+

@@ -62,4 +62,5 @@ public:
 	static Point3D LineWithHorizontalPlaneIntersection(float a_fPlaneZValue, Line3D& a_line);
 	static float GetPathLengthInHorizontalMedium(Geometry::Line3D& a_line, float a_fThickness);
 	static bool PointExceedsBoundaries(Geometry::HorizontalRectangle3D& a_rectange, Geometry::Point3D& a_point);
+	static Geometry::Point3D GetPointAtHorizontalPolarAngleAndDistanceFrom(Geometry::Point3D a_point, float a_fAngle, float a_fDistance);
 };
