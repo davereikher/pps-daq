@@ -20,7 +20,7 @@ LDFLAGS = $(MYFLAG)
 LDLIBS = -lpthread -ljson  $(ROOTLIBS)
 
 EXECS = $(BINDIR)/montecarlo
-_OBJECTS = main_montecarlo.o keyb.o CommonUtils.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o Track.o SignalAnalyzer.o Logger.o RandomTrackGenerator.o Geometry.o SimulationEngine.o Panel.o Scintillator.o BasicHorizontalRectangularDetectorElement.o Cell.o
+_OBJECTS = main_montecarlo.o keyb.o CommonUtils.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o Track.o SignalAnalyzer.o Logger.o RandomTrackGenerator.o Geometry.o SimulationEngine.o Panel.o Scintillator.o BasicHorizontalRectangularDetectorElement.o Cell.o TimingMonitorBase.o PanelDegradationMonitor.o
 INC_DEPS = $(INCDIR)/Queue.h
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 

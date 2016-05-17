@@ -20,7 +20,7 @@ ROOTOUTDIR = root
 LIBDIR = lib
 
 EXECS = $(BINDIR)/acquisition
-_OBJECTS = keyb.o ProprietaryUtils.o EventHandler.o EventHandlerAcquisition.o Exception.o dict.o DigitizerManager.o main_acquisition.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o Track.o SignalAnalyzer.o TimeManager.o Logger.o CommonUtils.o
+_OBJECTS = keyb.o ProprietaryUtils.o EventHandler.o EventHandlerAcquisition.o Exception.o dict.o DigitizerManager.o main_acquisition.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o Track.o SignalAnalyzer.o TimeManager.o Logger.o CommonUtils.o TimingMonitorBase.o PanelDegradationMonitor.o
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS)) 
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx

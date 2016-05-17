@@ -66,6 +66,7 @@
 	"crystal-ball-sigma": 5.4,
 	"crystal-ball-N": 45,
 	"trigger-rate-averaging-duration-seconds": 600,
+	"panel-degradation-averaging-duration-seconds": 1200,
 	"normalize-channels": true,
 	"distance-between-panels-mm": 37,
 	"readout-line-pitch-mm": 2.54,

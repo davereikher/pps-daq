@@ -5,3 +5,9 @@ BasicHorizontalRectangularDetectorElement(a_fEfficiency, a_polygon),
 m_iBelongingToROLine(a_iBelongingToROLine)
 {
 }
+
+
+int Cell::GetROLine() 
+{
+	return m_iBelongingToROLine;
+}

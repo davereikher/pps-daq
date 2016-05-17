@@ -117,6 +117,11 @@ seconds Configuration::GetTriggerRateAveragingDurationSecs()
 	return seconds(m_configuration["trigger-rate-averaging-duration-seconds"].asInt());
 }
 
+seconds Configuration::GetPanelDegradationAveragingDurationSecs()
+{
+	return seconds(m_configuration["panel-degradation-averaging-duration-seconds"].asInt());
+}
+
 float Configuration::GetIdleFluctuationsAmplitude()
 {
 	return m_configuration["idle-fluctuation-amplitude-volts"].asFloat();

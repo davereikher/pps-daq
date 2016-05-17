@@ -3,7 +3,9 @@
 #include "Panel.h"
 #include "Cell.h"
 #include "TPolyLine3D.h"
+#include "TPolyMarker3D.h"
 #include "Configuration.h"
+#include "TPad.h"
 
 Panel::Panel(int a_iIndex):
 m_iIndex(a_iIndex),
@@ -22,12 +24,14 @@ m_uniformAngleDistribution(0, 2*M_PI)
 }
 
 
-bool Panel::WasIonized(Geometry::Line3D a_track, Geometry::Point3D a_point)
+bool Panel::WasIonized(Geometry::Line3D& a_track, Geometry::Point3D& a_point)
 {
 	float fPathLengthUntilIonization = m_exponentialDistribution(m_generator);
+//	printf("zValue: %f, PathLengthUntilIonization: %f, pathLengthInMedium: %f ", m_fPanelZValueMm, fPathLengthUntilIonization, Geometry::GetPathLengthInHorizontalMedium(a_track, m_fGasGapsizeMm));
 	if (fPathLengthUntilIonization < Geometry::GetPathLengthInHorizontalMedium(a_track, m_fGasGapsizeMm))
 	{	
 		a_point = Geometry::LineWithHorizontalPlaneIntersection(m_fPanelZValueMm + m_fGasGapsizeMm, a_track);
+//		printf("X: %f, Y:%f, Z:%f\n", a_point
 		if( !Geometry::PointExceedsBoundaries(m_panelBoundaries, a_point))
 		{
 			return true;
@@ -59,7 +63,7 @@ bool Panel::WasIonized(Geometry::Line3D a_track, Geometry::Point3D a_point)
 	return NO_HIT;
 }*/
 
-int Panel::Captured(Geometry::Line3D a_track)
+int Panel::Captured(Geometry::Line3D& a_track)
 {
 	int i = 1;
 	Geometry::Point3D pt;
@@ -75,10 +79,13 @@ int Panel::GetClosestCellLine(Geometry::Point3D a_point)
 {
 	float fPreviousDistance = FLT_MAX;
 	int iLine = 0;
+//	printf("----");
 	for (auto& line: m_cellMatrix)
 	{
 		iLine = line[0].GetROLine();
+		//printf("Line: %d\n", iLine);
 		float fYDistance = abs(a_point.GetY() - iLine);
+		//printf("distance: %f\n", fYDistance);
 		if(fYDistance < fPreviousDistance)
 		{
 			fPreviousDistance = fYDistance;
@@ -88,14 +95,32 @@ int Panel::GetClosestCellLine(Geometry::Point3D a_point)
 			break;
 		}
 	}
+//	printf("****");
 
 	return iLine;
 }
 
 Geometry::Point3D Panel::GenerateBreakdownPoint(Geometry::Point3D a_ionizationPoint)
 {
-	return Geometry::GetPointAtHorizontalPolarAngleAndDistanceFrom(a_ionizationPoint, m_uniformAngleDistribution(m_generator), 
+	Geometry::Point3D pt = Geometry::GetPointAtHorizontalPolarAngleAndDistanceFrom(a_ionizationPoint, m_uniformAngleDistribution(m_generator), 
 		m_fSigmaOfBreakdownGaussian * m_gaussianDistribution(m_generator));
+
+	
+	TPolyMarker3D * pIonization = new TPolyMarker3D(1);
+	pIonization->SetPoint(0, a_ionizationPoint.GetX(), a_ionizationPoint.GetY(), a_ionizationPoint.GetZ());
+	pIonization->SetMarkerStyle(8);
+	pIonization->SetMarkerColor(2);
+	pIonization->Draw();
+
+	TPolyMarker3D * pBreakdown = new TPolyMarker3D(1);
+	pBreakdown->SetPoint(0,pt.GetX(), pt.GetY(), pt.GetZ());
+	pBreakdown->SetMarkerStyle(2);
+	pBreakdown->SetMarkerColor(3);
+	pBreakdown->Draw();
+
+	gPad->Update();
+
+	return pt;
 }
 
 void Panel::GenerateMatrix()
@@ -106,24 +131,26 @@ void Panel::GenerateMatrix()
 			Geometry::Point3D(config.GetCenterXOfPanel(m_iIndex), config.GetCenterXOfPanel(m_iIndex), m_fPanelZValueMm));
 	std::vector<float> YCenters = GetCentersVector(config.GetNumberOfROLinesOfPanel(m_iIndex), config.GetYPitchOfPanel(m_iIndex), config.GetCenterYOfPanel(m_iIndex));
 	std::vector<float> XCenters = GetCentersVector(config.GetNumberOfHVLinesOfPanel(m_iIndex), config.GetXPitchOfPanel(m_iIndex), config.GetCenterXOfPanel(m_iIndex));
-	printf("XCenters: %d, YCenter: %d", XCenters.size(), YCenters.size());
+//	printf("XCenters: %d, YCenter: %d", XCenters.size(), YCenters.size());
 	
 	std::vector<Cell> vCellRow;
 	int iLineIndex = 0;
 	for (auto& centerY: YCenters)
 	{
+		int i = 0;
 		for (auto& centerX: XCenters)
 		{
-
 			Cell cell(config.GetCellEfficiencyOfPanel(m_iIndex), Geometry::HorizontalRectangle3D(config.GetCellXLengthOfPanel(m_iIndex), 
 				config.GetCellYLengthOfPanel(m_iIndex), Geometry::Point3D(centerX, centerY, m_fPanelZValueMm)), iLineIndex);
-		
 			vCellRow.push_back(cell);
 
 		}
 		m_cellMatrix.push_back(vCellRow);
+		vCellRow.clear();
 		iLineIndex ++;
 	}
+
+
 }
 
 std::vector<float> Panel::GetCentersVector(int a_iNumber, float a_fPitch, float a_fGlobalCenterPoint)

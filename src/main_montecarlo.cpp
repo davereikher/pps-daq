@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 	SimulationEngine simEngine(rg);
 	simEngine.Draw();	
 	SignalAnalyzer sigAnalyzer;
-	for (int i = 0; i < 500; i++)
+	for (int i = 0; i < 10000; i++)
 	{
 		simEngine.SingleRun();
 		HitMap_t& results = simEngine.GetResults();

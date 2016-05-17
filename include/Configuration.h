@@ -24,6 +24,7 @@ public:
 	float GetSamplingFreqGHz();
 	int GetNumberOfEventsToDrawAfter();
 	seconds GetTriggerRateAveragingDurationSecs();
+	seconds GetPanelDegradationAveragingDurationSecs();
 	float GetIdleFluctuationsAmplitude();
 	float GetIdleLineDurationFraction();
 	bool ShouldNormalizeChannels();

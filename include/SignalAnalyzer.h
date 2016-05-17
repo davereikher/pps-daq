@@ -13,6 +13,7 @@
 #include "PanelMonitor.h"
 #include "PanelTimingMonitor.h"
 #include "TrackMonitor.h"
+#include "PanelDegradationMonitor.h"
 
 
 #define NO_PULSE_EDGE INT_MAX
@@ -124,7 +125,8 @@ public:
 		EPanelHitMonitor = 0x00000004,
 		EPanelTimingMonitor = 0x00000008,
 		ETrackMonitor = 0x00000010,
-		ECountPanelsWithPrimaryPulse = 0x00000020
+		ECountPanelsWithPrimaryPulse = 0x00000020,
+		EPanelDegradationMonitor = 0x00000040
 	};
 public:
 	SignalAnalyzer();
@@ -162,6 +164,7 @@ private:
 	Queue<std::pair<nanoseconds, Channels_t> > m_queue;
 	std::unique_ptr<TriggerTimingMonitor> m_pTriggerTimingMonitor;
 	std::vector<std::unique_ptr<PanelMonitor> > m_vpPanelMonitors;
+	std::vector<std::unique_ptr<PanelDegradationMonitor> > m_vpPanelDegradationMonitors;
 	std::vector<std::unique_ptr<PanelTimingMonitor> > m_vpPanelTimingMonitors;
 	std::unique_ptr<TrackMonitor> m_pTrackMonitor;
 	int m_iNumberOfPanelsWithPrimaryPulse;

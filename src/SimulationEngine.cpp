@@ -52,7 +52,6 @@ void SimulationEngine::SingleRun()
 {
 	m_mResult.clear();
 	Geometry::Line3D track = m_randomTrackGenerator.GenerateTrack();
-	TPolyLine3D* pTrack = MakePolyLine(track);
 	bool bCapturedInAllScintillators = true;
 	for (auto& scintillator: m_vScintillators)
 	{
@@ -64,7 +63,8 @@ void SimulationEngine::SingleRun()
 	}
 	if (!bCapturedInAllScintillators)
 	{
-		DrawPolyLine(pTrack);
+//		delete pTrack;
+//		DrawPolyLine(pTrack);
 		return;
 	}
 	
@@ -79,19 +79,23 @@ void SimulationEngine::SingleRun()
 //			printf("iLine: %d\n", iLine);
 			if(!bDrawn)
 			{
+				TPolyLine3D* pTrack = MakePolyLine(track);
 				pTrack->SetLineColor(3);
 				DrawPolyLine(pTrack);
 				bDrawn = true;
+
+				m_pCanvas->WaitPrimitive();
 			}
 			m_mResult[panel.first] = iLine;
 		}
 	}
-/*	if(!bDrawn)
+	if(!bDrawn)
 	{
-		pTrack->SetLineColor(4);
-		DrawPolyLine(pTrack);
-	}*/
-
+//		delete pTrack;
+		/*pTrack->SetLineColor(4);
+		DrawPolyLine(pTrack);*/
+	}
+	
 }
 
 float SimulationEngine::GetMaxZ()

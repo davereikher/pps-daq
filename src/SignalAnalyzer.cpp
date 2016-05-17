@@ -54,6 +54,7 @@ m_pTrackMonitor(new TrackMonitor())
 	{
 		printf("Pushing P.S. for %s\n", it.first.c_str());
 		m_vpPanelMonitors.push_back(std::unique_ptr<PanelMonitor>(new PanelMonitor(it.first)));
+		m_vpPanelDegradationMonitors.push_back(std::unique_ptr<PanelDegradationMonitor>(new PanelDegradationMonitor(Configuration::Instance().GetPanelDegradationAveragingDurationSecs(), it.first)));
 	}
 	for (auto it : m_vRanges)
 	{
@@ -600,7 +601,8 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 		m_pTriggerTimingMonitor->GotTrigger(a_timeStamp);
 	}
 	//All these require DC offset zeroing (normalization)
-	if ((m_iFlags & AnalysisFlags::EPanelHitMonitor) || (m_iFlags & AnalysisFlags::EPanelTimingMonitor) || (m_iFlags & AnalysisFlags::ETrackMonitor) || (m_iFlags & AnalysisFlags::ECountPanelsWithPrimaryPulse))
+	if ((m_iFlags & AnalysisFlags::EPanelHitMonitor) || (m_iFlags & AnalysisFlags::EPanelTimingMonitor) || (m_iFlags & AnalysisFlags::ETrackMonitor) || (m_iFlags & AnalysisFlags::ECountPanelsWithPrimaryPulse) || 
+			(m_iFlags & AnalysisFlags::EPanelDegradationMonitor))
 	{
 		bool bEventEmpty = false;
 
@@ -621,10 +623,6 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 		int i = 0;
 		for (auto it: m_vRanges)
 		{
-			if (m_iFlags & AnalysisFlags::EPanelHitMonitor)
-			{
-				m_vpPanelMonitors[i]->GotTrigger();
-			}
 			if (!bEventEmpty)
 			{
 				FindOriginalPulseInChannelRange(vNormalizedChannels, it.first, it.second);
@@ -645,7 +643,7 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 					}
 				}
 
-				if(m_iFlags & AnalysisFlags::EPanelTimingMonitor)
+				if((m_iFlags & AnalysisFlags::EPanelTimingMonitor) || (m_iFlags & AnalysisFlags::EPanelDegradationMonitor))
 				{
 //					printf("TIMING MONITOR\n");
 					Point p = FindTriggerTime(vNormalizedChannels);
@@ -660,8 +658,16 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 						}*/
 //						printf("iChannel: %d, pulse x = %f\n", iChannel,  std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX());
 
-						m_vpPanelTimingMonitors[i]->GotEvent(iChannel, std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX(), 
-							std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetY(), p.GetX());
+						if(m_iFlags & AnalysisFlags::EPanelTimingMonitor)
+						{
+							m_vpPanelTimingMonitors[i]->GotEvent(iChannel, std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX(), 
+								std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetY(), p.GetX());
+						}
+						if (m_iFlags & AnalysisFlags::EPanelDegradationMonitor)
+						{
+							m_vpPanelDegradationMonitors[i]->GotTrigger(a_timeStamp);
+						}
+
 					}
 				}
 			}

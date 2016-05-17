@@ -20,7 +20,7 @@ LDFLAGS = $(MYFLAG)
 LDLIBS = -lpthread -ljson  $(ROOTLIBS)
 
 EXECS = $(BINDIR)/analysis
-_OBJECTS = main_analysis.o keyb.o CommonUtils.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o Track.o SignalAnalyzer.o Logger.o
+_OBJECTS = main_analysis.o keyb.o CommonUtils.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o Track.o SignalAnalyzer.o Logger.o TimingMonitorBase.o PanelDegradationMonitor.o
 INC_DEPS = $(INCDIR)/Queue.h
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 

@@ -13,11 +13,11 @@ public:
 	Panel(int a_iIndex);
 	Panel(){}
 
-	int Captured(Geometry::Line3D a_track);
+	int Captured(Geometry::Line3D& a_track);
 	void GenerateMatrix();
 	std::vector<float> GetCentersVector(int a_iNumber, float a_fPitch, float a_fGlobalCenterPoint);
 	void Draw();
-	bool WasIonized(Geometry::Line3D a_track, Geometry::Point3D a_point);
+	bool WasIonized(Geometry::Line3D& a_track, Geometry::Point3D& a_point);
 	int GetClosestCellLine(Geometry::Point3D a_point);
 	Geometry::Point3D GenerateBreakdownPoint(Geometry::Point3D a_ionizationPoint);
 
