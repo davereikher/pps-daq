@@ -14,7 +14,7 @@ void Track::AddPoint(float a_fX, float a_fZ, float a_fError)
 {
 	m_vXValues.push_back((Double_t)a_fX);
 	m_vZValues.push_back((Double_t)a_fZ);
-	printf("Added point %f, %f\n", a_fX, a_fZ);
+//	printf("Added point %f, %f\n", a_fX, a_fZ);
 }
 
 int Track::GetNumberOfPoints()
@@ -29,7 +29,7 @@ void Track::DoLinearRegression()
 		return;
 	}
 	m_bRegressionDone = true;
-	printf("blah\n");
+//	printf("blah\n");
 
 	if(m_vXValues.size() == 2)
 	{
@@ -43,7 +43,7 @@ void Track::DoLinearRegression()
 		m_fSlope = m_linearFitter.GetParameter(1);
 		m_fIntercept = m_linearFitter.GetParameter(0);
 	}
-	printf("moo\n");
+//	printf("moo\n");
 }
 
 float Track::GetChiSquaredPerNDF()
@@ -71,7 +71,7 @@ float Track::GetAngle()
 	float fSlope = GetSlopeValue();
 	float angle = atan(fSlope);
 
-	printf("slope=%f, angle = %f\n", fSlope, angle);
+//	printf("slope=%f, angle = %f\n", fSlope, angle);
 	return angle;
 }
 

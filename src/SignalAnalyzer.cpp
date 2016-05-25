@@ -675,7 +675,7 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 		}
 		if (m_iFlags & AnalysisFlags::ETrackMonitor)
 		{
-			AnalyzeTrack(mPanelAndLine);
+			m_pTrackMonitor->GotEvent(mPanelAndLine);
 		}
 	}
 

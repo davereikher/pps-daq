@@ -72,12 +72,12 @@ int main(int argc, char* argv[])
 		
 	//		pltNotNormalized.PlotRanges(*channels, ranges, "");
 			plt.PlotRanges(vNormalizedChannels, ranges, std::string("Event  ") + std::to_string(i)); 
-			sigAnalyzer.FindOriginalPulseInChannelRange(vNormalizedChannels, "B", ranges["B"]);
+			sigAnalyzer.FindOriginalPulseInChannelRange(vNormalizedChannels, "T", ranges["T"]);
 	//		sigAnalyzerNotNormalized.FindOriginalPulseInChannelRange(*channels, ranges["A"]);
 //			printf("Panel H\n");
 			plt.AddAnalysisMarkers(0, sigAnalyzer.GetAnalysisMarkers());
 
-			sigAnalyzer.FindOriginalPulseInChannelRange(vNormalizedChannels, "C", ranges["C"]);
+	/*		sigAnalyzer.FindOriginalPulseInChannelRange(vNormalizedChannels, "C", ranges["C"]);
 	//		sigAnalyzerNotNormalized.FindOriginalPulseInChannelRange(*channels, ranges["A"]);
 //			printf("Panel H\n");
 			plt.AddAnalysisMarkers(1, sigAnalyzer.GetAnalysisMarkers());
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 
 			sigAnalyzer.FindOriginalPulseInChannelRange(vNormalizedChannels, "H", ranges["H"]);
 
-			plt.AddAnalysisMarkers(3, sigAnalyzer.GetAnalysisMarkers());
+			plt.AddAnalysisMarkers(3, sigAnalyzer.GetAnalysisMarkers());*/
 	//		pltNotNormalized.AddAnalysisMarkers(0, sigAnalyzerNotNormalized.GetAnalysisMarkers());
 			plt.Wait();
 		}

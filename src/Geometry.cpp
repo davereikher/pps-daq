@@ -46,3 +46,9 @@ Geometry::Point3D Geometry::GetPointAtHorizontalPolarAngleAndDistanceFrom(Geomet
 {
 	return Geometry::Point3D(a_point.GetX() + a_fDistance * sin(a_fAngle), a_point.GetY() + a_fDistance * cos(a_fAngle), a_point.GetZ());
 }
+
+Geometry::Point3D Geometry::GetPointAlongLineAtDistance(Geometry::Point3D a_origin, Geometry::Line3D a_line, float a_fDistance)
+{
+	return LineWithHorizontalPlaneIntersection(a_fDistance * cos(a_line.GetTheta()) + a_origin.GetZ(), a_line);
+}
+

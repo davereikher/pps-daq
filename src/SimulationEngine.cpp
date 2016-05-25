@@ -73,27 +73,27 @@ void SimulationEngine::SingleRun()
 	bool bDrawn = false;
 	for (auto& panel: m_mPanels)
 	{
+//		printf("track theta: %f, track phi: %f, track point x: %f, y: %f, z: %f\n", track.GetTheta(), track.GetPhi(), track.GetPoint().GetX(), track.GetPoint().GetY(), track.GetPoint().GetZ());
 		int iLine = panel.second.Captured(track);
 		if (iLine != -1)
 		{
 //			printf("iLine: %d\n", iLine);
 			if(!bDrawn)
 			{
-				TPolyLine3D* pTrack = MakePolyLine(track);
+	/*			TPolyLine3D* pTrack = MakePolyLine(track);
 				pTrack->SetLineColor(3);
-				DrawPolyLine(pTrack);
+				DrawPolyLine(pTrack);*/
 				bDrawn = true;
-
-				m_pCanvas->WaitPrimitive();
 			}
 			m_mResult[panel.first] = iLine;
 		}
 	}
-	if(!bDrawn)
+	if(bDrawn)
 	{
+//				m_pCanvas->WaitPrimitive();
 //		delete pTrack;
-		/*pTrack->SetLineColor(4);
-		DrawPolyLine(pTrack);*/
+		//pTrack->SetLineColor(4);
+//		DrawPolyLine(pTrack);
 	}
 	
 }

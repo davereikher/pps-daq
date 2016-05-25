@@ -7,7 +7,7 @@ class BasicHorizontalRectangularDetectorElement: public Geometry::HorizontalRect
 {
 public:
 	BasicHorizontalRectangularDetectorElement(float a_fEfficiency, HorizontalRectangle3D a_polygon);
-	bool Captured(Geometry::Line3D& a_track);
+	virtual bool Captured(Geometry::Line3D& a_track);
 	TPolyLine3D* GeneratePolyLine3D();
 
 private:

@@ -119,7 +119,8 @@ int main(int argc, char* argv[])
 	SimulationEngine simEngine(rg);
 	simEngine.Draw();	
 	SignalAnalyzer sigAnalyzer;
-	for (int i = 0; i < 10000; i++)
+	int iHitCounter[] = {0,0,0,0,0};
+	for (int i = 0; i < 10000000; i++)
 	{
 		simEngine.SingleRun();
 		HitMap_t& results = simEngine.GetResults();
@@ -133,10 +134,16 @@ int main(int argc, char* argv[])
 		{
 			printf("\n");
 		}*/
+		iHitCounter[results.size()]++;
 		if(results.size() >= 2)
 		{
-			sigAnalyzer.AnalyzeTrack(results);		
+			sigAnalyzer.AnalyzeTrack(results);
+//			printf("----");
+//			simEngine.Wait();
 		}
+/*		float sum = iHitCounter[0] + iHitCounter[1] + iHitCounter[2] + iHitCounter[3];
+		std::cout << (iHitCounter[0]/sum)*100 << "\t\t"<< (iHitCounter[1]/sum)*100<<"\t\t" << (iHitCounter[2]/sum)*100<<"\t\t" << (iHitCounter[3]/sum)*100 << "                         \r";
+		std::cout.flush();*/
 	}
 
 

@@ -9,38 +9,12 @@
 
 Panel::Panel(int a_iIndex):
 m_iIndex(a_iIndex),
-m_fCellEfficiency(Configuration::Instance().GetCellEfficiencyOfPanel(a_iIndex)),
-m_fGasGapsizeMm(Configuration::Instance().GetGasGapThicknessMmOfPanel(a_iIndex)),
-m_fPanelZValueMm(Configuration::Instance().GetCenterZOfPanel(a_iIndex)),
-m_fSigmaOfBreakdownGaussian(Configuration::Instance().GetBreakdownGenerationGaussianSigmaMmOfPanel(a_iIndex)),
-m_exponentialDistribution(Configuration::Instance().GetNumberIonPairsPerMmOfPanel(a_iIndex)),
-m_uniformAngleDistribution(0, 2*M_PI)
+m_fPanelZValueMm(Configuration::Instance().GetCenterZOfPanel(a_iIndex))
 {
-	std::random_device r;
-	std::seed_seq seed{r(), r(), r(), r(), r(), r(), r()};
-	m_generator.seed(seed);
-
 	GenerateMatrix();
 }
 
-
-bool Panel::WasIonized(Geometry::Line3D& a_track, Geometry::Point3D& a_point)
-{
-	float fPathLengthUntilIonization = m_exponentialDistribution(m_generator);
-//	printf("zValue: %f, PathLengthUntilIonization: %f, pathLengthInMedium: %f ", m_fPanelZValueMm, fPathLengthUntilIonization, Geometry::GetPathLengthInHorizontalMedium(a_track, m_fGasGapsizeMm));
-	if (fPathLengthUntilIonization < Geometry::GetPathLengthInHorizontalMedium(a_track, m_fGasGapsizeMm))
-	{	
-		a_point = Geometry::LineWithHorizontalPlaneIntersection(m_fPanelZValueMm + m_fGasGapsizeMm, a_track);
-//		printf("X: %f, Y:%f, Z:%f\n", a_point
-		if( !Geometry::PointExceedsBoundaries(m_panelBoundaries, a_point))
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-/*int Panel::Captured(Geometry::Line3D a_track)
+int Panel::Captured(Geometry::Line3D& a_track)
 {
 	int i = 1;
 	for (auto& row: m_cellMatrix)
@@ -48,79 +22,14 @@ bool Panel::WasIonized(Geometry::Line3D& a_track, Geometry::Point3D& a_point)
 		for (auto& cell: row)
 		{
 			Geometry::Point3D intersectionPoint;
-			if (Geometry::LineWithHorizontalRectangleIntersection(cell, a_track, intersectionPoint))
+			if (cell.Captured(a_track))
 			{
-				if (m_distribution0To1(m_generator) <= m_fCellEfficiency)
-				{
-					return i;
-				}
-				return NO_HIT;
+				return i;
 			}
 		}
 		i ++;
 	}
-
 	return NO_HIT;
-}*/
-
-int Panel::Captured(Geometry::Line3D& a_track)
-{
-	int i = 1;
-	Geometry::Point3D pt;
-	if (!WasIonized(a_track, pt))
-	{
-		return NO_HIT;
-	}
-	
-	return GetClosestCellLine(GenerateBreakdownPoint(pt));
-}
-
-int Panel::GetClosestCellLine(Geometry::Point3D a_point)
-{
-	float fPreviousDistance = FLT_MAX;
-	int iLine = 0;
-//	printf("----");
-	for (auto& line: m_cellMatrix)
-	{
-		iLine = line[0].GetROLine();
-		//printf("Line: %d\n", iLine);
-		float fYDistance = abs(a_point.GetY() - iLine);
-		//printf("distance: %f\n", fYDistance);
-		if(fYDistance < fPreviousDistance)
-		{
-			fPreviousDistance = fYDistance;
-		}
-		else
-		{
-			break;
-		}
-	}
-//	printf("****");
-
-	return iLine;
-}
-
-Geometry::Point3D Panel::GenerateBreakdownPoint(Geometry::Point3D a_ionizationPoint)
-{
-	Geometry::Point3D pt = Geometry::GetPointAtHorizontalPolarAngleAndDistanceFrom(a_ionizationPoint, m_uniformAngleDistribution(m_generator), 
-		m_fSigmaOfBreakdownGaussian * m_gaussianDistribution(m_generator));
-
-	
-	TPolyMarker3D * pIonization = new TPolyMarker3D(1);
-	pIonization->SetPoint(0, a_ionizationPoint.GetX(), a_ionizationPoint.GetY(), a_ionizationPoint.GetZ());
-	pIonization->SetMarkerStyle(8);
-	pIonization->SetMarkerColor(2);
-	pIonization->Draw();
-
-	TPolyMarker3D * pBreakdown = new TPolyMarker3D(1);
-	pBreakdown->SetPoint(0,pt.GetX(), pt.GetY(), pt.GetZ());
-	pBreakdown->SetMarkerStyle(2);
-	pBreakdown->SetMarkerColor(3);
-	pBreakdown->Draw();
-
-	gPad->Update();
-
-	return pt;
 }
 
 void Panel::GenerateMatrix()
@@ -178,6 +87,5 @@ void Panel::Draw()
 		}
 	}
 }
-
 
 
