@@ -58,7 +58,7 @@
 	"trigger-threshold-volts": -0.2,
 	"digitizer-resolution-bits": 4095,
 	"number-of-events-to-draw-after": 5,
-	"should-fit-timing-histograms": false,
+	"should-fit-timing-histograms": true,
 	"number-of-events-to-fit-after": 100,
 	"crystal-ball-alpha" : 0.46,
 	"crystal-ball-n": 15.67,

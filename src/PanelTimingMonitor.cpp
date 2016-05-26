@@ -31,7 +31,7 @@ void PanelTimingMonitor::GotEvent(int a_iChannelNum, float a_fTimeOfPulseEdge, f
 		if (m_iMaxFitCounter <= m_iFitCounter)
 		{
 			m_iFitCounter = 0;
-			m_pTimingHist->Fit("CrystalBall", "LW");
+			//m_pTimingHist->Fit("CrystalBall", "LW");
 		}
 		else
 		{
@@ -51,7 +51,7 @@ void PanelTimingMonitor::InitGraphics()
 	
 	if(Configuration::Instance().ShouldFitTimingHistograms())
 	{
-	   	m_pCrystalBallFunction->SetParameters(0.46,15.67,22,5.4, 45);
+	   	m_pCrystalBallFunction->SetParameters(0.7,6.8,28,5, 450);
 	   	m_pCrystalBallFunction->SetParNames("alpha","n", "mu","sigma","N");
 	}
 	else
@@ -103,7 +103,7 @@ void PanelTimingMonitor::InitGraphics()
 
 double PanelTimingMonitor::CrystalBall(double* x, double* par){ 
 //http://en.wikipedia.org/wiki/Crystal_Ball_function 
-	double xcur = x[0]; 
+	double xcur = -1*x[0]; 
 	double alpha = par[0]; 
 	double n = par[1]; 
 	double mu = par[2]; 
