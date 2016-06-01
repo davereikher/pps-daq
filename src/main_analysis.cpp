@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 
 	SignalAnalyzer sigAnalyzer;
 
-	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelTimingMonitor);
+	sigAnalyzer.SetFlags(SignalAnalyzer::ETrackMonitor);
 
 	sigAnalyzer.Start();
 	

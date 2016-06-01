@@ -8,6 +8,7 @@
 #include "TGeoMedium.h"
 #include "TGeoVolume.h"
 #include "TView.h"
+#include "PanelV2.h"
 #include "TPolyLine3D.h"
 
 
@@ -43,7 +44,7 @@ void SimulationEngine::InitObjects()
 	int iNumberOfPanels = config.GetNumberOfMonteCarloPanels();
 	for (int i = 0; i < iNumberOfPanels; i++)
 	{
-		Panel panel(i);
+		PanelV2 panel(i);
 		m_mPanels[config.GetPanelMonteCarloName(i)] = panel;
 	}	
 }
@@ -53,6 +54,8 @@ void SimulationEngine::SingleRun()
 	m_mResult.clear();
 	Geometry::Line3D track = m_randomTrackGenerator.GenerateTrack();
 	bool bCapturedInAllScintillators = true;
+
+	TPolyLine3D* pTrack = MakePolyLine(track);
 	for (auto& scintillator: m_vScintillators)
 	{
 		if(!scintillator.Captured(track))
@@ -63,8 +66,8 @@ void SimulationEngine::SingleRun()
 	}
 	if (!bCapturedInAllScintillators)
 	{
-//		delete pTrack;
-//		DrawPolyLine(pTrack);
+	//	delete pTrack;
+		DrawPolyLine(pTrack);
 		return;
 	}
 	
@@ -80,9 +83,9 @@ void SimulationEngine::SingleRun()
 //			printf("iLine: %d\n", iLine);
 			if(!bDrawn)
 			{
-	/*			TPolyLine3D* pTrack = MakePolyLine(track);
+	//			TPolyLine3D* pTrack = MakePolyLine(track);
 				pTrack->SetLineColor(3);
-				DrawPolyLine(pTrack);*/
+				DrawPolyLine(pTrack);
 				bDrawn = true;
 			}
 			m_mResult[panel.first] = iLine;
@@ -92,8 +95,12 @@ void SimulationEngine::SingleRun()
 	{
 //				m_pCanvas->WaitPrimitive();
 //		delete pTrack;
-		//pTrack->SetLineColor(4);
-//		DrawPolyLine(pTrack);
+		pTrack->SetLineColor(4);
+		DrawPolyLine(pTrack);
+	}
+	else
+	{
+		DrawPolyLine(pTrack);
 	}
 	
 }
@@ -118,6 +125,7 @@ TPolyLine3D* SimulationEngine::MakePolyLine(Geometry::Line3D& a_track)
 {
 	Geometry::Point3D top = Geometry::LineWithHorizontalPlaneIntersection(GetMaxZ(), a_track);
 	Geometry::Point3D bottom = Geometry::LineWithHorizontalPlaneIntersection(GetMinZ(), a_track);
+//	printf("Intersection with top: %f, %f, %f, Intersection with bottom: %f, %f, %f\n", top.GetX(), top.GetY(), top.GetZ(), bottom.GetX(), bottom.GetY(), bottom.GetZ());
 	
 	m_pCanvas->cd();
 

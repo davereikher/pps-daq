@@ -17,12 +17,20 @@ public:
 		float m_fZ;
 	};
 
+	class Point2D: public Point3D
+	{
+	public:
+		Point2D(float a_fX, float a_fZ):Point3D(a_fX, 0, a_fZ){}
+		Point2D(){}
+	};
+
 	class Line3D
 	{
 	public:
 		Line3D(float a_fTheta, float a_fPhi, Geometry::Point3D a_point):
 		m_fPhi(a_fPhi), m_fTheta(a_fTheta), m_point(a_point){}
 		Line3D(){}
+		void Rotate(Line3D a_rotationAxis, float a_fAngle);
 		
 		Point3D GetPoint() {return m_point;}
 		float GetPhi()	{return  m_fPhi;}
@@ -50,7 +58,15 @@ public:
 		float m_fLengthY;
 		Point3D m_centerPoint;
 	};
-/*	
+/*
+	class Angle
+	{
+		Angle(float a_fDeltaX, float a_fDeltaZ);
+		bool operator==(float a_fAngle) {return m_fAngle == a_fAngle;}
+	public:
+		float m_fAngle;
+	};
+	
 	class Vector3D
 	{
 		float a_fX;
@@ -64,5 +80,6 @@ public:
 	static bool PointExceedsBoundaries(Geometry::HorizontalRectangle3D& a_rectange, Geometry::Point3D& a_point);
 	static Geometry::Point3D GetPointAtHorizontalPolarAngleAndDistanceFrom(Geometry::Point3D a_point, float a_fAngle, float a_fDistance);
 	static Geometry::Point3D GetPointAlongLineAtDistance(Geometry::Point3D a_origin, Geometry::Line3D a_line, float a_fDistance);
+	static float DistanceBetweenTwoPoints(Geometry::Point3D a_point1, Geometry::Point3D a_point2);
 
 };

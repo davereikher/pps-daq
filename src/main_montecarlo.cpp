@@ -120,8 +120,10 @@ int main(int argc, char* argv[])
 	simEngine.Draw();	
 	SignalAnalyzer sigAnalyzer;
 	int iHitCounter[] = {0,0,0,0,0};
-	for (int i = 0; i < 10000000; i++)
+	int iNumberOfRuns = Configuration::Instance().GetNumberOfMonteCarloRuns();
+	for (int i = 0; i < iNumberOfRuns; i++)
 	{
+		ShowProgress(i, iNumberOfRuns);
 		simEngine.SingleRun();
 		HitMap_t& results = simEngine.GetResults();
 		bool bWritten = false;
@@ -141,6 +143,9 @@ int main(int argc, char* argv[])
 //			printf("----");
 //			simEngine.Wait();
 		}
+		char c = checkCommand();
+		if (c == 1) break;
+
 /*		float sum = iHitCounter[0] + iHitCounter[1] + iHitCounter[2] + iHitCounter[3];
 		std::cout << (iHitCounter[0]/sum)*100 << "\t\t"<< (iHitCounter[1]/sum)*100<<"\t\t" << (iHitCounter[2]/sum)*100<<"\t\t" << (iHitCounter[3]/sum)*100 << "                         \r";
 		std::cout.flush();*/

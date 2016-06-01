@@ -72,13 +72,26 @@
 	"readout-line-pitch-mm": 2.54,
 	"monte-carlo":
 	{
+		"runs": 100000000, 
+		"tracks":
+		{
+			"global-rotation":
+			{
+				"axis":
+				{
+					"theta": 1.5708,
+					"phi": 0
+				},
+				"angle":0.5235
+			}
+		},
 		"track-intersection-point-domain-rectangle": 
 		{
-			"length-x-mm": 300,
-			"length-y-mm": 300,
+			"length-x-mm": 1,
+			"length-y-mm": 1,
 			"center-x-mm": 0,
 			"center-y-mm": 0,
-			"center-z-mm": 500
+			"center-z-mm": 175
 		},
 		"scintillators":
 		{

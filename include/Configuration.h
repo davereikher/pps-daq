@@ -12,6 +12,7 @@ public:
 	Configuration();
 	void LoadConfiguration(const char* a_pFilename);
 	std::map<std::string, std::vector<int> > GetRanges();
+	int GetNumberOfPanels();
 	float GetPulseThresholdVolts(std::string a_sPanelName);
 	float GetEdgeThresholdVolts(std::string a_sPanelName);
 	float GetVoltMin();
@@ -74,6 +75,10 @@ public:
 	float GetNumberIonPairsPerMmOfPanel(int a_iPanelIndex);
 	float GetGasGapThicknessMmOfPanel(int a_iPanelIndex);
 	float GetBreakdownGenerationGaussianSigmaMmOfPanel(int a_iPanelIndex);
+	float GetGlobalRotationAxisTheta();
+	float GetGlobalRotationAxisPhi();
+	float GetGlobalRotationAngle();
+	float GetNumberOfMonteCarloRuns();
 
 	std::string GetDump();
 

@@ -1,5 +1,6 @@
 #include <math.h>
 #include "RandomTrackGenerator.h"
+#include "Configuration.h"
 
 RandomTrackGenerator::RandomTrackGenerator(Geometry::HorizontalRectangle3D a_pointDomainRectangle):
 m_distributionPhi(0, 2*M_PI),
@@ -18,6 +19,13 @@ m_fPointZOffset(a_pointDomainRectangle.GetZOffset())
 Geometry::Line3D RandomTrackGenerator::GenerateTrack()
 {
 	Geometry::Line3D line(GenerateThetaValue(), GeneratePhiValue(), GeneratePoint());
+	float fRotationAngle = Configuration::Instance().GetGlobalRotationAngle();
+	if (fRotationAngle != 0)
+	{
+		Configuration& config = Configuration::Instance();
+//		printf("Rotating: theta = %f, phi = %f\n", config.GetGlobalRotationAxisTheta(), config.GetGlobalRotationAxisPhi());
+		line.Rotate(Geometry::Line3D(config.GetGlobalRotationAxisTheta(), config.GetGlobalRotationAxisPhi(), line.GetPoint()), fRotationAngle);
+	}
 	return line;
 }
 
@@ -26,7 +34,10 @@ Phi is uniformly distributed between 0 and 2pi
 */
 float RandomTrackGenerator::GeneratePhiValue()
 {
+//TODO: return this!!!
 	return m_distributionPhi(m_generator);
+
+//return 0;
 }
 
 /**
@@ -51,7 +62,11 @@ float RandomTrackGenerator::GenerateThetaValue()
 	
 //	printf("Theta: %f\n", x);
 
+//TODO:  RETURN THIS!
 	return x;
+
+//TODO: REMOVE THIS!
+//	return 0;
 }
 
 Geometry::Point3D RandomTrackGenerator::GeneratePoint()

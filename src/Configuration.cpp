@@ -56,6 +56,11 @@ std::map<std::string, std::vector<int> > Configuration::GetRanges()
 		return m_vRanges;
 }
 
+int Configuration::GetNumberOfPanels()
+{
+	return m_vRanges.size();
+}
+
 float Configuration::GetPulseThresholdVolts(std::string a_sPanelName)
 {
 	return m_configuration["panels"][a_sPanelName]["pulse-threshold-volts"].asFloat();
@@ -156,7 +161,7 @@ float Configuration::GetTriggerThresholdVolts()
 
 int Configuration::GetLineCorrespondingTo(std::string a_sPanel, int a_iChannel)
 {	
-	printf("Getting line corresponding to %s, %d... ", a_sPanel.c_str(), a_iChannel);
+//	printf("Getting line corresponding to %s, %d... ", a_sPanel.c_str(), a_iChannel);
 	Json::Value ranges = m_configuration["panels"];
 	int i = 0;
 
@@ -388,3 +393,22 @@ std::string Configuration::GetPanelMonteCarloName(int a_iPanelIndex)
 	return m_configuration["monte-carlo"]["panels"][a_iPanelIndex]["name"].asString();
 }
 
+float Configuration::GetGlobalRotationAxisTheta()
+{
+	return m_configuration["monte-carlo"]["tracks"]["global-rotation"]["axis"]["theta"].asFloat();
+}
+
+float Configuration::GetGlobalRotationAxisPhi()
+{
+	return m_configuration["monte-carlo"]["tracks"]["global-rotation"]["axis"]["phi"].asFloat();
+}
+
+float Configuration::GetGlobalRotationAngle()
+{
+	return m_configuration["monte-carlo"]["tracks"]["global-rotation"]["angle"].asFloat();
+}
+
+float Configuration::GetNumberOfMonteCarloRuns()
+{
+	return m_configuration["monte-carlo"]["runs"].asInt();
+}
