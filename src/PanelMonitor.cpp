@@ -13,7 +13,7 @@ void PanelMonitor::GotEvent(nanoseconds a_eventTime, std::vector<int> a_vChannel
 	}
 	
 	AddToChannelsHistogram(a_vChannelsWithPulse);
-	AddToSimultaneousChannelsPlot(a_eventTime, a_vChannelsWithPulse.size());
+//	AddToSimultaneousChannelsPlot(a_eventTime, a_vChannelsWithPulse.size());
 	m_pCanvas->Update();
 }
 
@@ -25,15 +25,15 @@ void PanelMonitor::GotTrigger()
 void PanelMonitor::InitGraphics()
 {
 	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_PanelMonitor").c_str(), "Panel Monitor", 800, 600));
-	m_pSimultaneousChannelGraph = new TGraph(0);
+/*	m_pSimultaneousChannelGraph = new TGraph(0);
 	m_pSimultaneousChannelGraph->SetTitle("Number of Channels w/ Simultaneously Detected Pulses per Event");
 	m_pSimultaneousChannelGraph->SetMarkerSize(1);
 	m_pSimultaneousChannelGraph->SetMarkerColor(4);
-	m_pSimultaneousChannelGraph->SetMarkerStyle(21);
+	m_pSimultaneousChannelGraph->SetMarkerStyle(21);*/
 	m_pChannelsHist = new TH1F((m_sPanelName + "ChannelHist").c_str() , "Number of Primary Pulses vs Channel", 90, 0, 0);
 	m_pChannelsHist->SetFillColor(49);
 //	m_pChannelsHist->SetStats(0);
-	m_pCanvas->Divide(1,2);
+//	m_pCanvas->Divide(1,2);
 
 }
 
@@ -45,7 +45,7 @@ void PanelMonitor::AddToChannelsHistogram(std::vector<int>& a_vChannels)
 	}
 
 	std::string sLogMessage = "Num. of channels with primary pulse: " + std::to_string(a_vChannels.size()) + ". Channels ";
-	m_pCanvas->cd(1);
+	m_pCanvas->cd();
 	
 	for (auto it: a_vChannels)
 	{

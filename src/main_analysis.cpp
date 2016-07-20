@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <ctime>
 #include "keyb.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -11,6 +12,9 @@
 #include "TChain.h"
 #include "Types.h"
 #include "Logger.h"
+#include "TROOT.h"
+#include "TCanvas.h"
+#include "TCollection.h"
 
 int checkCommand() {
 	int c = 0;
@@ -21,6 +25,12 @@ int checkCommand() {
 	switch (c) {
 		case 'q':
 			return 1;
+			break;
+		case 's':
+			return 2;
+			break;
+		default:
+			return 0;
 			break;
 	}
 	return 0;
@@ -85,6 +95,33 @@ std::vector<std::string> GetVectorOfDataFileNames(std::string sListFile)
 
 	file.close();
 	return vResult;
+}
+
+void SaveAllCanvases()
+{
+	std::string sImageFolderPath = Configuration::Instance().GetImageFolderPath();
+	if(sImageFolderPath[sImageFolderPath.size() - 1] != '/')
+	{
+		sImageFolderPath += "/";
+	}
+	TCanvas *c = 0;
+	TIter next(gROOT->GetListOfCanvases());
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+	time (&rawtime);
+	timeinfo = localtime(&rawtime);
+	strftime(buffer,80,"-%F-%I:%M:%S",timeinfo);
+
+	while ((c = (TCanvas *)next()))
+	{
+		std::string sFileName = sImageFolderPath;
+	
+		sFileName += c->GetName();
+		sFileName += buffer;
+		sFileName += ".png";
+		c->Print(sFileName.c_str(), "png");
+	}
 }
 
 int main(int argc, char* argv[])
@@ -153,12 +190,16 @@ int main(int argc, char* argv[])
 	sigAnalyzer.Flush();
 	c = 0;
 
-	printf("press q again to quit...\n");
+	printf("press q to quit, s to save the png of all figures in %s...\n", Configuration::Instance().GetImageFolderPath().c_str());
 	do
 	{
 		c = checkCommand();
 		sigAnalyzer.ProcessEvents();
-	} while(c != 1);
+		if( c == 2 )
+		{
+			SaveAllCanvases();
+		}
+	} while(c == 0);
 
 	sigAnalyzer.Stop();
 	return 0;

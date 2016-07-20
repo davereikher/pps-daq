@@ -8,7 +8,7 @@ TrackMonitor::TrackMonitor()
 
 void TrackMonitor::GotEvent(HitMap_t& a_hitMap, bool a_bConvertChannelToLine)
 {
-	if(m_pCanvas == NULL)
+	if(m_pCanvasAngularDistribution == NULL)
 	{
 		InitGraphics();
 	}
@@ -39,13 +39,23 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap, bool a_bConvertChannelToLine)
 			trackPoints.push_back(std::make_pair(iLine, iPanelIndex));
 		}
 
-		FillAngleHist(track.GetAngle());
+//		FillAngleHist(track.GetAngle());
 		if(track.GetNumberOfPoints() == 2)
 		{
+			float fDistance = CalculateDistance(trackPoints);
+			if (fDistance < 50)
+			{
+//				FillAngleHist(track.GetAngle());
+			}
+			
 //			FillDistanceHist(trackPoints);
 //			FillAngleHist(track.GetAngle());
-			FillAngleDistanceHist(trackPoints, track.GetAngle());
+
+			FillAngleDistanceHist(fDistance, track.GetAngle());
 		}
+
+			FillAngleHist(track.GetAngle());
+
 
 		if(track.GetNumberOfPoints() > 2)
 		{	
@@ -56,8 +66,21 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap, bool a_bConvertChannelToLine)
 		Logger::Instance().AddMessage(sLogMessage);
 	}
 
-	m_pCanvas->Update();
+	m_pCanvasAngularDistribution->Update();
+	m_pCanvas2DHist->Update();
+	m_pCanvasChisquare->Update();
 	
+
+}
+
+float TrackMonitor::CalculateDistance(std::vector<std::pair<int, int> > a_points)
+{
+	float fZ1 = PanelIndexToZ(a_points[0].second);
+	float fX1 = LineToX(a_points[0].first);
+	float fZ2 = PanelIndexToZ(a_points[1].second);
+	float fX2 = LineToX(a_points[1].first);
+
+	return Geometry::DistanceBetweenTwoPoints(Geometry::Point2D(fX1, fZ1), Geometry::Point2D(fX2, fZ2));
 
 }
 
@@ -90,7 +113,7 @@ int TrackMonitor::GetMultiplicationFactor(int a_iLine1, int a_iPanelIndex1, int 
 
 void TrackMonitor::FillAngleHist(float a_fAngle, int a_iWeight)
 {
-	m_pCanvas->cd(1);
+	m_pCanvasAngularDistribution->cd();
 	for (int i = 0; i < a_iWeight; i++)
 	{
 		m_pAngleHist->Fill(a_fAngle);
@@ -99,46 +122,29 @@ void TrackMonitor::FillAngleHist(float a_fAngle, int a_iWeight)
 	m_pAngleHist->SetCanExtend(TH1::kXaxis);
 }
 
-void TrackMonitor::FillAngleDistanceHist(std::vector<std::pair<int, int> > a_points, float a_fAngle)
+void TrackMonitor::FillAngleDistanceHist(float a_fDistance, float a_fAngle)
 {
-	m_pCanvas->cd(3);
-	float fZ1 = PanelIndexToZ(a_points[0].second);
-	float fX1 = LineToX(a_points[0].first);
-	float fZ2 = PanelIndexToZ(a_points[1].second);
-	float fX2 = LineToX(a_points[1].first);
+	m_pCanvas2DHist->cd();
+	m_pDistanceAngleHist->Fill(a_fDistance, a_fAngle);
 
-	float distance = Geometry::DistanceBetweenTwoPoints(Geometry::Point2D(fX1, fZ1), Geometry::Point2D(fX2, fZ2));
-	printf("distance between (%f, %f) and (%f, %f): %f\n", fX1, fZ1, fX2, fZ2, distance);
-	m_pDistanceAndleHist->Fill(distance, a_fAngle);
-
-	m_pDistanceAndleHist->Draw("LEGO1 0");
-	m_pDistanceAndleHist->SetCanExtend(TH1::kXaxis);
+	m_pDistanceAngleHist->Draw("LEGO1 0");
+	m_pDistanceAngleHist->SetCanExtend(TH1::kXaxis);
 
 }
 
-void TrackMonitor::FillDistanceHist(std::vector<std::pair<int, int> > a_points)
+/*void TrackMonitor::FillDistanceHist(float a_fDistance)
 {
-	m_pCanvas->cd(3);
-	float fZ1 = PanelIndexToZ(a_points[0].second);
-	float fX1 = LineToX(a_points[0].first);
-	float fZ2 = PanelIndexToZ(a_points[1].second);
-	float fX2 = LineToX(a_points[1].first);
+	m_pCanvas->cd();
 
-	float distance = Geometry::DistanceBetweenTwoPoints(Geometry::Point2D(fX1, fZ1), Geometry::Point2D(fX2, fZ2));
-	printf("distance between (%f, %f) and (%f, %f): %f\n", fX1, fZ1, fX2, fZ2, distance);
-	int iMultFactor = GetMultiplicationFactor(a_points[0].first, a_points[0].second, a_points[1].first, a_points[1].second);
-	for (int i = 0; i < iMultFactor; i++)
-	{	
-		m_pDistanceHist->Fill(distance);
-	}
+	m_pDistanceHist->Fill(a_fDistance);
 
 	m_pDistanceHist->Draw("E1");
 	m_pDistanceHist->SetCanExtend(TH1::kXaxis);
-}
+}*/
 
 void TrackMonitor::FillChiSquaredPerNDFHist(float m_fChiSquaredPerNDF)
 {
-	m_pCanvas->cd(2);
+	m_pCanvasChisquare->cd();
 	Logger::Instance().SetWriteCurrentMessage();
 	Logger::Instance().AddMessage(std::string("Chi square per NDF is ") + std::to_string(m_fChiSquaredPerNDF));
 
@@ -177,10 +183,13 @@ void TrackMonitor::InitGraphics()
 {
 	printf("INITGRAPHICS\n");
 
-	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas("TrackMonitor", "Track Monitor", 800, 600));
-	m_pCanvas->Divide(3);
+	m_pCanvasAngularDistribution = std::unique_ptr<TCanvas>(new TCanvas("TracksAngularDistribution", "Tracks Angular Distribution", 800, 600));
+	m_pCanvas2DHist = std::unique_ptr<TCanvas>(new TCanvas("Tracks2DHist", "2-Point Tracks Angular Distribution and Distance Between Points", 800, 600));
+	m_pCanvasChisquare = std::unique_ptr<TCanvas>(new TCanvas("TrackChiSquare", "Chi Square/NDF of 3 and 4 Point Tracks", 800, 600));
 
-	m_pAngleHist = new TH1F("AngleHist" , "Polar Angle", 100, 0, 0);
+//	m_pCanvas->Divide(3);
+
+	m_pAngleHist = new TH1F("AngleHist" , "Angular Distribution", 100, 0, 0);
 	m_pAngleHist->SetFillColor(49);
 	m_pAngleHist->GetXaxis()->SetTitle("Angle (radians)");
 	m_pAngleHist->GetXaxis()->CenterTitle();
@@ -190,10 +199,21 @@ void TrackMonitor::InitGraphics()
 	m_pDistanceHist->GetXaxis()->SetTitle("Distance between points (mm)");
 	m_pDistanceHist->GetXaxis()->CenterTitle();*/
 
-	m_pDistanceAndleHist = new TH2F("angle_distance", "Track Angle by Distance Between Points on Track", 100, 0, 0, 100, 0, 0);
+	m_pDistanceAngleHist = new TH2F("angle_distance", "2-Point Tracks Angular Distribution and Distance Between Points", 100, 0, 0, 100, 0, 0);
+	m_pDistanceAngleHist->GetYaxis()->SetTitle("Angle (radians)");
+	m_pDistanceAngleHist->GetYaxis()->CenterTitle();
+	m_pDistanceAngleHist->GetYaxis()->SetTitleOffset(2);
+	
+	m_pDistanceAngleHist->GetXaxis()->SetTitle("Distance Between Points (mm)");
+	m_pDistanceAngleHist->GetXaxis()->CenterTitle();
+	m_pDistanceAngleHist->GetXaxis()->SetTitleOffset(2);
+
 	m_pAngleHist->SetFillColor(49);
 
-	m_pChiSquaredPerNDFHist = new TH1F("ChiSquarePerNDF", "Chi Square per NDF", 100, 0, 0);
+	m_pChiSquaredPerNDFHist = new TH1F("ChiSquarePerNDF", "Chi Square per NDF of 3,4 Point Tracks", 100, 0, 0);
+	m_pChiSquaredPerNDFHist->GetXaxis()->SetTitle("Chi Square/NDF");
+	m_pChiSquaredPerNDFHist->GetXaxis()->CenterTitle();
+
 	m_pChiSquaredPerNDFHist->SetFillColor(49);
 }
 

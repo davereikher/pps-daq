@@ -79,6 +79,7 @@ public:
 	float GetGlobalRotationAxisPhi();
 	float GetGlobalRotationAngle();
 	float GetNumberOfMonteCarloRuns();
+	std::string GetImageFolderPath();
 
 	std::string GetDump();
 

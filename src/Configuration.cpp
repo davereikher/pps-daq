@@ -412,3 +412,9 @@ float Configuration::GetNumberOfMonteCarloRuns()
 {
 	return m_configuration["monte-carlo"]["runs"].asInt();
 }
+
+std::string Configuration::GetImageFolderPath()
+{
+	return m_configuration["image-folder-path"].asString();
+}
+

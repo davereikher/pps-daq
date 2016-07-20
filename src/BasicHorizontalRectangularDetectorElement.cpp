@@ -13,6 +13,7 @@ bool BasicHorizontalRectangularDetectorElement::Captured(Geometry::Line3D& a_tra
 	{
 		if (m_distribution0To1(m_generator) <= m_fEfficiency)
 		{
+//			printf("Captured!\n");
 			return true;
 		}
 	}

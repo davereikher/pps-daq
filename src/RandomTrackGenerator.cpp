@@ -18,6 +18,7 @@ m_fPointZOffset(a_pointDomainRectangle.GetZOffset())
 
 Geometry::Line3D RandomTrackGenerator::GenerateTrack()
 {
+//	printf("Generated...");
 	Geometry::Line3D line(GenerateThetaValue(), GeneratePhiValue(), GeneratePoint());
 	float fRotationAngle = Configuration::Instance().GetGlobalRotationAngle();
 	if (fRotationAngle != 0)

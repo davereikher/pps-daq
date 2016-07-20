@@ -27,17 +27,23 @@ public:
 	class Line3D
 	{
 	public:
-		Line3D(float a_fTheta, float a_fPhi, Geometry::Point3D a_point):
-		m_fPhi(a_fPhi), m_fTheta(a_fTheta), m_point(a_point){}
+		Line3D(float a_fTheta, float a_fPhi, Geometry::Point3D a_point);
+		Line3D(float a_fXComp, float a_fYComp, float a_fZComp, Geometry::Point3D a_point);
 		Line3D(){}
 		void Rotate(Line3D a_rotationAxis, float a_fAngle);
 		
 		Point3D GetPoint() {return m_point;}
 		float GetPhi()	{return  m_fPhi;}
 		float GetTheta() {return m_fTheta;}
+		float GetXComponent(){return m_fX;}	
+		float GetYComponent(){return m_fY;}
+		float GetZComponent(){return m_fZ;}
 	private:
 		float m_fPhi;
 		float m_fTheta;
+		float m_fX;
+		float m_fY;
+		float m_fZ;
 		Point3D m_point;
 	};
 

@@ -50,6 +50,7 @@ float Track::GetChiSquaredPerNDF()
 {
 	DoLinearRegression();
 	Double_t fChiSquare = m_linearFitter.GetChisquare();
+	printf("Number of free parameters: %d", m_linearFitter.GetNumberFreeParameters());
 	float fResult = fChiSquare/m_linearFitter.GetNumberFreeParameters();
 	return fResult;
 }

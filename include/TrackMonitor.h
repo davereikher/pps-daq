@@ -21,21 +21,20 @@ public:
 	int ChannelToLine(std::string a_sPanel, int a_iChannel, bool a_bConvertChannelToLine = true);
 	float LineToX(int a_iLine);
 	void FillAngleHist(float a_fAngle, int a_iWeight = 1);
-	void FillAngleDistanceHist(std::vector<std::pair<int, int> > a_points, float a_fAngle);
+	void FillAngleDistanceHist(float a_fDistance, float a_fAngle);
 	void FillChiSquaredPerNDFHist(float m_fChiSquaredPerNDF);
-	void FillDistanceHist(std::vector<std::pair<int, int> > a_points);
+	void FillDistanceHist(float a_fDistance);
 	int GetMultiplicationFactor(int a_iLine1, int a_iPanelIndex1, int a_iLine2, int a_iPanelIndex2);
+	float CalculateDistance(std::vector<std::pair<int, int> > a_points);
 
 private:
 	void InitGraphics();
 private:
-	std::unique_ptr<TCanvas> m_pCanvas;
-//	std::unique_ptr<TCanvas> m_pLineTimingCanvas;
+	std::unique_ptr<TCanvas> m_pCanvasAngularDistribution;
+	std::unique_ptr<TCanvas> m_pCanvas2DHist;
+	std::unique_ptr<TCanvas> m_pCanvasChisquare;
 	TH1* m_pAngleHist;
 	TH1* m_pChiSquaredPerNDFHist;
 	TH1* m_pDistanceHist;
-	TH2* m_pDistanceAndleHist;
-
-//	std::map<int, TH1*> m_vpLineHistograms;
-//	std::string m_sPanelName;
+	TH2* m_pDistanceAngleHist;
 };

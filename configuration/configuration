@@ -70,6 +70,7 @@
 	"normalize-channels": true,
 	"distance-between-panels-mm": 37,
 	"readout-line-pitch-mm": 2.54,
+	"image-folder-path": "/home/tgc/pps/figures",
 	"monte-carlo":
 	{
 		"runs": 100000000, 
@@ -82,13 +83,13 @@
 					"theta": 1.5708,
 					"phi": 0
 				},
-				"angle":0.5235
+				"angle":0
 			}
 		},
 		"track-intersection-point-domain-rectangle": 
 		{
-			"length-x-mm": 1,
-			"length-y-mm": 1,
+			"length-x-mm": 1000,
+			"length-y-mm": 1000,
 			"center-x-mm": 0,
 			"center-y-mm": 0,
 			"center-z-mm": 175
