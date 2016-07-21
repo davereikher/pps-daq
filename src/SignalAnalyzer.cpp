@@ -33,7 +33,8 @@ SignalAnalyzer::SignalAnalyzer():
 m_iFlags(0),
 m_bStopAnalysisThread(false),
 m_pTriggerTimingMonitor(new TriggerTimingMonitor(milliseconds(Configuration::Instance().GetTriggerRateAveragingDurationSecs()))),
-m_pTrackMonitor(new TrackMonitor())
+m_pTrackMonitor(new TrackMonitor()),
+m_pPulseMonitor(new PulseMonitor())
 {
 	float fVoltMin = Configuration::Instance().GetVoltMin();
 	float fVoltMax = Configuration::Instance().GetVoltMax();
@@ -100,7 +101,7 @@ Maps a vector of samples to a tuple of values - the location of the leading edge
 @param a_samplesVector - a vector of samples from a channel.
 @return A tuple, where the first item is the location of the leading edge and the second is the location of the lowest point on the pulse.
 */
-std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> SignalAnalyzer::FindLeadingEdgeAndPulseExtremum(std::vector<float>& a_samplesVector)
+std::tuple<DataPoint, DataPoint> SignalAnalyzer::FindLeadingEdgeAndPulseExtremum(std::vector<float>& a_samplesVector)
 {
 	float minValue = FLT_MAX; 
 	int minValueIndex = -1;
@@ -142,7 +143,7 @@ std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> SignalAnalyzer::FindLea
 
 	if (!bChannelHasPulse)
 	{
-		return std::make_tuple(SignalAnalyzer::Point(0, 0, 0, 0, 0, false), SignalAnalyzer::Point(0, 0, 0, 0, 0, false));
+		return std::make_tuple(DataPoint(0, 0, 0, 0, 0, false), DataPoint(0, 0, 0, 0, 0, false));
 	}
 
 	for (i = 0; i < (int)a_samplesVector.size(); i++)
@@ -159,7 +160,7 @@ std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> SignalAnalyzer::FindLea
 	if (i == (int)a_samplesVector.size())
 	{
 		//no leading edge found => no pulse
-		return std::make_tuple(SignalAnalyzer::Point(0, 0, 0, 0, 0, false), SignalAnalyzer::Point(0, 0, 0, 0, 0, false));
+		return std::make_tuple(DataPoint(0, 0, 0, 0, 0, false), DataPoint(0, 0, 0, 0, 0, false));
 	}
 
 	leadingEdgeIndex = i;
@@ -176,8 +177,8 @@ std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> SignalAnalyzer::FindLea
 	}
 	
 
-	return std::make_tuple(SignalAnalyzer::Point(leadingEdgeIndex, m_markers.GetEdgeThreshold().Discrete(), m_fVoltageStartVolts, m_fTimeDivisionNs, m_fVoltageDivisionVolts), 
-			SignalAnalyzer::Point(minValueIndex, minValue, m_fVoltageStartVolts, m_fTimeDivisionNs, m_fVoltageDivisionVolts));
+	return std::make_tuple(DataPoint(leadingEdgeIndex, m_markers.GetEdgeThreshold().Discrete(), m_fVoltageStartVolts, m_fTimeDivisionNs, m_fVoltageDivisionVolts), 
+			DataPoint(minValueIndex, minValue, m_fVoltageStartVolts, m_fTimeDivisionNs, m_fVoltageDivisionVolts));
 }
 
 /**
@@ -211,7 +212,7 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,
 	{
 
 	//Each tuple represents a pulse. The first value is the location of the leading edge time, the second is the location of the lowest value of the pulse
-		std::tuple<SignalAnalyzer::Point, SignalAnalyzer::Point> p;
+		std::tuple<DataPoint, DataPoint> p;
 //		printf("CHANNEL %d\n", a_vRange[i]);
 		p = FindLeadingEdgeAndPulseExtremum(a_vAllChannels[a_vRange[i]]);
 //		printf("Channel %d, edge at %f, %d\n", a_vRange[i], std::get<EDGE_THRES_INDEX>(p).GetX(), std::get<EDGE_THRES_INDEX>(p).GetXDiscrete());
@@ -408,48 +409,6 @@ SignalAnalyzer::AnalysisMarkers& SignalAnalyzer::GetAnalysisMarkers()
 	return m_markers;
 }
 
-SignalAnalyzer::Point::Point()
-{}
-
-SignalAnalyzer::Point::Point(int a_iXDiscrete, int a_iYDiscrete, double a_fYStart, double a_fXConvertFactor, double a_fYConvertFactor, bool a_bExists):
-m_fX(a_iXDiscrete * a_fXConvertFactor), m_fY(a_fYStart + a_iYDiscrete * a_fYConvertFactor), m_iXDiscrete(a_iXDiscrete), m_iYDiscrete(a_iYDiscrete), m_bExists(a_bExists)
-{
-	if(a_fYConvertFactor == 0)
-	{
-		m_fY = (float)a_iYDiscrete;
-	}
-	if(a_fXConvertFactor == 0)
-	{
-		m_fX = (float)a_iXDiscrete;
-	}
-	//printf("a_fYStart: %f, a_fYConvertFactor = %f\n", a_fYStart, a_fYConvertFactor);
-}
-
-double SignalAnalyzer::Point::GetX()
-{
-	return m_fX;
-}
-
-double SignalAnalyzer::Point::GetY()
-{
-	return m_fY;
-}
-
-bool SignalAnalyzer::Point::Exists()
-{
-	return m_bExists;
-}
-
-int SignalAnalyzer::Point::GetXDiscrete()
-{
-	return m_iXDiscrete;
-}
-
-int SignalAnalyzer::Point::GetYDiscrete()
-{
-	return m_iYDiscrete;
-}
-
 void SignalAnalyzer::AnalysisMarkers::ConfigureVoltageConversion(float a_fVoltMin, float a_fVoltMax, int a_iDigitizerResolution)
 {
 	m_fVoltageDivisionVolts = (a_fVoltMax - a_fVoltMin)/(float)a_iDigitizerResolution;
@@ -620,6 +579,7 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 			 vNormalizedChannels = NormalizeChannels(a_vChannels);
 		}
 		HitMap_t mPanelAndLine;
+		SignalVector_t mSignalVector;
 		int i = 0;
 		for (auto it: m_vRanges)
 		{
@@ -643,13 +603,22 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 					}
 				}
 
+				int iChannel = -1;
+				if (m_markers.m_vChannelsWithPulse.size() == 1)
+				{
+					iChannel = m_markers.m_vChannelsWithPulse[0];
+					if (m_iFlags & AnalysisFlags::EPulseMonitor)
+					{
+						mSignalVector.push_back(m_markers.m_vChannelsEdgeAndMinimum[iChannel]);
+					}
+				}
+
 				if((m_iFlags & AnalysisFlags::EPanelTimingMonitor) || (m_iFlags & AnalysisFlags::EPanelDegradationMonitor))
 				{
 //					printf("TIMING MONITOR\n");
-					Point p = FindTriggerTime(vNormalizedChannels);
-					if(p.Exists() && (m_markers.m_vChannelsWithPulse.size() == 1))
+					DataPoint p = FindTriggerTime(vNormalizedChannels);
+					if(p.Exists())
 					{
-						int iChannel = m_markers.m_vChannelsWithPulse[0];
 /*						int cnt = 0;
 						for (auto& it: m_markers.m_vChannelsEdgeAndMinimum)
 						{
@@ -657,7 +626,6 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 	 						cnt++;
 						}*/
 //						printf("iChannel: %d, pulse x = %f\n", iChannel,  std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX());
-
 						if(m_iFlags & AnalysisFlags::EPanelTimingMonitor)
 						{
 							m_vpPanelTimingMonitors[i]->GotEvent(iChannel, std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX(), 
@@ -677,6 +645,10 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 		{
 			m_pTrackMonitor->GotEvent(mPanelAndLine);
 		}
+		if (m_iFlags & AnalysisFlags::EPulseMonitor)
+		{
+			m_pPulseMonitor->GotEvent(mSignalVector);
+		}
 	}
 
 	ProcessEvents();
@@ -687,7 +659,7 @@ void SignalAnalyzer::AnalyzeTrack(HitMap_t& a_panelAndLine)
 	m_pTrackMonitor->GotEvent(a_panelAndLine, false);
 }
 
-SignalAnalyzer::Point SignalAnalyzer::FindTriggerTime(Channels_t& a_vAllChannels)
+DataPoint SignalAnalyzer::FindTriggerTime(Channels_t& a_vAllChannels)
 {
 	int i = 0;
 	bool bFound = false;
@@ -704,11 +676,11 @@ SignalAnalyzer::Point SignalAnalyzer::FindTriggerTime(Channels_t& a_vAllChannels
 //	printf("found = %d\n", bFound);
 	if (bFound)
 	{
-		Point p(i, m_markers.GetTriggerThreshold().Discrete(), m_fVoltageStartVolts, m_fTimeDivisionNs, m_fVoltageDivisionVolts);
+		DataPoint p(i, m_markers.GetTriggerThreshold().Discrete(), m_fVoltageStartVolts, m_fTimeDivisionNs, m_fVoltageDivisionVolts);
 		return p;
 	}
 
-	return Point(0, 0, 0, 0, 0, false);
+	return DataPoint(0, 0, 0, 0, 0, false);
 }
 
 void SignalAnalyzer::ProcessEvents()

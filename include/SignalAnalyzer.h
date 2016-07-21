@@ -13,39 +13,20 @@
 #include "PanelMonitor.h"
 #include "PanelTimingMonitor.h"
 #include "TrackMonitor.h"
+#include "PulseMonitor.h"
 #include "PanelDegradationMonitor.h"
+#include "DataPoint.h"
 
 
 #define NO_PULSE_EDGE INT_MAX
 #define NO_PULSE_MINIMUM_VALUE FLT_MAX
 #define NO_PULSE_MIN_VALUE_LOCATION INT_MAX
-#define EDGE_THRES_INDEX 0
-#define MIN_PULSE_INDEX 1
 
 using namespace std::chrono;
 
 class SignalAnalyzer
 {
 public:
-	class Point
-	{
-	public:
-		Point(int a_iXDiscrete, int a_iYDiscrete, double a_fYStart, double a_fXConvertFactor = 1, double a_fYConvertFactor = 1, bool a_bExists = true);
-		Point();
-		double GetX();
-		double GetY();
-		int GetXDiscrete();
-		int GetYDiscrete();
-		bool Exists();
-	
-	private:
-		double m_fX;
-		double m_fY;
-		int m_iXDiscrete;
-		int m_iYDiscrete;
-		bool m_bExists;
-	};
-
 	class AnalysisMarkers
 	{
 		class Value
@@ -114,7 +95,7 @@ public:
 
 		int m_iZero;
 		
-		std::vector<std::tuple<Point, Point> > m_vChannelsEdgeAndMinimum;
+		std::vector<std::tuple<DataPoint, DataPoint> > m_vChannelsEdgeAndMinimum;
 		std::vector<int> m_vChannelsWithPulse;
 	};
 
@@ -126,13 +107,14 @@ public:
 		EPanelTimingMonitor = 0x00000008,
 		ETrackMonitor = 0x00000010,
 		ECountPanelsWithPrimaryPulse = 0x00000020,
-		EPanelDegradationMonitor = 0x00000040
+		EPanelDegradationMonitor = 0x00000040,
+		EPulseMonitor = 0x00000080
 	};
 public:
 	SignalAnalyzer();
-	std::tuple<Point, Point> FindLeadingEdgeAndPulseExtremum(std::vector<float>& a_samplesVector);
+	std::tuple<DataPoint, DataPoint> FindLeadingEdgeAndPulseExtremum(std::vector<float>& a_samplesVector);
 	void FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels, std::string a_sPanelName, std::vector<int>& a_vRange);
-	Point FindTriggerTime(Channels_t& a_vAllChannels);
+	DataPoint FindTriggerTime(Channels_t& a_vAllChannels);
 	void Analyze(nanoseconds a_eventTimeFromStart, Channels_t& a_vChannels);
 
 	AnalysisMarkers& GetAnalysisMarkers();
@@ -167,5 +149,6 @@ private:
 	std::vector<std::unique_ptr<PanelDegradationMonitor> > m_vpPanelDegradationMonitors;
 	std::vector<std::unique_ptr<PanelTimingMonitor> > m_vpPanelTimingMonitors;
 	std::unique_ptr<TrackMonitor> m_pTrackMonitor;
+	std::unique_ptr<PulseMonitor> m_pPulseMonitor;
 	int m_iNumberOfPanelsWithPrimaryPulse;
 };

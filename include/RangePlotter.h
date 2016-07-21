@@ -18,8 +18,12 @@ public:
 	void Wait();
 private:
 	inline float TransformToVoltage(float a_fSample);
+	void MakePads(int a_iChannelsToPadsAssociationSize);
+	void ChangePad(int a_iIndex);
+
 private:
 	std::unique_ptr<TCanvas> m_pCanvas;
+	std::vector<std::unique_ptr<TCanvas> > m_vCanvasVector;
 	int m_colors[16];
 	float m_fSamplingFreqGHz;
 	float m_fMinVoltage;

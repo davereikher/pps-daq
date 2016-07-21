@@ -80,6 +80,7 @@ public:
 	float GetGlobalRotationAngle();
 	float GetNumberOfMonteCarloRuns();
 	std::string GetImageFolderPath();
+	bool UseSeparateCanvasesForStep();
 
 	std::string GetDump();
 

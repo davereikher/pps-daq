@@ -5,6 +5,7 @@
 #include "TBox.h"
 #include "TMarker.h"
 #include "CommonUtils.h"
+#include "Configuration.h"
 
 
 RangePlotter::RangePlotter(float a_fSamplingFreqGHz, float a_fMinVoltage, float a_fMaxVoltage, int a_iDigitizerResolution, std::string a_sInstanceName):
@@ -18,6 +19,50 @@ m_sInstanceName(a_sInstanceName)
 {
 }
 
+
+void RangePlotter::MakePads(int a_iChannelsToPadsAssociationSize)
+{
+	if (Configuration::Instance().UseSeparateCanvasesForStep())
+	{
+		for (int i = 0; i < a_iChannelsToPadsAssociationSize; i++)
+		{
+			m_vCanvasVector.push_back(std::unique_ptr<TCanvas>(new TCanvas((m_sInstanceName + "Canvas" + std::to_string(i)).c_str(), "", 800, 600)));
+		}
+	}
+	else
+	{
+		double fPads1, fPads2;
+		if (a_iChannelsToPadsAssociationSize > 1)
+		{
+	// determine the division of the canvas into pads according to the size of a_channelsToPadsAssociation
+			double fPads1 = ceil(sqrt(a_iChannelsToPadsAssociationSize));
+			double fPads2 = ceil(a_iChannelsToPadsAssociationSize/fPads1);
+	
+	// since the screen is wider usually, we want more pads in the horizontal direction:
+			if ( fPads1 > fPads2)
+			{
+			m_pCanvas->Divide((int)fPads1, (int)fPads2);	
+			}
+			else
+			{
+				m_pCanvas->Divide((int)fPads2, (int)fPads1);
+			}
+		}
+
+	}
+}
+
+void RangePlotter::ChangePad(int a_iIndex)
+{
+	if(Configuration::Instance().UseSeparateCanvasesForStep())
+	{
+		m_vCanvasVector[a_iIndex]->cd();
+	}
+	else
+	{
+			m_pCanvas->cd(a_iIndex + 1);
+	}
+}
 
 /**
 The purpose of this function is to conveniently plot an event. Each event is plotted on a TCanvas. Divided into as many pads as there are panels. Each pad is a TMultiGraph with a TLegend, and shows the channels of the digitizer connected to the lines of that panel. The grouping into pads must not necessarily be according to panels, but in any other prefered way.
@@ -36,30 +81,14 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 	int iPadCounter = 0;
 	if(0 == m_vpMultiGraph.size())
 	{
-		double fPads1, fPads2;
-		if (a_channelsToPadsAssociation.size() > 1)
-		{
-	// determine the division of the canvas into pads according to the size of a_channelsToPadsAssociation
-			double fPads1 = ceil(sqrt(a_channelsToPadsAssociation.size()));
-			double fPads2 = ceil(a_channelsToPadsAssociation.size()/fPads1);
-	
-	// since the screen is wider usually, we want more pads in the horizontal direction:
-			if ( fPads1 > fPads2)
-			{
-			m_pCanvas->Divide((int)fPads1, (int)fPads2);	
-			}
-			else
-			{
-				m_pCanvas->Divide((int)fPads2, (int)fPads1);
-			}
-		}
-	
+		MakePads(a_channelsToPadsAssociation.size());	
 		for (auto& rangeIt: a_channelsToPadsAssociation)
 		{	
 			TMultiGraph* pMg = new TMultiGraph();	
 			m_vpMultiGraph.push_back(std::unique_ptr<TMultiGraph>(pMg));
 
-			m_pCanvas->cd(iPadCounter + 1);
+	//		m_pCanvas->cd(iPadCounter + 1);
+			ChangePad(iPadCounter);
 			int i = 0;
 
 			auto legend = new TLegend(0.8,0.8,1,1, "Channels");

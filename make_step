@@ -19,7 +19,7 @@ LDFLAGS = $(MYFLAG)
 LDLIBS = -lpthread -ljson $(ROOTLIBS) 
 
 EXECS = $(BINDIR)/step
-_OBJECTS = main_step.o CommonUtils.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o Track.o RangePlotter.o SignalAnalyzer.o Logger.o TimingMonitorBase.o PanelDegradationMonitor.o Geometry.o
+_OBJECTS = main_step.o CommonUtils.o Configuration.o TriggerTimingMonitor.o PanelMonitor.o PanelTimingMonitor.o TrackMonitor.o Track.o RangePlotter.o SignalAnalyzer.o Logger.o TimingMonitorBase.o PanelDegradationMonitor.o Geometry.o DataPoint.o PulseMonitor.o
 OBJECTS = $(patsubst %,$(OBJDIR)/%,$(_OBJECTS))
 
 #.SUFFIXES: .o .C .c .cpp .so .cxx

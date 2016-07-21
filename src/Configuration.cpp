@@ -418,3 +418,8 @@ std::string Configuration::GetImageFolderPath()
 	return m_configuration["image-folder-path"].asString();
 }
 
+bool Configuration::UseSeparateCanvasesForStep()
+{
+	return m_configuration["use-separate-canvases-for-step"].asBool();
+}
+

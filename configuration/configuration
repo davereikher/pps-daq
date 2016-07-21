@@ -71,6 +71,7 @@
 	"distance-between-panels-mm": 37,
 	"readout-line-pitch-mm": 2.54,
 	"image-folder-path": "/home/tgc/pps/figures",
+	"use-separate-canvases-for-step": false,
 	"monte-carlo":
 	{
 		"runs": 100000000, 
