@@ -81,6 +81,11 @@ public:
 	float GetNumberOfMonteCarloRuns();
 	std::string GetImageFolderPath();
 	bool UseSeparateCanvasesForStep();
+	bool ShowTriggerInWaveformsStep();
+	bool ShowEdgeThresholdMarkerStep();
+	bool ShowPulseThresholdMarkerStep();
+	bool TagPrimaryPulseStep();
+
 
 	std::string GetDump();
 

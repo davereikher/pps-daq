@@ -13,6 +13,7 @@
 #include "Types.h"
 #include "Logger.h"
 #include "TROOT.h"
+#include "TStyle.h"
 #include "TCanvas.h"
 #include "TCollection.h"
 
@@ -124,6 +125,21 @@ void SaveAllCanvases()
 	}
 }
 
+void SetPlotStyle()
+{
+	gStyle->SetLabelSize(0.06, "xyz");
+	gStyle->SetTitleSize(0.06, "xyz");
+	gStyle->SetTitleOffset(1.1, "xyz");
+	gStyle->SetTitleFontSize(0.08);
+	gStyle->SetOptStat("e");
+	gStyle->SetStatW(0.3);
+	gStyle->SetStatH(0.3);
+	gStyle->SetPadLeftMargin(0.15);
+	gStyle->SetPadRightMargin();
+	gStyle->SetPadTopMargin(0.15);
+	gStyle->SetPadBottomMargin(0.15);
+}
+
 int main(int argc, char* argv[])
 {
 	if (argc < 3)
@@ -138,10 +154,18 @@ int main(int argc, char* argv[])
 	
 	Logger::Instance().Init(argv[3]);
 	Logger::Instance().AddNecessaryMessage(Configuration::Instance().GetDump());
+	
+	SetPlotStyle();
 
 	SignalAnalyzer sigAnalyzer;
 
-	sigAnalyzer.SetFlags(SignalAnalyzer::EPulseMonitor);
+//	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelDegradationMonitor | SignalAnalyzer::ETriggerTimingMonitor | SignalAnalyzer::ETrackMonitor |SignalAnalyzer::EPanelHitMonitor| SignalAnalyzer::EPanelTimingMonitor);
+//	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelTimingMonitor);
+	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelHitMonitor);
+//	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelDegradationMonitor);
+//	sigAnalyzer.SetFlags(SignalAnalyzer::ETriggerTimingMonitor);
+//	sigAnalyzer.SetFlags(SignalAnalyzer::ETrackMonitor);
+
 
 	sigAnalyzer.Start();
 	

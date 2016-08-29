@@ -420,6 +420,26 @@ std::string Configuration::GetImageFolderPath()
 
 bool Configuration::UseSeparateCanvasesForStep()
 {
-	return m_configuration["use-separate-canvases-for-step"].asBool();
+	return m_configuration["step"]["use-separate-canvases-for-step"].asBool();
+}
+
+bool Configuration::ShowTriggerInWaveformsStep()
+{
+	return m_configuration["step"]["show-trigger-in-waveforms-step"].asBool();
+}
+
+bool Configuration::ShowEdgeThresholdMarkerStep()
+{
+	return m_configuration["step"]["show-edge-threshold-marker"].asBool();
+}
+
+bool Configuration::ShowPulseThresholdMarkerStep()
+{
+	return m_configuration["step"]["show-pulse-threshold-marker"].asBool();
+}
+
+bool Configuration::TagPrimaryPulseStep()
+{
+	return m_configuration["step"]["tag-primary-pulse"].asBool();
 }
 

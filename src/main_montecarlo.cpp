@@ -10,6 +10,7 @@
 #include "Configuration.h"
 #include "TChain.h"
 #include "Types.h"
+#include "TStyle.h"
 #include "Logger.h"
 
 #include "RandomTrackGenerator.h"
@@ -91,6 +92,21 @@ std::vector<std::string> GetVectorOfDataFileNames(std::string sListFile)
 	return vResult;
 }
 
+void SetPlotStyle()
+{
+	gStyle->SetLabelSize(0.06, "xyz");
+	gStyle->SetTitleSize(0.06, "xyz");
+	gStyle->SetTitleOffset(1.1, "xyz");
+	gStyle->SetTitleFontSize(0.08);
+	gStyle->SetOptStat("e");
+	gStyle->SetStatW(0.3);
+	gStyle->SetStatH(0.3);
+	gStyle->SetPadLeftMargin(0.15);
+	gStyle->SetPadRightMargin();
+	gStyle->SetPadTopMargin(0.15);
+	gStyle->SetPadBottomMargin(0.15);
+}
+
 int main(int argc, char* argv[])
 {
 	TApplication* pApplication = new TApplication("app",0, 0);
@@ -102,6 +118,7 @@ int main(int argc, char* argv[])
 	}
 
 	Configuration& config = Configuration::Instance();
+	SetPlotStyle();
 
 	config.LoadConfiguration(argv[1]);
 
@@ -124,7 +141,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < iNumberOfRuns; i++)
 	{
 		ShowProgress(i, iNumberOfRuns);
-		simEngine.SingleRun();
+		simEngine.SingleRun(SimulationEngine::ERandomPulses);
 		HitMap_t& results = simEngine.GetResults();
 		bool bWritten = false;
 	/*	for (auto& it: results)

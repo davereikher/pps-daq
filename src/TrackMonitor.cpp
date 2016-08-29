@@ -40,6 +40,7 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap, bool a_bConvertChannelToLine)
 		}
 
 //		FillAngleHist(track.GetAngle());
+//		printf("Number of points in track: %d", track.GetNumberOfPoints());
 		if(track.GetNumberOfPoints() == 2)
 		{
 			float fDistance = CalculateDistance(trackPoints);
@@ -50,7 +51,7 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap, bool a_bConvertChannelToLine)
 			
 //			FillDistanceHist(trackPoints);
 //			FillAngleHist(track.GetAngle());
-
+			//printf("\n---\nOnly two points\n---\n");
 			FillAngleDistanceHist(fDistance, track.GetAngle());
 		}
 
@@ -59,6 +60,7 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap, bool a_bConvertChannelToLine)
 
 		if(track.GetNumberOfPoints() > 2)
 		{	
+			FillChiSquareVsAngleHist(track.GetChiSquaredPerNDF(), track.GetAngle());
 			FillChiSquaredPerNDFHist(track.GetChiSquaredPerNDF());
 		}
 	//	printf("%s\n", sLogMessage.c_str());
@@ -69,8 +71,38 @@ void TrackMonitor::GotEvent(HitMap_t& a_hitMap, bool a_bConvertChannelToLine)
 	m_pCanvasAngularDistribution->Update();
 	m_pCanvas2DHist->Update();
 	m_pCanvasChisquare->Update();
+	m_pCanvasAvgChiSquareVsAngle->Update();
 	
 
+}
+
+void TrackMonitor::FillChiSquareVsAngleHist(float a_fChiSquare, float a_fAngle)
+{
+	m_pCanvasAvgChiSquareVsAngle->cd();
+	int iBinIndexOfAngle = m_pAngleHistFor3PointTracks->FindFixBin(a_fAngle);
+	if (iBinIndexOfAngle != (m_pAngleHistFor3PointTracks->GetXaxis()->GetLast() + 1))
+	{
+		int iNumberOfEntriesForAngle = m_pAngleHistFor3PointTracks->GetBinContent(iBinIndexOfAngle);
+		int iAvgChiSquareBinIndex = m_pAvgChiSquareHistVsAngle->FindFixBin(a_fAngle);
+		float fAverageChiSquareForAngle = m_pAvgChiSquareHistVsAngle->GetBinContent(iAvgChiSquareBinIndex);
+		float fNewAverageValue = (fAverageChiSquareForAngle * iNumberOfEntriesForAngle + a_fChiSquare) / (iNumberOfEntriesForAngle + 1);
+		printf("\nchisquare:%f, angle: %f, Bin: %d, num. of entries: %d, chi square bin: %d, avg chi square value: %f, new average value: %f\n", a_fChiSquare, a_fAngle, iBinIndexOfAngle, iNumberOfEntriesForAngle, iAvgChiSquareBinIndex, fAverageChiSquareForAngle, fNewAverageValue);
+		m_pAvgChiSquareHistVsAngle->SetBinContent(iAvgChiSquareBinIndex, fNewAverageValue);
+	}
+	else
+	{
+		
+		printf("\nNEW chisquare:%f, angle: %f\n", a_fChiSquare, a_fAngle);
+		m_pAvgChiSquareHistVsAngle->Fill(a_fAngle, a_fChiSquare);
+	}
+	
+	m_pAngleHistFor3PointTracks->Fill(a_fAngle);
+//	m_pAngleHistFor3PointTracks->SetCanExtend(TH1::kXaxis);
+
+/*	m_pAngleHistFor3PointTracks->Draw("E1");
+	m_pAngleHistFor3PointTracks->SetCanExtend(TH1::kXaxis);*/
+	m_pAvgChiSquareHistVsAngle->Draw("E1");
+//	m_pAvgChiSquareHistVsAngle->SetCanExtend(TH1::kXaxis);
 }
 
 float TrackMonitor::CalculateDistance(std::vector<std::pair<int, int> > a_points)
@@ -186,6 +218,7 @@ void TrackMonitor::InitGraphics()
 	m_pCanvasAngularDistribution = std::unique_ptr<TCanvas>(new TCanvas("TracksAngularDistribution", "Tracks Angular Distribution", 800, 600));
 	m_pCanvas2DHist = std::unique_ptr<TCanvas>(new TCanvas("Tracks2DHist", "2-Point Tracks Angular Distribution and Distance Between Points", 800, 600));
 	m_pCanvasChisquare = std::unique_ptr<TCanvas>(new TCanvas("TrackChiSquare", "Chi Square/NDF of 3 and 4 Point Tracks", 800, 600));
+	m_pCanvasAvgChiSquareVsAngle = std::unique_ptr<TCanvas>(new TCanvas("AvgChiSquare", "Average Chi Square vs. Angle", 800, 600));
 
 //	m_pCanvas->Divide(3);
 
@@ -199,14 +232,14 @@ void TrackMonitor::InitGraphics()
 	m_pDistanceHist->GetXaxis()->SetTitle("Distance between points (mm)");
 	m_pDistanceHist->GetXaxis()->CenterTitle();*/
 
-	m_pDistanceAngleHist = new TH2F("angle_distance", "2-Point Tracks Angular Distribution and Distance Between Points", 100, 0, 0, 100, 0, 0);
+	m_pDistanceAngleHist = new TH2F("angle_distance", "", 100, 0, 0, 100, 0, 0);
 	m_pDistanceAngleHist->GetYaxis()->SetTitle("Angle (radians)");
 	m_pDistanceAngleHist->GetYaxis()->CenterTitle();
-	m_pDistanceAngleHist->GetYaxis()->SetTitleOffset(2);
+	m_pDistanceAngleHist->GetYaxis()->SetTitleOffset(1.4);
 	
 	m_pDistanceAngleHist->GetXaxis()->SetTitle("Distance Between Points (mm)");
 	m_pDistanceAngleHist->GetXaxis()->CenterTitle();
-	m_pDistanceAngleHist->GetXaxis()->SetTitleOffset(2);
+	m_pDistanceAngleHist->GetXaxis()->SetTitleOffset(1.2);
 
 	m_pAngleHist->SetFillColor(49);
 
@@ -215,5 +248,14 @@ void TrackMonitor::InitGraphics()
 	m_pChiSquaredPerNDFHist->GetXaxis()->CenterTitle();
 
 	m_pChiSquaredPerNDFHist->SetFillColor(49);
+
+	m_pAvgChiSquareHistVsAngle = new TH1F("AvgChiSquarePerNDFVsAngle", "Avg. Chi Square/NDF vs. Angle", 100, -0.55, 0.55);
+	m_pAvgChiSquareHistVsAngle->GetYaxis()->SetTitle("Average Chi Square/NDF");
+	m_pAvgChiSquareHistVsAngle->GetYaxis()->CenterTitle();
+	m_pAvgChiSquareHistVsAngle->GetXaxis()->SetTitle("Angle");
+	m_pAvgChiSquareHistVsAngle->GetXaxis()->CenterTitle();
+	m_pAvgChiSquareHistVsAngle->SetFillColor(49);
+
+	m_pAngleHistFor3PointTracks = new TH1F("AngleHistFor3PointTracks", "", 100, -0.55, 0.55);
 }
 

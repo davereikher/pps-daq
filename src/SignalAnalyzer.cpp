@@ -561,7 +561,7 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 	}
 	//All these require DC offset zeroing (normalization)
 	if ((m_iFlags & AnalysisFlags::EPanelHitMonitor) || (m_iFlags & AnalysisFlags::EPanelTimingMonitor) || (m_iFlags & AnalysisFlags::ETrackMonitor) || (m_iFlags & AnalysisFlags::ECountPanelsWithPrimaryPulse) || 
-			(m_iFlags & AnalysisFlags::EPanelDegradationMonitor))
+			(m_iFlags & AnalysisFlags::EPanelDegradationMonitor) || (m_iFlags & AnalysisFlags::EPulseMonitor))
 	{
 		bool bEventEmpty = false;
 
@@ -611,9 +611,14 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 					{
 						mSignalVector.push_back(m_markers.m_vChannelsEdgeAndMinimum[iChannel]);
 					}
+					if (m_iFlags & AnalysisFlags::EPanelDegradationMonitor)
+					{
+						m_vpPanelDegradationMonitors[i]->GotTrigger(a_timeStamp);
+					}
+
 				}
 
-				if((m_iFlags & AnalysisFlags::EPanelTimingMonitor) || (m_iFlags & AnalysisFlags::EPanelDegradationMonitor))
+				if(m_iFlags & AnalysisFlags::EPanelTimingMonitor)
 				{
 //					printf("TIMING MONITOR\n");
 					DataPoint p = FindTriggerTime(vNormalizedChannels);
@@ -626,16 +631,11 @@ void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels
 	 						cnt++;
 						}*/
 //						printf("iChannel: %d, pulse x = %f\n", iChannel,  std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX());
-						if(m_iFlags & AnalysisFlags::EPanelTimingMonitor)
+						if((m_iFlags & AnalysisFlags::EPanelTimingMonitor) && (iChannel != -1))
 						{
 							m_vpPanelTimingMonitors[i]->GotEvent(iChannel, std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX(), 
 								std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetY(), p.GetX());
 						}
-						if (m_iFlags & AnalysisFlags::EPanelDegradationMonitor)
-						{
-							m_vpPanelDegradationMonitors[i]->GotTrigger(a_timeStamp);
-						}
-
 					}
 				}
 			}

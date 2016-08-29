@@ -38,7 +38,6 @@ void PanelTimingMonitor::GotEvent(int a_iChannelNum, float a_fTimeOfPulseEdge, f
 			m_iFitCounter ++;
 		}
 	}
-	
 	m_vpLineHistograms[a_iChannelNum]->Fill(a_fTimeOfPulseEdge - a_fTriggerEdge);
 	m_vpLineHistograms[a_iChannelNum]->Draw();
 	m_vpLineHistograms[a_iChannelNum]->SetCanExtend(TH1::kXaxis);
@@ -47,7 +46,7 @@ void PanelTimingMonitor::GotEvent(int a_iChannelNum, float a_fTimeOfPulseEdge, f
 
 void PanelTimingMonitor::InitGraphics()
 {
-	printf("INITGRAPHICS\n");
+	printf("INITGRAPHICS panel timing\n");
 	
 	if(Configuration::Instance().ShouldFitTimingHistograms())
 	{
@@ -60,9 +59,9 @@ void PanelTimingMonitor::InitGraphics()
 	}
 
 	m_pCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_PanelTimingMonitor").c_str(), (std::string("Panel ") + m_sPanelName  + " Timing Monitor").c_str(), 800, 600));
-	m_pTimingHist = new TH1F((m_sPanelName + "TimingHist").c_str() , (std::string("Pan. ") + m_sPanelName + " Timing (Pulse-Trigger)").c_str(), 100, 0, 0);
+	m_pTimingHist = new TH1F((m_sPanelName + "TimingHist").c_str() , "Pulse-Trigger Interval", 100, 0, 0);
 	m_pTimingHist->SetFillColor(49);
-	m_pTimingHist->GetXaxis()->SetTitle("Time (ns)");
+	m_pTimingHist->GetXaxis()->SetTitle("Interval (ns)");
 	m_pTimingHist->GetXaxis()->CenterTitle();
 
 	m_pLineTimingCanvas = std::unique_ptr<TCanvas>(new TCanvas((m_sPanelName + "_LineTimingMonitor").c_str(), (std::string("Panel ") + m_sPanelName  + " Line Timing Monitor").c_str(), 800, 600));

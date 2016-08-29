@@ -13,10 +13,15 @@
 
 
 SimulationEngine::SimulationEngine(RandomTrackGenerator& a_rg):
-m_randomTrackGenerator(a_rg)
+m_randomTrackGenerator(a_rg),
+m_randomLine(1,8)
 {
 	InitGraphics();
 	InitObjects();
+
+	std::random_device r;
+	std::seed_seq seed{r(), r(), r(), r(), r(), r(), r()};
+	m_generator.seed(seed);
 }
 
 void SimulationEngine::InitGraphics()
@@ -47,6 +52,46 @@ void SimulationEngine::InitObjects()
 		PanelV2 panel(i);
 		m_mPanels[config.GetPanelMonteCarloName(i)] = panel;
 	}	
+}
+
+void SimulationEngine::SingleRun(int a_iTypeOfRun)
+{
+	switch (a_iTypeOfRun)
+	{
+		case EMIPTracks:
+		{
+			SingleRun();
+		}
+		break;
+		case ERandomPulses:
+		{
+			SingleRandomPulsesRun();
+		}
+		break;
+		default:
+		break;
+	}
+}
+
+void SimulationEngine::SingleRandomPulsesRun()
+{
+//This is done primarily to generate a chi^2/ndf distribution for 3-point tracks which originate from random pulses
+//TODO: This is quick and dirty code, and the amount of lines is fixed to 8. Generalize it, if needed.
+
+//printf("------------------------");
+	m_mResult.clear();
+	for(auto& it: m_mPanels)
+	{
+		int iRandomNumber = m_randomNumber(m_generator);
+//		printf("\nRandom Line: %d\n", iRandomLine);
+		if(iRandomNumber % 2)
+		{
+			int random_line =  m_randomLine(m_generator);
+//			printf("random line is %d", random_line);
+			m_mResult[it.first] = random_line;
+		}
+	}
+//printf("*****************************");
 }
 
 void SimulationEngine::SingleRun()

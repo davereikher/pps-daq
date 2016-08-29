@@ -24,6 +24,7 @@ public:
 	void FillAngleDistanceHist(float a_fDistance, float a_fAngle);
 	void FillChiSquaredPerNDFHist(float m_fChiSquaredPerNDF);
 	void FillDistanceHist(float a_fDistance);
+	void FillChiSquareVsAngleHist(float a_fChiSquare, float a_fAngle);
 	int GetMultiplicationFactor(int a_iLine1, int a_iPanelIndex1, int a_iLine2, int a_iPanelIndex2);
 	float CalculateDistance(std::vector<std::pair<int, int> > a_points);
 
@@ -33,8 +34,11 @@ private:
 	std::unique_ptr<TCanvas> m_pCanvasAngularDistribution;
 	std::unique_ptr<TCanvas> m_pCanvas2DHist;
 	std::unique_ptr<TCanvas> m_pCanvasChisquare;
+	std::unique_ptr<TCanvas> m_pCanvasAvgChiSquareVsAngle;
 	TH1* m_pAngleHist;
 	TH1* m_pChiSquaredPerNDFHist;
 	TH1* m_pDistanceHist;
 	TH2* m_pDistanceAngleHist;
+	TH1* m_pAngleHistFor3PointTracks;
+	TH1* m_pAvgChiSquareHistVsAngle;
 };

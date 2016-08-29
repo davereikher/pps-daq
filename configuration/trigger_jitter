@@ -1,53 +1,17 @@
 {
 	"panels": {
-		"E": {
+		"T": {
 
-			"channels": [0, 1, 2, 3, 4, 5, 6, 7],
-			"lines": [7, 8, 9, 10, 11, 12, 13, 14],
-			"pulse-threshold-volts": -0.13,
-			"edge-threshold-volts": -0.11,
+			"channels": [0],
+			"lines": [1],
+			"pulse-threshold-volts": -0.05,
+			"edge-threshold-volts": -0.05,
 			"pulse-start-amplitude-volts": 0.02,
 			"expected-pulse-width-ns": 3,
 			"min-edge-separation-ns": 3,
 			"max-edge-jitter-ns": 2,
 			"max-amplitude-jitter-volts": 0.1,
 			"index": 3
-		},
-		"C": {
-			"channels": [8, 9, 10, 11, 12, 13, 14, 15],
-			"lines": [7, 8, 9, 10, 11, 12, 13, 14],
-			"pulse-threshold-volts": -0.13,
-			"edge-threshold-volts": -0.11,
-			"pulse-start-amplitude-volts": 0.02,
-			"expected-pulse-width-ns": 3,
-			"min-edge-separation-ns": 3,
-			"max-edge-jitter-ns": 2,
-			"max-amplitude-jitter-volts": 0.1,
-			"index": 2
-		},
-		"H": {
-			"channels": [16, 17, 18, 19, 20, 21, 22, 23],
-			"lines": [7, 8, 9, 10, 11, 12, 13, 14],
-			"pulse-threshold-volts": -0.13,
-			"edge-threshold-volts": -0.11,
-			"pulse-start-amplitude-volts": 0.02,
-			"expected-pulse-width-ns": 3,
-			"min-edge-separation-ns": 3,
-			"max-edge-jitter-ns": 2,
-			"max-amplitude-jitter-volts": 0.1,
-			"index": 1
-		},
-		"B": {
-			"channels": [24, 25, 26, 27, 28, 29, 30, 31],
-			"lines": [7, 8, 9, 10, 11, 12, 13, 14],
-			"pulse-threshold-volts": -0.13,
-			"edge-threshold-volts": -0.11,
-			"pulse-start-amplitude-volts": 0.02,
-			"expected-pulse-width-ns": 3,
-			"min-edge-separation-ns": 3,
-			"max-edge-jitter-ns": 2,
-			"max-amplitude-jitter-volts": 0.1,
-			"index": 0
 		}
 	},
 	"volt-min": -0.5,
@@ -57,8 +21,8 @@
 	"idle-line-duration-fraction": 0.05,
 	"trigger-threshold-volts": -0.2,
 	"digitizer-resolution-bits": 4095,
-	"number-of-events-to-draw-after": 500,
-	"should-fit-timing-histograms": true,
+	"number-of-events-to-draw-after": 5,
+	"should-fit-timing-histograms": false,
 	"number-of-events-to-fit-after": 100,
 	"crystal-ball-alpha" : 0.46,
 	"crystal-ball-n": 15.67,
@@ -70,38 +34,15 @@
 	"normalize-channels": true,
 	"distance-between-panels-mm": 37,
 	"readout-line-pitch-mm": 2.54,
-	"image-folder-path": "/home/tgc/pps/figures",
-	"step":
-	{
-		"show-trigger-in-waveforms-step": true,
-		"use-separate-canvases-for-step": false,
-		"show-edge-threshold-marker": false,
-		"show-pulse-threshold-marker": false,
-		"tag-primary-pulse": true
-	
-	},
 	"monte-carlo":
 	{
-		"runs": 100000000, 
-		"tracks":
-		{
-			"global-rotation":
-			{
-				"axis":
-				{
-					"theta": 1.5708,
-					"phi": 0
-				},
-				"angle":0
-			}
-		},
 		"track-intersection-point-domain-rectangle": 
 		{
-			"length-x-mm": 1000,
-			"length-y-mm": 1000,
+			"length-x-mm": 300,
+			"length-y-mm": 300,
 			"center-x-mm": 0,
 			"center-y-mm": 0,
-			"center-z-mm": 175
+			"center-z-mm": 500
 		},
 		"scintillators":
 		{

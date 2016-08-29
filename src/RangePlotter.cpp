@@ -114,19 +114,22 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 				pMg->Add(pGr);
 				i++;
 			}
-			
-			int iNumOfSamples = a_channels[a_channels.size() - 1].size();
-			m_vpGraphPrecisionTrigger = new TGraph(iNumOfSamples);
-			std::vector<float> vTimeSeq = CommonUtils::GenerateTimeSequence(iNumOfSamples, m_fSamplingFreqGHz);
-			for (int counter = 0; counter < iNumOfSamples; counter++)
+
+			if(Configuration::Instance().ShowTriggerInWaveformsStep())
 			{
-				m_vpGraphPrecisionTrigger->SetPoint(counter, vTimeSeq[counter], TransformToVoltage(a_channels[a_channels.size() - 1][counter]));
+				int iNumOfSamples = a_channels[a_channels.size() - 1].size();
+				m_vpGraphPrecisionTrigger = new TGraph(iNumOfSamples);
+				std::vector<float> vTimeSeq = CommonUtils::GenerateTimeSequence(iNumOfSamples, m_fSamplingFreqGHz);
+				for (int counter = 0; counter < iNumOfSamples; counter++)
+				{
+					m_vpGraphPrecisionTrigger->SetPoint(counter, vTimeSeq[counter], TransformToVoltage(a_channels[a_channels.size() - 1][counter]));
+				}
+				
+				m_vpGraphPrecisionTrigger->SetName((m_sInstanceName + std::string("Pan_") + rangeIt.first + "_Trig").c_str());	
+				m_vpGraphPrecisionTrigger->SetTitle("Trigger");
+				legend->AddEntry(m_vpGraphPrecisionTrigger,"Trigger", "l");
+				pMg->Add(m_vpGraphPrecisionTrigger);
 			}
-			
-			m_vpGraphPrecisionTrigger->SetName((m_sInstanceName + std::string("Pan_") + rangeIt.first + "_Trig").c_str());	
-			m_vpGraphPrecisionTrigger->SetTitle("Trigger");
-			legend->AddEntry(m_vpGraphPrecisionTrigger,"Trigger", "l");
-			pMg->Add(m_vpGraphPrecisionTrigger);
 			
 			std::string sMultiGraphTitle = std::string("Panel ") + rangeIt.first;
 			pMg->SetTitle(sMultiGraphTitle.c_str());
@@ -192,7 +195,6 @@ float RangePlotter::TransformToVoltage(float a_fSample)
 
 void RangePlotter::AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::AnalysisMarkers& a_analysisMarkers)
 {
-
 	m_pCanvas->cd(a_iPanelIndex + 1);
 //	printf("pulse threshold: %f\n", a_analysisMarkers.GetPulseThreshold().Continuous());
 	TLine* pulseThresholdLine = new TLine(0, a_analysisMarkers.GetPulseThreshold().Continuous(), m_vpMultiGraph[a_iPanelIndex]->GetXaxis()->GetXmax(), a_analysisMarkers.GetPulseThreshold().Continuous());
@@ -225,13 +227,23 @@ void RangePlotter::AddAnalysisMarkers(int a_iPanelIndex, SignalAnalyzer::Analysi
 		i++;
 	}
 */
-	for (auto& it: a_analysisMarkers.m_vChannelsWithPulse)
-	{		
-		m_vpGraph[it]->SetLineWidth(3);
+	if (Configuration::Instance().TagPrimaryPulseStep())
+	{
+		for (auto& it: a_analysisMarkers.m_vChannelsWithPulse)
+		{		
+			m_vpGraph[it]->SetLineWidth(3);
+		}
 	}
 
-	pulseThresholdLine->Draw();
-	edgeThresholdLine->Draw();
+	if (Configuration::Instance().ShowEdgeThresholdMarkerStep())
+	{
+		pulseThresholdLine->Draw();
+	}
+	
+	if (Configuration::Instance().ShowPulseThresholdMarkerStep())
+	{
+		edgeThresholdLine->Draw();
+	}
 
 	m_pCanvas->Update();
 }

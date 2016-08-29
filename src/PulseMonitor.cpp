@@ -3,7 +3,8 @@
 #include "Logger.h"
 
 PulseMonitor::PulseMonitor()
-{}
+{
+}
 
 void PulseMonitor::GotEvent(SignalVector_t& a_signalMap)
 {
@@ -12,11 +13,17 @@ void PulseMonitor::GotEvent(SignalVector_t& a_signalMap)
 	{
 		return;
 	}
+	
+	if(m_pPulseTimingCanvas == NULL)
+	{
+		InitGraphics();
+	}
 
 	double fLeadingEdge1 = std::get<EDGE_THRES_INDEX>(a_signalMap[0]).GetX();
 	double fLeadingEdge2 = std::get<EDGE_THRES_INDEX>(a_signalMap[1]).GetX();
 
 	FillPulseTimingHist(fLeadingEdge1 - fLeadingEdge2);
+	m_pPulseTimingCanvas->Update();
 }
 
 void PulseMonitor::FillPulseTimingHist(float a_fTimeDeltaNs)
