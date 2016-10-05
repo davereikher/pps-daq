@@ -123,3 +123,56 @@ int Proprietary1742Utils::TurnOnFastTriggerDigitizing(int a_iHandle)
 	}
 	return 0;
 }
+
+int Proprietary1742Utils::GetAcquisitionControl(int a_iHandle, unsigned int& a_iAcqControl)
+{
+//	unsigned int data = 0;
+	int ret = CAEN_DGTZ_ReadRegister(a_iHandle, CAEN_DGTZ_ACQ_CONTROL_ADD, &a_iAcqControl);
+	printf("\nAcq. control: %d", a_iAcqControl);
+	if (ret != 0)
+	{
+		return ret;
+	}
+}
+
+int Proprietary1742Utils::SetAcquisitionControl(int a_iHandle)
+{
+	unsigned int data = 0;
+	unsigned int read_data = 0;
+	int ret = CAEN_DGTZ_ReadRegister(a_iHandle, CAEN_DGTZ_ACQ_CONTROL_ADD, &read_data);
+	if (ret != 0)
+	{
+		return ret;
+	}
+	printf("acq control: %x", read_data);
+
+	data = read_data | 0x00000020;
+	
+	ret = CAEN_DGTZ_WriteRegister(a_iHandle, CAEN_DGTZ_BROAD_CH_CTRL_ADD, data);
+	if (ret != 0)
+	{
+		return ret;
+	}
+	return 0;
+}
+
+int Proprietary1742Utils::SetVMEControl(int a_iHandle)
+{
+	unsigned int data = 0;
+	unsigned int read_data = 0;
+	int ret = CAEN_DGTZ_ReadRegister(a_iHandle, CAEN_DGTZ_VME_CONTROL_ADD, &read_data);
+	if (ret != 0)
+	{
+		return ret;
+	}
+	printf("VME control: %x\n", read_data);
+
+	data = read_data & 0x00000010;
+	
+	ret = CAEN_DGTZ_WriteRegister(a_iHandle, CAEN_DGTZ_VME_CONTROL_ADD, data);
+	if (ret != 0)
+	{
+		return ret;
+	}
+	return 0;
+}

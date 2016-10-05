@@ -8,7 +8,6 @@
 #include "keyb.h"
 
 #define TOTAL_NUMBER_OF_CHANNELS 32
-std::vector <std::vector<int> > gvPanelChannelRanges;
 static SignalAnalyzer::AnalysisMarkers m_markers;
 
 //using std;
@@ -31,10 +30,7 @@ Constructor.
 */
 SignalAnalyzer::SignalAnalyzer():
 m_iFlags(0),
-m_bStopAnalysisThread(false),
-m_pTriggerTimingMonitor(new TriggerTimingMonitor(milliseconds(Configuration::Instance().GetTriggerRateAveragingDurationSecs()))),
-m_pTrackMonitor(new TrackMonitor()),
-m_pPulseMonitor(new PulseMonitor())
+m_bStopAnalysisThread(false)
 {
 	float fVoltMin = Configuration::Instance().GetVoltMin();
 	float fVoltMax = Configuration::Instance().GetVoltMax();
@@ -47,22 +43,7 @@ m_pPulseMonitor(new PulseMonitor())
 	m_markers.ConfigureVoltageConversion(fVoltMin,fVoltMax, iDigitizerRes);
 	m_markers.ConfigureTimeConversion(Configuration::Instance().GetSamplingFreqGHz());
 	m_markers.SetTriggerThreshold(Configuration::Instance().GetTriggerThresholdVolts());
-	m_markers.SetZero(fVoltMin, fVoltMax, iDigitizerRes);
-	
-	m_vRanges = Configuration::Instance().GetRanges();
-	
-	for (auto it : m_vRanges)
-	{
-		printf("Pushing P.S. for %s\n", it.first.c_str());
-		m_vpPanelMonitors.push_back(std::unique_ptr<PanelMonitor>(new PanelMonitor(it.first)));
-		m_vpPanelDegradationMonitors.push_back(std::unique_ptr<PanelDegradationMonitor>(new PanelDegradationMonitor(Configuration::Instance().GetPanelDegradationAveragingDurationSecs(), it.first)));
-	}
-	for (auto it : m_vRanges)
-	{
-		m_vpPanelTimingMonitors.push_back(std::unique_ptr<PanelTimingMonitor>(new PanelTimingMonitor(it.first)));
-	}
-
-
+	m_markers.SetZero(fVoltMin, fVoltMax, iDigitizerRes);	
 }
 
 void SignalAnalyzer::Configure(std::string a_sPanelName)
@@ -287,13 +268,6 @@ void SignalAnalyzer::FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels,
 		
 }
 
-void SignalAnalyzer::Flush()
-{
-	if(m_iFlags & ETriggerTimingMonitor)
-	{
-		m_pTriggerTimingMonitor->Flush();
-	}
-}
 
 /*
 The purpose of this function is to compensate for small, constant (between event to event) DC offsets in the channels. These offsets can come, for example, from small differences in the resistances inside the attenuators used to connect cables to the digitizer. After normalization, all lines should have 0 DC offset.
@@ -543,121 +517,6 @@ void SignalAnalyzer::MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer)
 	}
 }
 
-/**
-Returns the number of panels with primary pulses in an acquisition event if the flag AnalysisFlags::ECountPanelsWithPrimaryPulse is set. This is for the 'compression' utility, which goes over the raw root tree and creates a "compressed" root tree, containing only interesting events. This function and flag should be set when running in synchronous mode only (not together with the flag AnalysisFlags::EAsynchronous)!
-@return Number of panels containing pulses
-*/
-int SignalAnalyzer::GetLastNumberOfPanelsWithPrimaryPulse()
-{
-	return m_iNumberOfPanelsWithPrimaryPulse;
-}
-
-void SignalAnalyzer::DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels)
-{
-	m_iNumberOfPanelsWithPrimaryPulse= 0;
-	if (m_iFlags & AnalysisFlags::ETriggerTimingMonitor)
-	{
-		m_pTriggerTimingMonitor->GotTrigger(a_timeStamp);
-	}
-	//All these require DC offset zeroing (normalization)
-	if ((m_iFlags & AnalysisFlags::EPanelHitMonitor) || (m_iFlags & AnalysisFlags::EPanelTimingMonitor) || (m_iFlags & AnalysisFlags::ETrackMonitor) || (m_iFlags & AnalysisFlags::ECountPanelsWithPrimaryPulse) || 
-			(m_iFlags & AnalysisFlags::EPanelDegradationMonitor) || (m_iFlags & AnalysisFlags::EPulseMonitor))
-	{
-		bool bEventEmpty = false;
-
-		if(a_vChannels.size() == 1)
-		{
-			if(a_vChannels[0].size() == 1)
-			{
-				bEventEmpty = true;
-			}
-		}
-		
-		Channels_t vNormalizedChannels;
-		if(!bEventEmpty)
-		{
-			 vNormalizedChannels = NormalizeChannels(a_vChannels);
-		}
-		HitMap_t mPanelAndLine;
-		SignalVector_t mSignalVector;
-		int i = 0;
-		for (auto it: m_vRanges)
-		{
-			if (!bEventEmpty)
-			{
-				FindOriginalPulseInChannelRange(vNormalizedChannels, it.first, it.second);
-				if (m_iFlags & AnalysisFlags::EPanelHitMonitor)
-				{
-					m_vpPanelMonitors[i]->GotEvent(a_timeStamp, m_markers.m_vChannelsWithPulse);
-				}
-				if((m_iFlags & AnalysisFlags::ETrackMonitor) || (m_iFlags & AnalysisFlags::ECountPanelsWithPrimaryPulse))
-				{
-					if(m_markers.m_vChannelsWithPulse.size() == 1)
-					{
-						mPanelAndLine[it.first] = m_markers.m_vChannelsWithPulse[0];
-						m_iNumberOfPanelsWithPrimaryPulse ++;
-					}
-					else
-					{
-						mPanelAndLine[it.first] = NO_SIGNAL_ON_PANEL;
-					}
-				}
-
-				int iChannel = -1;
-				if (m_markers.m_vChannelsWithPulse.size() == 1)
-				{
-					iChannel = m_markers.m_vChannelsWithPulse[0];
-					if (m_iFlags & AnalysisFlags::EPulseMonitor)
-					{
-						mSignalVector.push_back(m_markers.m_vChannelsEdgeAndMinimum[iChannel]);
-					}
-					if (m_iFlags & AnalysisFlags::EPanelDegradationMonitor)
-					{
-						m_vpPanelDegradationMonitors[i]->GotTrigger(a_timeStamp);
-					}
-
-				}
-
-				if(m_iFlags & AnalysisFlags::EPanelTimingMonitor)
-				{
-//					printf("TIMING MONITOR\n");
-					DataPoint p = FindTriggerTime(vNormalizedChannels);
-					if(p.Exists())
-					{
-/*						int cnt = 0;
-						for (auto& it: m_markers.m_vChannelsEdgeAndMinimum)
-						{
-							printf("channel %d, edge at %f\n", cnt, std::get<EDGE_THRES_INDEX>(it).GetX());
-	 						cnt++;
-						}*/
-//						printf("iChannel: %d, pulse x = %f\n", iChannel,  std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX());
-						if((m_iFlags & AnalysisFlags::EPanelTimingMonitor) && (iChannel != -1))
-						{
-							m_vpPanelTimingMonitors[i]->GotEvent(iChannel, std::get<EDGE_THRES_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetX(), 
-								std::get<MIN_PULSE_INDEX>(m_markers.m_vChannelsEdgeAndMinimum[iChannel]).GetY(), p.GetX());
-						}
-					}
-				}
-			}
-			i++;
-		}
-		if (m_iFlags & AnalysisFlags::ETrackMonitor)
-		{
-			m_pTrackMonitor->GotEvent(mPanelAndLine);
-		}
-		if (m_iFlags & AnalysisFlags::EPulseMonitor)
-		{
-			m_pPulseMonitor->GotEvent(mSignalVector);
-		}
-	}
-
-	ProcessEvents();
-}
-
-void SignalAnalyzer::AnalyzeTrack(HitMap_t& a_panelAndLine)
-{
-	m_pTrackMonitor->GotEvent(a_panelAndLine, false);
-}
 
 DataPoint SignalAnalyzer::FindTriggerTime(Channels_t& a_vAllChannels)
 {
@@ -705,9 +564,7 @@ void SignalAnalyzer::Stop()
 Set which actions must be performed during analysis
 
 @param: a_iFlags. Can take the following values:
-	AVG_TRIG_RATE - every X seconds, plot the average trigger rate.
-	AVG_PANEL_COINCIDENCE_RATES - every Y seconds, plot the average rate of coincidence for each panel with the trigger, on a split canvas.
-	AVG_TRACK_DETECTION_RATE - every Z seconds, plot 
+	AnalysisFlags::EAsynchronous - runs the DoAnalyze() method asynchronously, in a seprate thread. This is good for performing real-time analysis during acquisition
 */
 void SignalAnalyzer::SetFlags(int a_iFlags)
 {
@@ -727,3 +584,10 @@ void SignalAnalyzer::Analyze(nanoseconds a_eventTimeFromStart, Channels_t& a_vCh
 	}
 }
 
+/**
+Flush everything to monitors after analysis. This is used when we quit the application and some analysis results are still not flushed to the monitors. Default implementation is empty.
+*/
+void SignalAnalyzer::Flush()
+{
+	//Default implementation
+}

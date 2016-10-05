@@ -175,8 +175,8 @@ void DigitizerManager::InitAndConfigure()
 	ASSERT_SUCCESS(CAEN_DGTZ_SetExtTriggerInputMode(m_iHandle, CAEN_DGTZ_TRGMODE_ACQ_ONLY), "Failed to set external trigger mode");
 	ASSERT_SUCCESS(CAEN_DGTZ_SetIOLevel(m_iHandle, CAEN_DGTZ_IOLevel_NIM), "Failed to set IO level to NIM");	
 	ASSERT_SUCCESS(CAEN_DGTZ_SetSWTriggerMode(m_iHandle,CAEN_DGTZ_TRGMODE_DISABLED), "Failed to set SW trigger mode to disabled")
-	ASSERT_SUCCESS(CAEN_DGTZ_SetMaxNumEventsBLT(m_iHandle,3), "Failed to set max num of events to be transferred");                           
-	ASSERT_SUCCESS(CAEN_DGTZ_SetAcquisitionMode(m_iHandle,CAEN_DGTZ_FIRST_TRG_CONTROLLED), "Failed to set acquisition mode");	
+	ASSERT_SUCCESS(CAEN_DGTZ_SetMaxNumEventsBLT(m_iHandle,1), "Failed to set max num of events to be transferred");                           
+	ASSERT_SUCCESS(CAEN_DGTZ_SetAcquisitionMode(m_iHandle,CAEN_DGTZ_SW_CONTROLLED), "Failed to set acquisition mode");	
 	int mode = -1;
 	CAEN_DGTZ_GetFastTriggerDigitizing(m_iHandle, (CAEN_DGTZ_EnaDis_t*)&mode);
 	printf("Digitizing before: %d\n", mode);
@@ -188,6 +188,15 @@ void DigitizerManager::InitAndConfigure()
 	uint32_t size = 0; //dummy variable. Not used.
 	ASSERT_SUCCESS(CAEN_DGTZ_MallocReadoutBuffer(m_iHandle,&m_pBuffer,&size), "Failed to allocate readout buffer");
 	ASSERT_SUCCESS(CAEN_DGTZ_AllocateEvent(m_iHandle, (void**)&m_pEvent), "Failed to allocate event");
+//	ASSERT_SUCCESS(Proprietary1742Utils::SetVMEControl(m_iHandle), "Failed to set VME control");
+	uint32_t iAcqControl = -1;
+//	ASSERT_SUCCESS(Proprietary1742Utils::GetAcquisitionControl(m_iHandle, iAcqControl), "Failed to get acquisition control");
+//printf("acquisition control before: %d\n", iAcqControl);
+//	ASSERT_SUCCESS(Proprietary1742Utils::SetAcquisitionControl(m_iHandle), "Failed to set acquisition control");
+	printf("\n done initializing\n");
+//	ASSERT_SUCCESS(Proprietary1742Utils::GetAcquisitionControl(m_iHandle, iAcqControl), "Failed to get acquisition control");
+//printf("acquisition control after: %d\n", iAcqControl);
+	//ASSERT_SUCCESS(CAEN_DGTZ_DisableEventAlignedReadout(m_iHandle), "Failed to disable aligned readout");
 
 /*	m_eventHandler.SetEventInfoAddress(&m_eventInfo);
 	m_eventHandler.SetEventAddress(m_pEvent);*/
@@ -196,6 +205,7 @@ void DigitizerManager::InitAndConfigure()
 void DigitizerManager::Start()
 {
 	ASSERT_SUCCESS(CAEN_DGTZ_SWStartAcquisition(m_iHandle), "Failed to start acquiring samples");
+	printf("\n111\n");
 }
 
 int DigitizerManager::Acquire()
@@ -205,13 +215,15 @@ int DigitizerManager::Acquire()
 	uint32_t iNumEvents;
 
 	ASSERT_SUCCESS(CAEN_DGTZ_ReadData(m_iHandle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, m_pBuffer,&bsize), "Failed to read data");
+//	ASSERT_SUCCESS(CAEN_DGTZ_ReadData(m_iHandle, CAEN_DGTZ_POLLING_MBLT, m_pBuffer,&bsize), "Failed to read data");
 
+//	printf("Number of events: %d, buffer size: %d\n", iNumEvents, bsize);
 	ASSERT_SUCCESS(CAEN_DGTZ_GetNumEvents(m_iHandle,m_pBuffer,bsize,&iNumEvents), "Failed to get number of events");
 
 	for (uint32_t i=0; i < iNumEvents; i++) {
 		/* Get the Infos and pointer to the event */
 		ASSERT_SUCCESS(CAEN_DGTZ_GetEventInfo(m_iHandle,m_pBuffer,bsize,i,&m_eventInfo,&evtptr), "Failed to get event info");
-		//printf("Time tag: %08x, %u\n",m_eventInfo.TriggerTimeTag & 0x7FFFFFFF,  m_eventInfo.TriggerTimeTag & 0x7FFFFFFF);	
+//		printf("Time tag: %08x, %u\n",m_eventInfo.TriggerTimeTag & 0x7FFFFFFF,  m_eventInfo.TriggerTimeTag & 0x7FFFFFFF);	
 		ASSERT_SUCCESS(CAEN_DGTZ_DecodeEvent(m_iHandle, m_pBuffer, (void**)&m_pEvent), "Failed to decode event");
 		nanoseconds secs = TimeManager::ConvertPrecisionTime(m_eventInfo.TriggerTimeTag);
 //		printf("TIME TAG: %d, in nano: %llu, in seconds: %f\n", m_eventInfo.TriggerTimeTag, secs.count(), secs.count() / (1e9));

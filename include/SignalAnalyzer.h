@@ -21,6 +21,7 @@
 #define NO_PULSE_EDGE INT_MAX
 #define NO_PULSE_MINIMUM_VALUE FLT_MAX
 #define NO_PULSE_MIN_VALUE_LOCATION INT_MAX
+#define TOTAL_NUMBER_OF_CHANNELS 32
 
 using namespace std::chrono;
 
@@ -101,14 +102,7 @@ public:
 
 	enum AnalysisFlags
 	{
-		EAsynchronous = 0x00000001,
-		ETriggerTimingMonitor = 0x00000002,
-		EPanelHitMonitor = 0x00000004,
-		EPanelTimingMonitor = 0x00000008,
-		ETrackMonitor = 0x00000010,
-		ECountPanelsWithPrimaryPulse = 0x00000020,
-		EPanelDegradationMonitor = 0x00000040,
-		EPulseMonitor = 0x00000080
+		EAsynchronous = 0x00000001
 	};
 public:
 	SignalAnalyzer();
@@ -116,24 +110,22 @@ public:
 	void FindOriginalPulseInChannelRange(Channels_t& a_vAllChannels, std::string a_sPanelName, std::vector<int>& a_vRange);
 	DataPoint FindTriggerTime(Channels_t& a_vAllChannels);
 	void Analyze(nanoseconds a_eventTimeFromStart, Channels_t& a_vChannels);
-
+	virtual void Flush();
 	AnalysisMarkers& GetAnalysisMarkers();
 	void Start();
 	void Stop();
 	void SetFlags(int a_iFlags);
-	void Flush();
 	float FindOffsetVoltage(std::vector<float> a_vSamples, int a_iChannelNum);
 	Channels_t NormalizeChannels(Channels_t& a_vChannels);
 	void ProcessEvents();
 	void Configure(std::string a_sPanelName);
-	int GetLastNumberOfPanelsWithPrimaryPulse();
 	void AnalyzeTrack(HitMap_t& a_panelAndLine);
 
 private:
 	static void MainAnalysisThreadFunc(SignalAnalyzer* a_pSignalAnalyzer);
-	void DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels);
+	virtual void DoAnalysis(nanoseconds a_timeStamp, Channels_t& a_vChannels) = 0;
 
-private:
+protected:
 	AnalysisMarkers m_markers;
 	Range_t m_vRanges;
 	float m_fTimeDivisionNs;
@@ -144,11 +136,4 @@ private:
 	std::thread m_analysisThread;
 	std::mutex m_mutex;
 	Queue<std::pair<nanoseconds, Channels_t> > m_queue;
-	std::unique_ptr<TriggerTimingMonitor> m_pTriggerTimingMonitor;
-	std::vector<std::unique_ptr<PanelMonitor> > m_vpPanelMonitors;
-	std::vector<std::unique_ptr<PanelDegradationMonitor> > m_vpPanelDegradationMonitors;
-	std::vector<std::unique_ptr<PanelTimingMonitor> > m_vpPanelTimingMonitors;
-	std::unique_ptr<TrackMonitor> m_pTrackMonitor;
-	std::unique_ptr<PulseMonitor> m_pPulseMonitor;
-	int m_iNumberOfPanelsWithPrimaryPulse;
 };

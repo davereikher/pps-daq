@@ -161,10 +161,10 @@ int main(int argc, char* argv[])
 
 //	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelDegradationMonitor | SignalAnalyzer::ETriggerTimingMonitor | SignalAnalyzer::ETrackMonitor |SignalAnalyzer::EPanelHitMonitor| SignalAnalyzer::EPanelTimingMonitor);
 //	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelTimingMonitor);
-	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelHitMonitor);
+//	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelHitMonitor);
 //	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelDegradationMonitor);
 //	sigAnalyzer.SetFlags(SignalAnalyzer::ETriggerTimingMonitor);
-//	sigAnalyzer.SetFlags(SignalAnalyzer::ETrackMonitor);
+	sigAnalyzer.SetFlags(SignalAnalyzer::ETrackMonitor);
 
 
 	sigAnalyzer.Start();

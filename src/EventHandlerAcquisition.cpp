@@ -6,7 +6,6 @@
 #include "TSystem.h"
 #include "TInterpreter.h"
 #include "time.h"
-#include "SignalAnalyzer.h"
 #include "RangePlotter.h"
 #include "Configuration.h"
 #include "Logger.h"
@@ -23,14 +22,14 @@ m_pRootFile(new TFile(a_sRootFileName.c_str(), "RECREATE","", 3)),
 m_pRootTree(new TTree(TREE_NAME, TREE_DESCRIPTION)),
 m_bEventAddrSet(false),
 m_bEventInfoSet(false),
-m_pSignalAnalyzer(new SignalAnalyzer()),
+m_pSignalAnalyzer(new SignalAnalyzerTracker()),
 m_iEventCounter(0)
 {
 	m_pRootTree->Branch("Event", &m_vChannels);
 	m_pRootTree->Branch("ArrivalTimeMSB", &m_iNowMSB);
 	m_pRootTree->Branch("ArrivalTimeLSB", &m_iNowLSB);
 
-	m_pSignalAnalyzer->SetFlags(SignalAnalyzer::ETriggerTimingMonitor | SignalAnalyzer::EAsynchronous | SignalAnalyzer::EPanelHitMonitor);
+	m_pSignalAnalyzer->SetFlags(SignalAnalyzerTracker::ETriggerTimingMonitor | SignalAnalyzer::EAsynchronous | SignalAnalyzerTracker::EPanelHitMonitor | SignalAnalyzerTracker::EPanelDegradationMonitor);
 	m_pSignalAnalyzer->Start();
 }
 

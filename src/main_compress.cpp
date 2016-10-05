@@ -3,7 +3,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include <unistd.h>
-#include "SignalAnalyzer.h"
+#include "SignalAnalyzerTracker.h"
 #include "CommonUtils.h"
 #include "Configuration.h"
 #include "Types.h"
@@ -81,9 +81,9 @@ int main(int argc, char* argv[])
 /*	Logger::Instance().Init(argv[3]);
 	Logger::Instance().AddNecessaryMessage(Configuration::Instance().GetDump());*/
 
-	SignalAnalyzer sigAnalyzer;
+	SignalAnalyzerTracker sigAnalyzer;
 
-	sigAnalyzer.SetFlags(SignalAnalyzer::AnalysisFlags::ECountPanelsWithPrimaryPulse);
+	sigAnalyzer.SetFlags(SignalAnalyzerTracker::AnalysisFlagsTracker::ECountPanelsWithPrimaryPulse);
 
 	sigAnalyzer.Start();
 	

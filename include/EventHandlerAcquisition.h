@@ -9,7 +9,8 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "Queue.h"
-#include "SignalAnalyzer.h"
+#include "SignalAnalyzerTracker.h"
+
 
 using namespace std;
 
@@ -34,7 +35,7 @@ private:
 	unsigned int m_iNowLSB;
 	bool m_bEventAddrSet;
 	bool m_bEventInfoSet;
-	std::unique_ptr<SignalAnalyzer> m_pSignalAnalyzer;
+	std::unique_ptr<SignalAnalyzerTracker> m_pSignalAnalyzer;
 	int m_iEventCounter;
 };
 
