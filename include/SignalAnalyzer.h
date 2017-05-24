@@ -10,6 +10,8 @@
 #include "Queue.h"
 #include "PanelMonitor.h"
 #include "TriggerTimingMonitor.h"
+#include "ChannelMonitor.h"
+#include "ChannelCountRateMonitor.h"
 #include "PanelMonitor.h"
 #include "PanelTimingMonitor.h"
 #include "TrackMonitor.h"

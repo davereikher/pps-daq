@@ -85,8 +85,10 @@ public:
 	bool ShowEdgeThresholdMarkerStep();
 	bool ShowPulseThresholdMarkerStep();
 	bool TagPrimaryPulseStep();
-
-
+	int GetRateTimer();
+	float GetAfterPulse_timer();
+	int GetApplied_Voltage();
+	
 	std::string GetDump();
 
 private:

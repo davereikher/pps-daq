@@ -3,6 +3,7 @@
 #include "DigitizerManager.h"
 #include "EventHandlerAcquisition.h"
 #include "Exception.h"
+#include "TROOT.h"
 #include "keyb.h"
 #include "TApplication.h"
 #include "Configuration.h"
@@ -26,6 +27,33 @@ int checkCommand() {
 void Usage(char* a_pProcName)
 {
 	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to out folder> <description (surrounded by quotes)>" << std::endl;
+}
+
+void SaveAllCanvases()
+{
+	std::string sImageFolderPath = Configuration::Instance().GetImageFolderPath();
+	if(sImageFolderPath[sImageFolderPath.size() - 1] != '/')
+	{
+		sImageFolderPath += "/";
+	}
+	TCanvas *c = 0;
+	TIter next(gROOT->GetListOfCanvases());
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+	time (&rawtime);
+	timeinfo = localtime(&rawtime);
+	strftime(buffer,80,"-%F-%I:%M:%S",timeinfo);
+
+	while ((c = (TCanvas *)next()))
+	{
+		std::string sFileName = sImageFolderPath;
+	
+		sFileName += c->GetName();
+		sFileName += buffer;
+		sFileName += ".png";
+		c->Print(sFileName.c_str(), "png");
+	}
 }
 
 
@@ -103,6 +131,12 @@ int main(int argc, char** argv)
 		{
 			c = checkCommand();
 			eventHandler.ProcessEvents();
+			if( c == 1 )
+			{
+				printf("Saving all canvases");
+				SaveAllCanvases();
+			}
+
 		}while (c != 1);
 	}
 	catch(ExceptionBase& ex)

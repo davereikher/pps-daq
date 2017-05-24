@@ -2,10 +2,10 @@
 	"panels": {
 		"E": {
 
-			"channels": [0],
-			"lines": [0],
-			"pulse-threshold-volts": -0.13,
-			"edge-threshold-volts": -0.11,
+			"channels": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+			"lines": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+			"pulse-threshold-volts": -0.08,
+			"edge-threshold-volts": -0.06,
 			"pulse-start-amplitude-volts": 0.02,
 			"expected-pulse-width-ns": 3,
 			"min-edge-separation-ns": 3,
@@ -29,12 +29,15 @@
 	"crystal-ball-mu": 22,
 	"crystal-ball-sigma": 5.4,
 	"crystal-ball-N": 45,
-	"trigger-rate-averaging-duration-seconds": 5,
+	"trigger-rate-averaging-duration-seconds": 60,
 	"panel-degradation-averaging-duration-seconds": 5,
 	"normalize-channels": true,
 	"distance-between-panels-mm": 37,
 	"readout-line-pitch-mm": 2.54,
 	"image-folder-path": "/home/tgc/pps/figures",
+	"rate-timer": 120,
+	"AfterPulse_timer": 30,
+	"Applied_Voltage": 780,
 	"step":
 	{
 		"show-trigger-in-waveforms-step": true,

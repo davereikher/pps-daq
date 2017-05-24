@@ -9,7 +9,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "Queue.h"
-#include "SignalAnalyzerTracker.h"
+#include "SignalAnalyzerMicrocavity.h"
 
 
 using namespace std;
@@ -35,7 +35,7 @@ private:
 	unsigned int m_iNowLSB;
 	bool m_bEventAddrSet;
 	bool m_bEventInfoSet;
-	std::unique_ptr<SignalAnalyzerTracker> m_pSignalAnalyzer;
+	std::unique_ptr<SignalAnalyzerMicrocavity> m_pSignalAnalyzer;
 	int m_iEventCounter;
 };
 

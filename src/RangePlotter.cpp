@@ -103,8 +103,8 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 				{
 					pGr->SetPoint(counter, vTimeSeq[counter], TransformToVoltage(a_channels[chanIt][counter]));
 				}
-
 				m_vpGraph[chanIt] = pGr;
+				printf("creating graph %x", m_vpGraph[chanIt])
 				pGr->SetLineColor(m_colors[i%(sizeof(m_colors)/sizeof(int))]);
 				pGr->SetName((m_sInstanceName + std::string("Pan_") + rangeIt.first + std::string("chan_") + std::to_string(chanIt)).c_str());
 				std::string sGraphTitle = std::string("Channel ") + std::to_string(chanIt);
@@ -158,7 +158,7 @@ void RangePlotter::PlotRanges(Channels_t& a_channels, Range_t& a_channelsToPadsA
 			m_pCanvas->cd(iPadCounter + 1);
 			for (auto& chanIt: rangeIt.second)
 			{
-//				printf("Chanenl %d\n", chanIt);
+				printf("Chanenl %d\n", chanIt);
 				//TODO: num of samples is constant per run at least!
 				m_vpGraph[chanIt]->SetLineWidth(1);
 				int iNumOfSamples = a_channels[chanIt].size();	

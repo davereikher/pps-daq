@@ -4,9 +4,10 @@
 #include "keyb.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TROOT.h"
 #include <unistd.h>
 #include "TApplication.h"
-#include "SignalAnalyzer.h"
+#include "SignalAnalyzerMicrocavity.h"
 #include "CommonUtils.h"
 #include "Configuration.h"
 #include "TChain.h"
@@ -39,7 +40,7 @@ int checkCommand() {
 
 void Usage(char* a_pProcName)
 {
-	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to root file> <path to new log file>" << std::endl;
+	std::cout << "Usage: " << std::endl << "\t " << a_pProcName << " <path to configuration file> <path to list of root files> <path to new log file>" << std::endl;
 	std::vector<float> vec = CommonUtils::GenerateTimeSequence(5);
 }
 
@@ -157,14 +158,14 @@ int main(int argc, char* argv[])
 	
 	SetPlotStyle();
 
-	SignalAnalyzer sigAnalyzer;
+	SignalAnalyzerMicrocavity sigAnalyzer;
 
 //	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelDegradationMonitor | SignalAnalyzer::ETriggerTimingMonitor | SignalAnalyzer::ETrackMonitor |SignalAnalyzer::EPanelHitMonitor| SignalAnalyzer::EPanelTimingMonitor);
 //	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelTimingMonitor);
 //	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelHitMonitor);
 //	sigAnalyzer.SetFlags(SignalAnalyzer::EPanelDegradationMonitor);
 //	sigAnalyzer.SetFlags(SignalAnalyzer::ETriggerTimingMonitor);
-	sigAnalyzer.SetFlags(SignalAnalyzer::ETrackMonitor);
+	sigAnalyzer.SetFlags(0);
 
 
 	sigAnalyzer.Start();

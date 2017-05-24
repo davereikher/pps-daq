@@ -443,3 +443,18 @@ bool Configuration::TagPrimaryPulseStep()
 	return m_configuration["step"]["tag-primary-pulse"].asBool();
 }
 
+int Configuration::GetRateTimer()
+{
+	return m_configuration["rate-timer"].asInt(); 
+}
+
+float Configuration::GetAfterPulse_timer()
+{
+	return m_configuration["AfterPulse_timer"].asInt(); 
+}
+
+int Configuration::GetApplied_Voltage()
+{
+	return m_configuration["Applied_Voltage"].asInt(); 
+}
+

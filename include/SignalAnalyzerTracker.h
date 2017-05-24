@@ -50,6 +50,7 @@ private:
 private:
 	Range_t m_vRanges;
 	std::unique_ptr<TriggerTimingMonitor> m_pTriggerTimingMonitor;
+	std::unique_ptr<ChannelMonitor> m_pChannelMonitor;
 	std::vector<std::unique_ptr<PanelMonitor> > m_vpPanelMonitors;
 	std::vector<std::unique_ptr<PanelDegradationMonitor> > m_vpPanelDegradationMonitors;
 	std::vector<std::unique_ptr<PanelTimingMonitor> > m_vpPanelTimingMonitors;
